@@ -10,21 +10,33 @@
 <meta name="description" content="Карта дня и расклад на три карты из колоды Bloody Feast Tarot. Card of the day and a three-card spread.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://lidkin.github.io/bloody-tarot/">
-<meta property="og:title" content="Bloody Feast Tarot — ты хочешь знать?">
+<meta property="og:title" content="Bloody Feast Tarot — хочешь знать?">
 <meta property="og:description" content="Карта дня и расклад на три карты из колоды Лидии Хаит. Card of the day and a three-card spread.">
 <meta property="og:image" content="https://lidkin.github.io/bloody-tarot/og-image.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#0c0303">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Oswald:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Trispace:wght@700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-<link rel="stylesheet" href="style.css?v=35">
+<link rel="stylesheet" href="style.css?v=53">
 </head>
-<body class="noir">
+<body class="noir intro">
 <div class="glow"></div>
 <canvas id="dust"></canvas>
 <div class="vignette"></div>
+
+<!-- splash: large logo → top-left, then crime-scene tape unrolls across the width -->
+<div id="intro" class="intro-layer" aria-hidden="true">
+  <div class="intro-brand" id="introBrand">
+    <img class="intro-logo" id="introLogo" src="assets/logo-big.png" alt="Bloody Feast Tarot">
+    <div class="intro-tape-wrap" id="introTapeWrap">
+      <!-- line.svg is inlined so Trispace from the page can paint the words (an <img> svg cannot) -->
+      <div class="intro-tape" id="introTape" role="img" aria-label="Crime scene tape"></div>
+    </div>
+  </div>
+</div>
+
 <h1 class="title" data-i18n="heading">Таро «Кровавый пир» от Лидии Хаит</h1>
 <!-- the open card's name and how it fell, in place of the title while its description is shown -->
 <div class="card-head" id="cardHead"><h2 id="mName"></h2></div>
@@ -43,7 +55,7 @@
     <div class="opt-col"><button class="opt" data-mode="day" data-i18n="optDay">Карта дня</button><div class="ask-sub" id="askSub"></div></div>
     <button class="opt" data-mode="three" data-i18n="optThree">Три карты</button>
   </div>
-  <div class="whisper" id="whisper" data-i18n="whisper">ты хочешь знать?</div>
+  <div class="whisper" id="whisper" data-i18n="whisper">хочешь знать?</div>
 </div>
 
 <div class="scene" id="fanScreen" hidden>
@@ -82,6 +94,6 @@
 </div>
 <div class="rotate-note"><span class="rot-ic">↻</span><span data-i18n="rotate">Поверни телефон вертикально</span></div>
 
-<script src="app.js?v=35"></script>
+<script src="app.js?v=61"></script>
 </body>
 </html>

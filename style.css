@@ -17,7 +17,7 @@ body.noir::before{content:''; position:fixed; inset:0; z-index:0; pointer-events
 body.noir{
   --red:#e42423; --ink:#e9e6e1; --muted:#aaa6a1;
   --accent:#f2efea; --accent-rgb:242,239,234; --orient:#e42423;
-  --glow:rgba(110,35,20,.14); --head-font:'Oswald',sans-serif;
+  --glow:rgba(110,35,20,.14); --head-font:'Trispace',sans-serif;
   --tface-bg:#f4f1ec; --tface-frame:#111; --tface-num:#e42423; --tface-text:#111;
 }
 *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
@@ -77,7 +77,7 @@ body:not(.fonts-ready) h1.title{visibility:hidden;}
 .ask-sub.gone{opacity:0;}
 /* the negative margin cancels the spacing after the last digit */
 .ask-sub .countdown{display:block; width:fit-content; margin:3px auto 0; font-family:var(--head-font); font-style:normal; font-size:16px;
-  line-height:1; letter-spacing:.18em; color:var(--accent); opacity:.8; font-variant-numeric:tabular-nums;}
+  line-height:1; letter-spacing:.171em; color:var(--accent); opacity:.8; font-variant-numeric:tabular-nums; font-weight:700;}
 .ask-sub .cd-row{display:flex; align-items:center; justify-content:center; gap:7px; margin-top:3px;}
 .ask-sub .cd-row .countdown{margin:0;}
 /* the fortune-teller's whisper under the choice of readings, answered by "Теперь ты знаешь" at the end; it keeps
@@ -101,8 +101,8 @@ body:not(.fonts-ready) .ask-sub{visibility:hidden;}
 /* without a pointer to hover with (phones), red keeps passing through them, so they read as buttons */
 @media not all and (hover:hover) and (pointer:fine){ .finish-btn .fill{animation:call 3.6s ease-in-out infinite;} }
 @keyframes call{0%{background-position:100% 0;} 28%, 58%{background-position:50% 0;} 86%, 100%{background-position:0 0;}}
-.opt{position:relative; background:none; border:none; padding:8px 0; font-family:var(--head-font); font-size:19px;
-  letter-spacing:3px; margin-right:-3px; color:var(--accent); cursor:var(--cur-on); text-transform:uppercase;
+.opt{position:relative; background:none; border:none; padding:8px 0; font-family:var(--head-font); font-size:19px; font-weight:700;
+  letter-spacing:2.85px; margin-right:-2.85px; color:var(--accent); cursor:var(--cur-on); text-transform:uppercase;
   text-shadow:0 0 12px rgba(var(--accent-rgb),.45); transition:color .35s ease, text-shadow .35s ease, opacity .35s ease;}
 .opt::after{content:''; position:absolute; left:0; right:3px; bottom:0; height:1px; background:var(--red);
   transform:scaleX(0); transition:transform .35s ease;}
@@ -131,20 +131,20 @@ body:not(.fonts-ready) .spread-options{visibility:hidden;}
   opacity:0; transition:opacity .5s ease-in-out; pointer-events:none;}
 .pick-list.on{opacity:1;}
 .pick-line, .pick-go{visibility:hidden;}
-.pick-line{font-family:var(--head-font); font-size:1em; line-height:1.38; letter-spacing:.2em; text-transform:uppercase;}
+.pick-line{font-family:var(--head-font); font-size:1em; font-weight:700; line-height:1.38; letter-spacing:.19em; text-transform:uppercase;}
 .pick-go{margin-top:.5em; font-size:max(13px, .5em); line-height:1.6;}
 .pick-hint{position:absolute; top:1.1em; display:grid; justify-items:center;}
-.pick-word{grid-area:1/1; font-family:var(--head-font); font-size:1.3em; letter-spacing:.2em; margin-right:-.2em; white-space:nowrap;
+.pick-word{grid-area:1/1; font-family:var(--head-font); font-size:1.3em; font-weight:700; letter-spacing:.19em; margin-right:-.19em; white-space:nowrap;
   color:var(--accent); text-transform:uppercase; text-shadow:0 0 12px #000, 0 0 4px #000;
   opacity:0; transform:translateY(8px); transition:opacity .5s ease, transform .5s ease;}
 .pick-word.on{opacity:1; transform:none; transition-delay:.25s;}
-.pick-word.pick-ask{font-family:inherit; font-size:.9em; font-style:italic; letter-spacing:1px; margin-right:0; text-transform:none; color:var(--ink);}
+.pick-word.pick-ask{font-family:inherit; font-size:.9em; font-style:italic; letter-spacing:.95px; margin-right:0; text-transform:none; color:var(--ink);}
 .spread-cap{position:fixed; z-index:1500; display:flex; flex-direction:column; align-items:center; gap:3px;
   text-align:center; transform:translate(-50%,0); opacity:0; transition:opacity .5s ease-in-out; pointer-events:none;}
 .spread-cap.above{transform:translate(-50%,-100%);}
 .spread-slot.on, .spread-cap.on{opacity:1;}
-.cap-pos{font-family:var(--head-font); font-size:14px; letter-spacing:3px; color:var(--red); text-transform:uppercase;}
-.cap-name{font-family:var(--head-font); font-size:14px; letter-spacing:1.5px; line-height:1.3; color:var(--accent); text-transform:uppercase;}
+.cap-pos{font-family:var(--head-font); font-size:14px; font-weight:700; letter-spacing:2.85px; color:var(--red); text-transform:uppercase;}
+.cap-name{font-family:var(--head-font); font-size:14px; font-weight:700; letter-spacing:1.425px; line-height:1.3; color:var(--accent); text-transform:uppercase;}
 .cap-name:empty{display:none;}
 .cap-title{font-style:italic; font-size:14px; line-height:1.3; color:var(--ink); opacity:.8;}
 .cap-title:empty{display:none;}
@@ -201,7 +201,7 @@ body.noir .face.front .tface{transition:background-color .6s ease-in-out;}
 body.noir .fcard.lit .tface{background:#fff;}
 /* desktop: the opened card's name, huge, across the screen behind the card */
 .big-name{position:fixed; left:50%; z-index:950; will-change:transform; pointer-events:none; white-space:nowrap;
-  font-family:'Oswald',sans-serif; font-weight:500; text-transform:uppercase; line-height:1; color:#b71b1b;}
+  font-family:'Trispace',sans-serif; font-weight:700; text-transform:uppercase; line-height:1; color:#b71b1b;}
 /* opaque colours (as the former translucent ones look on the darkened screen): the name is drawn twice,
    in front of and behind the card, and the two copies must look like one where they overlap */
 body:not(.noir) .big-name{font-family:'Cinzel',serif; color:#5e4c25;}
@@ -213,9 +213,9 @@ body:not(.noir) .big-name{font-family:'Cinzel',serif; color:#5e4c25;}
   background:var(--tface-bg);}
 .face.front .tframe{position:absolute; inset:calc(var(--cw,76px) * .06); border:1px solid var(--tface-frame);
   border-radius:calc(var(--cw,76px) * .05); box-shadow:inset 0 0 calc(var(--cw,76px) * .08) rgba(var(--accent-rgb),.15);}
-.face.front .fnum{font-family:var(--head-font); color:var(--tface-num); font-size:calc(var(--cw,76px) * .16);
-  letter-spacing:1px; margin-bottom:calc(var(--cw,76px) * .08); opacity:.85;}
-.face.front .ftext{font-family:var(--head-font); font-size:calc(var(--cw,76px) * .12); letter-spacing:.5px; color:var(--tface-text);
+.face.front .fnum{font-family:var(--head-font); font-weight:700; color:var(--tface-num); font-size:calc(var(--cw,76px) * .16);
+  letter-spacing:.95px; margin-bottom:calc(var(--cw,76px) * .08); opacity:.85;}
+.face.front .ftext{font-family:var(--head-font); font-weight:700; font-size:calc(var(--cw,76px) * .12); letter-spacing:.475px; color:var(--tface-text);
   text-align:center; padding:0 calc(var(--cw,76px) * .12); line-height:1.25;}
 .toast{position:absolute; bottom:2%; left:50%; transform:translateX(-50%); color:var(--muted); font-size:13px; font-style:italic; opacity:0; transition:opacity .5s ease-in-out; white-space:nowrap;}
 .toast.show{opacity:1;}
@@ -231,18 +231,18 @@ body:not(.noir) .big-name{font-family:'Cinzel',serif; color:#5e4c25;}
 .meaning-panel{position:absolute; left:50%; bottom:6%; transform:translateX(-50%); max-width:420px; width:88%;
   text-align:center; z-index:6; opacity:0; transition:opacity .7s .35s ease-in-out; pointer-events:none;}
 .meaning-panel.show{opacity:1; pointer-events:auto;}
-.meaning-panel .pos-label{display:block; font-family:var(--head-font); color:var(--red); font-size:14px; letter-spacing:4px;
+.meaning-panel .pos-label{display:block; font-family:var(--head-font); font-weight:700; color:var(--red); font-size:14px; letter-spacing:3.8px;
   text-transform:uppercase; margin-bottom:6px;}
 .meaning-panel .pos-label:empty{display:none;}
 /* the suit's drawing over the name: the long wand and sword by width, the cup and pentacle by height */
-.meaning-panel h2{font-family:var(--head-font); color:var(--accent); letter-spacing:1.5px; font-size:19px; margin:0 0 2px;}
+.meaning-panel h2{font-family:var(--head-font); font-weight:700; color:var(--accent); letter-spacing:1.425px; font-size:19px; margin:0 0 2px;}
 /* the card's own title from the guidebook, Minor Arcana only */
 .meaning-panel .card-title{display:block; font-style:italic; color:var(--ink); opacity:.8; font-size:16px; margin:0 0 4px;}
 .meaning-panel .card-title:empty{display:none;}
-.meaning-panel .orient{display:block; font-family:var(--head-font); color:var(--orient); font-size:14px; letter-spacing:2px; text-transform:uppercase; margin-bottom:6px;}
+.meaning-panel .orient{display:block; font-family:var(--head-font); font-weight:700; color:var(--orient); font-size:14px; letter-spacing:1.9px; text-transform:uppercase; margin-bottom:6px;}
 .meaning-panel p{color:var(--ink); font-size:15px; line-height:1.4; margin:0 0 12px;}
 .meaning-end{display:flex; align-items:center; justify-content:center; gap:22px; margin-top:6px;}
-.finish-btn{font-family:var(--head-font); font-size:14px; letter-spacing:3px; text-transform:uppercase; color:var(--accent);}
+.finish-btn{font-family:var(--head-font); font-weight:700; font-size:14px; letter-spacing:2.85px; text-transform:uppercase; color:var(--accent);}
 .end-phrase{font-size:19px; font-style:italic; letter-spacing:.5px; color:var(--ink);}
 .end-rule{width:1px; height:22px; background:var(--red); opacity:.7; transform-origin:50% 50%;}
 .finish-btn{background:none; border:none; padding:6px 0; cursor:var(--cur-on);}
@@ -265,7 +265,7 @@ body:not(.noir) .big-name{font-family:'Cinzel',serif; color:#5e4c25;}
 .cta:active{transform:scale(.97);}
 .link-btn:active{color:var(--ink);}
 .return-btn{background:none; border:1px solid rgba(var(--accent-rgb),.4); color:var(--accent);
-  font-family:var(--head-font); font-size:14px; letter-spacing:1.5px; padding:9px 20px; border-radius:24px;
+  font-family:var(--head-font); font-weight:700; font-size:14px; letter-spacing:1.425px; padding:9px 20px; border-radius:24px;
   cursor:var(--cur-on); text-transform:uppercase; transition:.2s;}
 /* closing screen of a reading */
 .finale{display:flex; flex-direction:column; align-items:center;}
@@ -275,14 +275,14 @@ body:not(.noir) .big-name{font-family:'Cinzel',serif; color:#5e4c25;}
 .finale .f-card{width:100%;}
 .finale .f-card[hidden]{display:none;}
 .finale b{color:var(--accent); font-weight:600;}
-.cta{display:inline-block; background:var(--accent); color:#1a0a0e; text-decoration:none; font-family:var(--head-font);
-  font-size:14px; letter-spacing:2px; text-transform:uppercase; padding:12px 30px; border-radius:26px;
+.cta{display:inline-block; background:var(--accent); color:#1a0a0e; text-decoration:none; font-family:var(--head-font); font-weight:700;
+  font-size:14px; letter-spacing:1.9px; text-transform:uppercase; padding:12px 30px; border-radius:26px;
   box-shadow:0 0 18px rgba(var(--accent-rgb),.35); transition:.2s;}
 body.noir .cta{background:var(--red); color:#fff; box-shadow:0 0 18px rgba(228,36,35,.4);}
 /* narrow phones: the long "Колода для печати · купить на Etsy" still on one line */
 .cta{white-space:nowrap;}
-@media (max-width:380px){ .cta{letter-spacing:1px; padding-left:22px; padding-right:22px;} }
-@media (max-width:340px){ .cta{font-size:13px; letter-spacing:.8px; padding-left:18px; padding-right:18px;} }
+@media (max-width:380px){ .cta{letter-spacing:.95px; padding-left:22px; padding-right:22px;} }
+@media (max-width:340px){ .cta{font-size:13px; letter-spacing:.76px; padding-left:18px; padding-right:18px;} }
 /* phones: the shop button on a line of its own above the other two; wide screens: all three on one line,
    the shop in the middle, and the line about the deck unbroken */
 .finale-row{display:flex; column-gap:14px; align-items:center; flex-wrap:wrap; justify-content:center;}
@@ -302,12 +302,12 @@ body.noir .cta{background:var(--red); color:#fff; box-shadow:0 0 18px rgba(228,3
 /* the closing block stands on the bottom of the screen; the cards find room above it (fitAbove / fitRow) */
 .finale{top:auto; bottom:calc(28px + env(safe-area-inset-bottom,0px));}
 @media (hover:hover) and (pointer:fine){ .finale{bottom:calc(40px + env(safe-area-inset-bottom,0px));} }
-.link-btn{background:none; border:none; color:var(--muted); font-family:var(--head-font); font-size:14px;
-  letter-spacing:1.5px; text-transform:uppercase; cursor:var(--cur-on); padding:9px 6px;}
+.link-btn{background:none; border:none; color:var(--muted); font-family:var(--head-font); font-weight:700; font-size:14px;
+  letter-spacing:1.425px; text-transform:uppercase; cursor:var(--cur-on); padding:9px 6px;}
 .link-btn .ic{display:inline-block; font-size:1.35em; line-height:0; vertical-align:-.08em; margin-right:2px;}
 h1.title{position:fixed; top:calc(14px + env(safe-area-inset-top,0px)); left:50%; transform:translateX(-50%);
   margin:0; width:max-content; white-space:nowrap; font-family:var(--head-font); color:var(--accent);
-  font-size:13px; line-height:20px; letter-spacing:3px; opacity:.6; z-index:5; text-transform:uppercase;}
+  font-size:13px; line-height:20px; letter-spacing:2.85px; opacity:.6; z-index:5; text-transform:uppercase;}
 /* desktop: a bigger deck and the title lower */
 @media (hover:hover) and (pointer:fine){
   .velvet{--deck-w:185px;}
@@ -316,27 +316,41 @@ h1.title{position:fixed; top:calc(14px + env(safe-area-inset-top,0px)); left:50%
 /* the language button (the language it switches to) in the top right corner and the sound in the top left, on the title's line; only on the resting
    deck, like the choice of spread. The buttons' padding is taken back by margins: big for a finger, 20px tall */
 .lang-switch, .sound-btn{position:fixed; top:calc(14px + env(safe-area-inset-top,0px)); height:20px;
-  display:flex; align-items:center; gap:2px; z-index:6; font-family:var(--head-font); font-size:11px; line-height:20px;
-  letter-spacing:2px; color:var(--muted); transition:opacity .5s ease-in-out;}
-.lang-switch{right:calc(14px + env(safe-area-inset-right,0px));}
+  display:flex; align-items:center; gap:2px; z-index:42; font-family:var(--head-font); font-size:11px; line-height:20px;
+  letter-spacing:1.9px; color:var(--muted); transition:opacity .5s ease-in-out;}
+/* round language badge on the tape's midline. Brand height is the logo ratio (840×678), tape at 38% */
+.lang-switch{right:calc(14px + env(safe-area-inset-right,0px)); color:var(--red);
+  width:34px; height:34px; justify-content:center;
+  font-size:15px; line-height:1; font-weight:700; letter-spacing:.95px;
+  top:calc(10px + env(safe-area-inset-top,0px) + min(12vw, 68px) * 678 / 840 * .38 - 17px);}
 .sound-btn{left:calc(14px + env(safe-area-inset-left,0px));}
 .lang-switch.gone, .sound-btn.gone{opacity:0; pointer-events:none;}
 .lang-switch.off{display:none;}
 .lang-switch button, .sound-btn{background:none; border:none; padding:10px 4px; margin:-10px 0; font:inherit; letter-spacing:inherit;
   color:inherit; cursor:var(--cur-on); transition:color .3s ease, opacity .5s ease-in-out;}
+.lang-switch button{width:34px; height:34px; margin:0; padding:0; border-radius:50%;
+  background:#0d0000; border:none; text-shadow:none;
+  display:flex; align-items:center; justify-content:center;
+  transition:color .3s ease, background-color .3s ease, box-shadow .3s ease;}
 .sound-btn{color:var(--muted); margin:0; padding:0 4px;}
 .sound-btn::before{content:''; position:absolute; inset:-10px -6px;}
 .sound-btn svg{width:15px; height:15px; display:block;}
 .sound-btn .wave{transition:opacity .3s ease;}
 .sound-btn.muted .wave{opacity:0;}
 .sound-btn:not(.muted) .cross{opacity:0;}
-@media (hover:hover){ .lang-switch button:hover, .sound-btn:hover{color:var(--ink);} }
+@media (hover:hover){ .sound-btn:hover{color:var(--ink);} }
 @media (hover:hover) and (pointer:fine){
-  .lang-switch, .sound-btn{top:calc(64px + env(safe-area-inset-top,0px));}
-  .lang-switch{right:28px;} .sound-btn{left:28px;}
+  .lang-switch button:hover{
+    background:#2a0808;
+    box-shadow:0 0 12px rgba(228,36,35,.85), 0 0 26px rgba(228,36,35,.45);
+  }
+}
+@media (hover:hover) and (pointer:fine){
+  .sound-btn{top:calc(40px + env(safe-area-inset-top,0px)); left:28px;}
+  .lang-switch{right:28px; top:calc(40px + env(safe-area-inset-top,0px) + 72px * 678 / 840 * .38 - 17px);}
 }
 body:not(.fonts-ready) .lang-switch{visibility:hidden;}
-body.noir h1.title, body.noir .meaning-panel h2{letter-spacing:4px; font-weight:500;}
+body.noir h1.title, body.noir .meaning-panel h2{letter-spacing:3.8px; font-weight:700;}
 body.noir h1.title{opacity:.75;}
 /* while a card lies open with its description, its name takes the title's place */
 h1.title{transition:opacity .5s ease-in-out;}
@@ -346,10 +360,10 @@ body.card-open h1.title, body.car-open h1.title{opacity:0 !important;}
 body.card-open .card-head, body.car-open .card-head{opacity:1;}
 /* phones, the carousel of the spread: the top card's name stands in the header instead of over its description */
 body.car-open #fName{display:none;}
-.card-head h2{margin:0; font-family:var(--head-font); color:var(--accent); font-size:19px; line-height:24px; letter-spacing:4px; font-weight:500;}
+.card-head h2{margin:0; font-family:var(--head-font); font-weight:700; color:var(--accent); font-size:19px; line-height:24px; letter-spacing:3.8px;}
 @media (hover:hover) and (pointer:fine){ .card-head{top:calc(64px + env(safe-area-inset-top,0px));} }
 /* narrow phones: a smaller title; fitTitle (app.js) keeps it on one line clear of RU / EN */
-@media (max-width:480px){ body.noir h1.title{font-size:12px; letter-spacing:3px;} }
+@media (max-width:480px){ body.noir h1.title{font-size:12px; letter-spacing:2.85px;} }
 /* a phone held sideways: the page is made for upright phones and a browser page cannot lock the rotation,
    so it asks to turn the phone back */
 .rotate-note{display:none;}
@@ -360,7 +374,45 @@ body.car-open #fName{display:none;}
 }
 /* phones, three cards: arrows in the free margins beside the stack; placeCarArrows (app.js) sets their height */
 .car-arrow{position:fixed; z-index:1200; transform:translate(-50%,-50%); background:none; border:none; padding:14px 12px;
-  font-family:var(--head-font); font-size:40px; line-height:1; color:var(--accent); opacity:0; pointer-events:none;
+  font-family:var(--head-font); font-weight:700; font-size:40px; line-height:1; color:var(--accent); opacity:0; pointer-events:none;
   text-shadow:0 0 10px rgba(0,0,0,.8); transition:opacity .5s ease-in-out, color .2s;}
 .fan.carousel ~ .finale.show ~ .car-arrow{opacity:.75; pointer-events:auto;}
 .car-arrow:active{color:var(--red); opacity:1 !important;}
+
+/* —— intro: logo lands top-left, crime-scene tape unrolls from it —— */
+.intro-layer{position:fixed; inset:0; z-index:40; pointer-events:none;}
+body.intro .intro-layer{pointer-events:auto;}
+body.intro h1.title,
+body.intro .lang-switch,
+body.intro .sound-btn,
+body.intro #opening{opacity:0 !important; pointer-events:none;}
+body.intro-done h1.title{opacity:0 !important; pointer-events:none;} /* brand mark replaces the text title */
+.intro-brand{position:fixed; left:50%; top:50%; transform:translate(-50%,-50%);
+  display:block; z-index:41; width:min(72vw, 420px); will-change:transform, width, top, left;}
+.intro-logo{position:relative; z-index:2; display:block; width:100%; height:auto; user-select:none;
+  -webkit-user-drag:none; transform-origin:left center; clip-path:inset(0 0 0 0);}
+/* rail starts at the logo's right edge (not under transparent type); the strip slides in via translateX */
+.intro-tape-wrap{position:absolute; left:100%; top:38%; transform:translateY(-50%);
+  z-index:1; height:clamp(10px, 2.1vw, 16px); width:0; overflow:hidden; pointer-events:none;}
+.intro-tape{display:block; height:100%; width:max-content; will-change:transform;}
+.intro-tape svg{display:block; height:100%; width:auto;}
+/* docked brand; rail to the right edge; EN sits on the same axis above the tape */
+body.intro-done .intro-brand{left:calc(14px + env(safe-area-inset-left,0px)); top:calc(10px + env(safe-area-inset-top,0px));
+  transform:none; width:min(12vw, 68px);}
+body.intro-done .intro-logo{clip-path:inset(0 0 12% 0);}
+body.intro-done .intro-tape-wrap{
+  width:calc(100vw - (14px + env(safe-area-inset-left,0px)) - min(12vw, 68px) - env(safe-area-inset-right,0px));}
+@media (hover:hover) and (pointer:fine){
+  body.intro-done .intro-brand{left:28px; top:calc(40px + env(safe-area-inset-top,0px)); width:72px;}
+  body.intro-done .intro-tape-wrap{width:calc(100vw - 28px - 72px - env(safe-area-inset-right,0px));}
+}
+/* the tape's own label, lifted out of the rail after the slide so it can grow past the strip */
+.tape-zoom{position:fixed; z-index:43; pointer-events:none; transform-origin:50% 50%;}
+.tape-zoom svg{display:block; width:100%; height:100%;}
+body.card-open .tape-zoom, body.car-open .tape-zoom{opacity:0; transition:opacity .5s ease-in-out;}
+/* while a card is open, tuck the brand like the old title */
+body.card-open .intro-brand, body.car-open .intro-brand{opacity:0; transition:opacity .5s ease-in-out;}
+body.intro-done .intro-brand{transition:opacity .5s ease-in-out;}
+@media (prefers-reduced-motion:reduce){
+  body.intro #opening, body.intro .lang-switch{opacity:1; pointer-events:auto;}
+}

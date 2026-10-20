@@ -206,7 +206,7 @@ for(let i=0;i<78;i++){
 
 /* ---------- language ---------- */
 const UI={
-ru:{title:'Таро Лидии Хаит', comeBack:'возвращайся через', whisper:'ты хочешь знать?',
+ru:{title:'Таро Лидии Хаит', comeBack:'возвращайся через', whisper:'хочешь знать?',
   optDay:'Карта дня', optThree:'Три карты', positions:['Прошлое','Настоящее','Будущее'],
   upright:'Прямое положение', reversed:'Перевёрнутое положение', pickHint:'выбери три карты', reveal:'Узнать',
   next:'Далее', finish:'Завершить', nowYouKnow:'Теперь ты знаешь',
@@ -227,7 +227,7 @@ ru:{title:'Таро Лидии Хаит', comeBack:'возвращайся че�
     n=>`${n} легла перевёрнутой — здесь энергия застревает.`,
     'Две карты перевёрнуты — сначала стоит разобраться с тем, что мешает.',
     'Все карты перевёрнуты — время посмотреть внутрь себя, прежде чем действовать.']},
-en:{title:'Tarot by Lidiia Khait', comeBack:'come back in', whisper:'do you want to know?',
+en:{title:'Tarot by Lidiia Khait', comeBack:'come back in', whisper:'want to know?',
   optDay:'Card of the day', optThree:'Three cards', positions:['Past','Present','Future'],
   upright:'Upright', reversed:'Reversed', pickHint:'choose three cards', reveal:'Reveal',
   next:'Next', finish:'Finish', nowYouKnow:'Now you know',
@@ -1582,8 +1582,8 @@ function storyCanvas(title){
     if(maxW){ const m=x.measureText(str).width; if(m>maxW) x.font=font.replace(/(\d+)px/, (_,n)=>Math.floor(n*maxW/m)+'px'); }
     x.fillText(str, cx, y);
   };
-  text(title, SAFE.top+80, '500 40px Oswald', '#e9e6e1', 10);
-  text('BLOODY FEAST TAROT', SAFE.bottom-92, '500 40px Oswald', '#e9e6e1', 10);
+  text(title, SAFE.top+80, '700 40px Trispace', '#e9e6e1', 9.5);
+  text('BLOODY FEAST TAROT', SAFE.bottom-92, '700 40px Trispace', '#e9e6e1', 9.5);
   text('illusbyme.etsy.com', SAFE.bottom-40, 'italic 500 34px "Cormorant Garamond"', '#8a8784');
   return {c, x, W, H, text};
 }
@@ -1602,9 +1602,9 @@ async function drawStoryCard(x, card, reversed, cx, cy, cw){
   } else {
     x.strokeStyle='#111'; x.lineWidth=3*k; x.beginPath(); x.roundRect(cx+cw*.06, cy+cw*.06, cw*.88, ch-cw*.12, cw*.05); x.stroke();
     x.textAlign='center'; x.letterSpacing='0px';
-    if(card.num){ x.font=`500 ${96*k}px Oswald`; x.fillStyle='#e42423'; x.fillText(card.num, cx+cw/2, cy+ch/2-60*k); }
-    x.font=`500 ${72*k}px Oswald`; x.fillStyle='#111';
-    const m=x.measureText(card.name).width; if(m>cw*.8) x.font=`500 ${72*k*cw*.8/m}px Oswald`;
+    if(card.num){ x.font=`700 ${96*k}px Trispace`; x.fillStyle='#e42423'; x.fillText(card.num, cx+cw/2, cy+ch/2-60*k); }
+    x.font=`700 ${72*k}px Trispace`; x.fillStyle='#111';
+    const m=x.measureText(card.name).width; if(m>cw*.8) x.font=`700 ${72*k*cw*.8/m}px Trispace`;
     x.fillText(card.name, cx+cw/2, cy+ch/2+50*k);
   }
   x.restore();
@@ -1644,7 +1644,7 @@ function wrapLines(x, str, font, maxW){
 async function drawCardStory(el){
   const card=el._card, reversed=el.dataset.reversed==='true';
   const {c, x, W, text}=storyCanvas(tr('storyDay'));
-  text(card.name.toUpperCase(), SAFE.top+162, '500 72px Oswald', '#f2efea', 6, W/2, W-120);
+  text(card.name.toUpperCase(), SAFE.top+162, '700 72px Trispace', '#f2efea', 5.7, W/2, W-120);
   const meaning=reversed ? card.rev : card.up;
   let font='italic 500 42px "Cormorant Garamond"', lh=54, lines=wrapLines(x, meaning, font, W-200);
   if(lines.length>2){ font='italic 500 38px "Cormorant Garamond"'; lh=48; lines=wrapLines(x, meaning, font, W-180); }
@@ -1654,7 +1654,7 @@ async function drawCardStory(el){
   const ch=await drawStoryCard(x, card, reversed, (W-cw)/2, cy, cw);
   lines.forEach((l,i)=>text(l, cy+ch+72+i*lh, font, '#d9d4ce'));
   // an invitation to whoever sees the story, in the red of the card backs
-  text(tr('storyAsk'), askY(ch), '500 44px Oswald', '#e42423', 6, W/2, W-160);
+  text(tr('storyAsk'), askY(ch), '700 44px Trispace', '#e42423', 5.7, W/2, W-160);
   return {c, name:`card-of-the-day-${isoDay()}.jpg`, title:tr('optDay'), text:`${tr('shareDay')(card.name)} Bloody Feast Tarot: ${ETSY_URL}`};
 }
 // the spread: its three cards side by side, each under its position and over its name, then the summary
@@ -1664,9 +1664,9 @@ async function drawSpreadStory(els){
   let ch=0;
   for(const [i, el] of els.entries()){
     const cx=left+i*(cw+gap), mid=cx+cw/2;
-    text(POSITIONS[i].toUpperCase(), cy-40, '500 30px Oswald', '#e42423', 6, mid);
+    text(POSITIONS[i].toUpperCase(), cy-40, '700 30px Trispace', '#e42423', 5.7, mid);
     ch=await drawStoryCard(x, el._card, el.dataset.reversed==='true', cx, cy, cw);
-    text(el._card.name.toUpperCase(), cy+ch+64, '500 32px Oswald', '#f2efea', 2, mid, cw+gap-10);
+    text(el._card.name.toUpperCase(), cy+ch+64, '700 32px Trispace', '#f2efea', 1.9, mid, cw+gap-10);
   }
   // the summary, wrapped to the width of the row
   const font='italic 500 40px "Cormorant Garamond"';
@@ -1692,7 +1692,7 @@ function fitTitle(){
   const side=langSwitch.classList.contains('off') ? EDGE : innerWidth-langSwitch.getBoundingClientRect().left+GAP;
   const room=innerWidth-2*side;
   for(let f=parseFloat(getComputedStyle(t).fontSize); f>=8 && t.offsetWidth>room; f-=.5){
-    t.style.fontSize=f+'px'; t.style.letterSpacing=f*.2+'px';
+    t.style.fontSize=f+'px'; t.style.letterSpacing=(f*.19)+'px';
   }
 }
 document.fonts.ready.then(fitTitle); addEventListener('resize', fitTitle);
@@ -1712,3 +1712,204 @@ if(!isDesktop()) screen.orientation?.lock?.('portrait').catch(()=>{});
 
 document.addEventListener('contextmenu', e=>{ if(e.target.closest('img, .card, canvas')) e.preventDefault(); });
 document.addEventListener('dragstart', e=>{ if(e.target.tagName==='IMG') e.preventDefault(); });
+
+/* ---------- intro: large logo → top-left, tape slides until a label hits center, then swaps ---------- */
+(async function runIntro(){
+  const brand=document.getElementById('introBrand'), logo=document.getElementById('introLogo'),
+    tape=document.getElementById('introTapeWrap'), tapeHost=document.getElementById('introTape'),
+    layer=document.getElementById('intro');
+  if(!brand || !logo || !tape){ document.body.classList.remove('intro'); document.body.classList.add('intro-done'); return; }
+
+  // outlined tape (Border LIne.svg): letters are paths, so no webfont is needed
+  try{
+    const raw=await fetch(encodeURI('assets/SVG/Border LIne.svg')).then(r=>r.text());
+    const doc=new DOMParser().parseFromString(raw, 'image/svg+xml');
+    const svg=doc.querySelector('svg');
+    if(svg && tapeHost){
+      svg.setAttribute('preserveAspectRatio','xMinYMid meet');
+      tapeHost.replaceChildren(svg);
+    }
+  }catch(e){}
+
+  const finish=()=>{
+    layer?.setAttribute('aria-hidden','true');
+    gsap.set([openingEl, langSwitch].filter(Boolean), {clearProps:'opacity,pointerEvents'});
+    showStart(true);
+    fitTitle();
+  };
+
+  const desk=()=>matchMedia('(hover:hover) and (pointer:fine)').matches;
+  const dockTarget=()=>{
+    const d=desk(), safeTop=parseFloat(getComputedStyle(document.documentElement).paddingTop)||0;
+    const left=d ? 28 : 14, top=d ? 40+safeTop : 10+safeTop;
+    const width=d ? 72 : Math.min(innerWidth*.12, 68);
+    // rail to the right edge (EN sits on the tape axis, not beside a gap)
+    const tapeW=Math.max(80, innerWidth - left - width);
+    return {left, top, width, tapeW};
+  };
+
+  // red letters are one path.st1 cluster; their center, as a fraction of the viewBox, never changes
+  let svgEl=tapeHost.querySelector('svg'), redFrac=0;
+  if(svgEl){
+    const letters=[...svgEl.querySelectorAll('path.st1')];
+    const vb=svgEl.viewBox.baseVal.width;
+    let minX=Infinity, maxX=-Infinity;
+    for(const letter of letters){
+      const b=letter.getBBox();
+      minX=Math.min(minX, b.x); maxX=Math.max(maxX, b.x+b.width);
+    }
+    if(vb && maxX>minX) redFrac=(minX+maxX)/2/vb;
+  }
+  // the white plate under the red words; shift the letters so they sit in its center
+  let plateGroup=null;
+  if(svgEl && redFrac){
+    const letters=[...svgEl.querySelectorAll('path.st1')];
+    let minX=Infinity, maxX=-Infinity, minY=Infinity, maxY=-Infinity;
+    for(const letter of letters){
+      const b=letter.getBBox();
+      minX=Math.min(minX, b.x); maxX=Math.max(maxX, b.x+b.width);
+      minY=Math.min(minY, b.y); maxY=Math.max(maxY, b.y+b.height);
+    }
+    const textCx=(minX+maxX)/2, textCy=(minY+maxY)/2;
+    const plate=[...svgEl.querySelectorAll('rect.st2')].find(rect=>{
+      const x=+rect.getAttribute('x'), w=+rect.getAttribute('width');
+      return textCx>=x && textCx<=x+w;
+    });
+    if(plate && letters.length){
+      const px=+plate.getAttribute('x'), py=+plate.getAttribute('y');
+      const pw=+plate.getAttribute('width'), ph=+plate.getAttribute('height');
+      const dx=(px+pw/2)-textCx, dy=(py+ph/2)-textCy;
+      plateGroup=document.createElementNS('http://www.w3.org/2000/svg','g');
+      const shift=document.createElementNS('http://www.w3.org/2000/svg','g');
+      if(dx || dy) shift.setAttribute('transform', `translate(${dx} ${dy})`);
+      svgEl.appendChild(plateGroup);
+      shift.append(...letters);
+      plateGroup.append(plate, shift);
+      redFrac=(px+pw/2)/svgEl.viewBox.baseVal.width;
+    }
+  }
+  const zoom=document.createElement('div');
+  zoom.className='tape-zoom';
+  zoom.setAttribute('aria-hidden','true');
+  document.body.appendChild(zoom);
+  let zoomed=false, zoomTween=null;
+  // after the tape stops, the same plate scales up past the rail
+  const growPlate=(animate)=>{
+    if(!plateGroup) return;
+    const b=plateGroup.getBBox();
+    const r=plateGroup.getBoundingClientRect();
+    if(r.width<2 || r.height<2) return;
+    if(!zoom.firstChild){
+      const mini=document.createElementNS('http://www.w3.org/2000/svg','svg');
+      mini.setAttribute('viewBox', `${b.x} ${b.y} ${b.width} ${b.height}`);
+      mini.setAttribute('preserveAspectRatio','xMidYMid meet');
+      const style=document.createElementNS('http://www.w3.org/2000/svg','style');
+      style.textContent='.st1{fill:#ed1c24}.st2{fill:#fff}';
+      mini.append(style, plateGroup.cloneNode(true));
+      zoom.appendChild(mini);
+    }
+    plateGroup.setAttribute('visibility','hidden');
+    const scale=1.7;
+    gsap.set(zoom,{left:r.left, top:r.top, width:r.width, height:r.height, transformOrigin:'50% 50%'});
+    if(animate && !zoomed){
+      zoomed=true;
+      zoomTween=gsap.fromTo(zoom,{scale:1},{scale, duration:.55, ease:'power2.out'});
+    }else{
+      zoomTween?.kill();
+      gsap.set(zoom,{scale});
+      zoomed=true;
+    }
+  };
+
+  // tape height follows the CSS clamp, but grows on a wide screen so the one red label
+  // can sit on the viewport center while the strip still covers the rail
+  const cssTapeH=()=>Math.max(10, Math.min(16, innerWidth*0.021));
+  let endP=0, slideTween=null, logoTween=null, tapeReady=false;
+  const syncTape=(snap)=>{
+    if(!svgEl || !redFrac) return 0;
+    const spec=dockTarget();
+    const vb=svgEl.viewBox.baseVal;
+    const aspect=vb.width/vb.height;
+    const brandLeft=brand.getBoundingClientRect().left;
+    const dockedNow=Math.abs(brandLeft-spec.left)<2;
+    const L=dockedNow ? tape.getBoundingClientRect().left : spec.left+spec.width;
+    const mid=innerWidth/2;
+    const minW=Math.max((mid-L)/redFrac, (innerWidth-mid)/(1-redFrac))+4;
+    const H=Math.max(cssTapeH(), minW/aspect);
+    tape.style.height=H+'px';
+    void tapeHost.offsetWidth;
+    const W=tapeHost.offsetWidth||1;
+    const p=100*(mid-L-redFrac*W)/W;
+    endP=p;
+    if(snap) gsap.set(tapeHost,{xPercent:p});
+    return p;
+  };
+  const onResize=()=>{
+    if(!tapeReady) return;
+    const p=syncTape(false);
+    if(document.body.classList.contains('intro-done')){
+      gsap.set(tapeHost,{xPercent:p});
+      if(zoomed) growPlate(false);
+    }
+    else if(slideTween && slideTween.isActive()){
+      const rest=Math.max(.05, slideTween.duration()*(1-slideTween.progress()));
+      const spec=dockTarget();
+      slideTween.kill();
+      slideTween=gsap.to(tapeHost,{xPercent:p, duration:rest, ease:'none'});
+      if(logoTween && logoTween.isActive()){
+        logoTween.kill();
+        logoTween=gsap.to(brand,{left:spec.left, duration:rest, ease:'none'});
+      }
+    }
+  };
+  addEventListener('resize', onResize);
+  visualViewport?.addEventListener('resize', onResize);
+
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches){
+    document.body.classList.remove('intro');
+    document.body.classList.add('intro-done');
+    tapeReady=true;
+    requestAnimationFrame(()=>{ syncTape(true); growPlate(false); });
+    finish();
+    return;
+  }
+
+  const end=dockTarget();
+  const startW=Math.min(innerWidth*.72, 420);
+  const ratio=logo.naturalWidth ? logo.naturalHeight/logo.naturalWidth : 678/840;
+
+  // pre-measure the stop while docked (rail invisible) so the slide can start with no pause
+  gsap.set(brand,{left:end.left, top:end.top, width:end.width, xPercent:0, yPercent:0});
+  gsap.set(tape,{width:end.tapeW, autoAlpha:0});
+  await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
+  syncTape(false);
+  tapeReady=true;
+  gsap.set(tape,{width:0, autoAlpha:1});
+  gsap.set(brand,{left:(innerWidth-startW)/2, top:(innerHeight-startW*ratio)/2, width:startW, xPercent:0, yPercent:0});
+  gsap.set(tapeHost,{xPercent:-100});
+  gsap.set(logo,{opacity:0, scale:1.08, clipPath:'inset(0% 0% 0% 0%)'});
+
+  const dockDur=1.0, unrollDur=2.5;
+  const riseLeft=(innerWidth-end.width)/2;
+  gsap.timeline({defaults:{ease:'power2.inOut'}, onComplete:()=>{
+    document.body.classList.add('intro-done');
+    document.body.classList.remove('intro');
+    gsap.set(brand,{clearProps:'left,top,width,xPercent,yPercent,transform'});
+    gsap.set(tape,{clearProps:'width,autoAlpha'});
+    gsap.set(logo,{clearProps:'clipPath'});
+    requestAnimationFrame(()=>{ syncTape(true); growPlate(true); });
+    finish();
+  }})
+    .to(logo,{opacity:1, scale:1, duration:1.15, ease:'power2.out'}, 0.2)
+    .to({}, {duration:.7})
+    // straight up to the top, still centered; the subtitle crops away on the way
+    .to(brand,{left:riseLeft, top:end.top, width:end.width, duration:dockDur, ease:'power2.out'}, 'dock')
+    .to(logo,{clipPath:'inset(0% 0% 12% 0%)', duration:dockDur, ease:'power2.out'}, 'dock')
+    // tape pays out to the right while the logo rolls left into the corner
+    .set(tape,{width:end.tapeW}, `dock+=${dockDur}`)
+    .to(brand,{left:end.left, duration:unrollDur, ease:'none', onStart(){ logoTween=this; }}, `dock+=${dockDur}`)
+    .fromTo(tapeHost,{xPercent:-100},{xPercent:()=>endP, duration:unrollDur, ease:'none',
+      onStart(){ slideTween=this; }}, `dock+=${dockDur}`)
+    .to([openingEl, langSwitch].filter(Boolean), {opacity:1, duration:.9, ease:'power1.out',
+      onStart:()=>{ openingEl.style.pointerEvents='auto'; if(langSwitch) langSwitch.style.pointerEvents=''; }}, `dock+=${dockDur + 0.1}`);
+})();
