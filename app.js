@@ -212,7 +212,7 @@ ru:{title:'Таро Лидии Хаит', comeBack:'возвращайся че�
   next:'Далее', finish:'Завершить', nowYouKnow:'Теперь ты знаешь',
   deckOne:'Эта карта — из колоды <b>Bloody Feast Tarot</b>: все 78 карт с авторской графикой в файле для печати на Etsy.',
   deckMany:'Эти карты — из колоды <b>Bloody Feast Tarot</b>: все 78 карт с авторской графикой в файле для печати на Etsy.',
-  etsy:'Купить колоду', etsyPrint:'Колода для печати · купить на Etsy', rotate:'Поверни телефон вертикально', touchDeck:'коснись колоды', heading:'Таро «Кровавый пир» от Лидии Хаит', share:'Поделиться', gather:'Собрать колоду', onceMore:'<span class="ic">↺</span> Ещё раз',
+  etsy:'Купить колоду', etsyPrint:'Колода для печати · купить на Etsy', rotate:'Поверни телефон вертикально', touchDeck:'коснись колоды', heading:'Таро «Кровавый пир» от Лидии Хаит', share:'Поделиться', gather:'Собрать колоду', onceMore:'Ещё раз',
   again:'↺ Новое гадание', saved:'Картинка сохранена — её можно выложить в сторис',
   storyDay:'КАРТА ДНЯ', storyThree:'ТРИ КАРТЫ', storyAsk:'А ЧТО ВЫПАДЕТ ТЕБЕ?',
   shareDay:name=>`Моя карта дня — ${name}.`, shareSpreadText:list=>`Мой расклад: ${list}.`,
@@ -233,7 +233,7 @@ en:{title:'Tarot by Lidiia Khait', comeBack:'come back in', whisper:'want to kno
   next:'Next', finish:'Finish', nowYouKnow:'Now you know',
   deckOne:'This card comes from the <b>Bloody Feast Tarot</b> deck: all 78 cards with original artwork in a printable file on Etsy.',
   deckMany:'These cards come from the <b>Bloody Feast Tarot</b> deck: all 78 cards with original artwork in a printable file on Etsy.',
-  etsy:'Buy the deck', etsyPrint:'Printable deck · buy on Etsy', rotate:'Turn your phone upright', touchDeck:'touch the deck', heading:'Bloody Feast Tarot deck by Lidiia Khait', share:'Share', gather:'Gather the deck', onceMore:'<span class="ic">↺</span> Once more',
+  etsy:'Buy the deck', etsyPrint:'Printable deck · buy on Etsy', rotate:'Turn your phone upright', touchDeck:'touch the deck', heading:'Bloody Feast Tarot deck by Lidiia Khait', share:'Share', gather:'Gather the deck', onceMore:'Once more',
   again:'↺ New reading', saved:'Image saved — you can post it to your story',
   storyDay:'CARD OF THE DAY', storyThree:'THREE CARDS', storyAsk:'WHAT WILL YOU DRAW?',
   shareDay:name=>`My card of the day: ${name}.`, shareSpreadText:list=>`My spread: ${list}.`,
@@ -793,7 +793,7 @@ function openedPose(el, card){
 const cardHead=document.getElementById('cardHead');
 function fitCardHead(){
   const h=document.getElementById('mName'); h.style.fontSize=h.style.letterSpacing='';
-  for(let f=19; f>=12 && cardHead.offsetWidth>innerWidth-28; f-=.5){ h.style.fontSize=f+'px'; h.style.letterSpacing=f*.15+'px'; }
+  for(let f=20; f>=12 && cardHead.offsetWidth>innerWidth-28; f-=.5){ h.style.fontSize=f+'px'; h.style.letterSpacing=f*.06+'px'; }
 }
 // the name takes the title's place for as long as the description is shown
 new MutationObserver(()=>document.body.classList.toggle('card-open', meaningPanel.classList.contains('show')))
@@ -801,10 +801,23 @@ new MutationObserver(()=>document.body.classList.toggle('card-open', meaningPane
 // pose of a face-up card that, together with `panel` right under it, fits the viewport minus FIT_MARGIN
 function fitAbove(panel){
   const GAP=16, panelH=panel.offsetHeight, ASPECT=CARD_ASPECT;
-  // the title (or, over an open card, its name) stays above the scene, so the card must keep clear of it
-  const head=panel===meaningPanel || document.body.classList.contains('car-open') ? cardHead : document.querySelector('h1.title');
-  const minTop=Math.max(FIT_MARGIN, head.getBoundingClientRect().bottom+24);
   const availW=innerWidth-2*FIT_MARGIN;
+  // an open card is one column, as in the frames: the name sits on the card, the text sits under it,
+  // and the whole column is centred. The phone carousel keeps the name in the top bar.
+  if(panel===meaningPanel){
+    const nameH=Math.max(cardHead.offsetHeight, 24), nameGap=18, minTop=24;
+    const availH=innerHeight-minTop-FIT_MARGIN-nameH-nameGap-GAP-panelH;
+    const h=Math.min(Math.max(availH, 120), availW/ASPECT), w=h*ASPECT;
+    const block=nameH+nameGap+h+GAP+panelH;
+    const top=Math.max(minTop, (innerHeight-block)/2);
+    cardHead.style.top=top+'px';
+    const cardTop=top+nameH+nameGap;
+    panel.style.top=(cardTop+h+GAP)+'px'; panel.style.bottom='auto';
+    return {x:innerWidth/2, y:cardTop+h/2, rot:0, w, h, ry:180, tx:0, ty:0};
+  }
+  // the title (or, over the phone carousel, the card's name) stays above the scene
+  const head=document.body.classList.contains('car-open') ? cardHead : document.querySelector('h1.title');
+  const minTop=Math.max(FIT_MARGIN, head.getBoundingClientRect().bottom+24);
   // the closing block stands on the bottom of the screen (style.css): the card is centred in the room above it
   if(panel===finale){
     const room=panel.getBoundingClientRect().top-GAP-minTop, h=Math.min(room, availW/ASPECT), w=h*ASPECT;
@@ -1007,6 +1020,7 @@ const fCard=document.getElementById('fCard');
 function showCarousel(){
   const els=spread.cards;
   fCard.hidden=false; document.body.classList.add('car-open');
+  cardHead.style.top='';
   // the description block keeps the height of the longest one, so nothing moves as the cards change
   fCard.style.minHeight='';
   const hMax=Math.max(...els.map(c=>{ fillCarouselText(c); return fCard.offsetHeight; }));
@@ -1170,8 +1184,8 @@ function onCardOpened(el){
 const endPhrase=document.getElementById('endPhrase'), endRule=document.getElementById('endRule');
 // between the cards of a spread there is only the way on to the next one
 function setEndRow(next){
-  endPhrase.style.display=endRule.style.display=next ? 'none' : '';
-  document.querySelector('#finishBtn .fill').textContent=tr(next ? 'next' : 'finish');
+  endPhrase.style.display=endRule.style.display=spread ? 'none' : '';
+  document.querySelector('#finishBtn .fill').textContent=tr(spread || !next ? 'finish' : 'next');
 }
 function revealEnd(at){
   const btn=document.getElementById('finishBtn');
@@ -1405,8 +1419,8 @@ function setFinale(els){
   prepareStory(els);
   document.getElementById('etsyBtn').href=etsyLink(els[0]._card);
   document.getElementById('fDeck').innerHTML=tr(one ? 'deckOne' : 'deckMany');
-  document.getElementById('fDeck').hidden=!!els[0]._fromDeck && !one; // phones, three cards: room for the cards instead
-  document.getElementById('etsyBtn').textContent=tr(document.getElementById('fDeck').hidden ? 'etsyPrint' : 'etsy'); // it tells of the file when that line is gone
+  document.getElementById('fDeck').hidden=!one || !!els[0]._fromDeck; // the three-card row is the summary and the buttons, as in the spread screens
+  document.getElementById('etsyBtn').textContent=tr(!one || !document.getElementById('fDeck').hidden ? 'etsy' : 'etsyPrint');
   shareBtnEl.textContent=tr('share');
   document.getElementById('gatherBtn').innerHTML=tr(one ? 'gather' : 'onceMore');
   sum.hidden=one; sum.textContent=one ? '' : spreadSummary(els);
