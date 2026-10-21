@@ -304,8 +304,24 @@ h1.title{position:fixed; top:calc(14px + env(safe-area-inset-top,0px)); left:50%
   font-size:13px; line-height:20px; letter-spacing:2.85px; opacity:.6; z-index:5; text-transform:uppercase;}
 /* desktop: a bigger deck and the title lower */
 @media (hover:hover) and (pointer:fine){
-  .velvet{--deck-w:185px;}
+  /* a little larger, and centred in the gap between the logo and the button block */
+  .velvet{--deck-w:210px; position:absolute; left:50%; width:min(92vw,520px); height:auto; margin:0;
+    transform:translateX(-50%);
+    top:calc(40px + env(safe-area-inset-top, 0px) + 72px * 678 / 840 * .88);
+    bottom:calc(80px + 36px + var(--whisper-size) + var(--btn-size) + 32px + var(--count-size));}
   h1.title{top:calc(64px + env(safe-area-inset-top,0px));}
+  /* whisper sits 80px off the bottom; 36px above it is the button block, whose lower part is the
+     countdown slot. The slot stays 16px under "Карта дня" even while the numbers are hidden. */
+  #opening{--whisper-size:clamp(12px, .9722vw, 16px); --btn-size:clamp(14px, 1.1111vw, 18px);
+    --count-size:clamp(14px, 1.1111vw, 18px);}
+  .spread-options{position:absolute; left:0; right:0; margin-top:0; transform:none; align-items:flex-start;
+    bottom:calc(80px + 36px + var(--whisper-size));}
+  .whisper{position:absolute; left:0; right:0; bottom:80px; margin-top:0; transform:none; line-height:1;}
+  .opt-col{display:flex; flex-direction:column; align-items:center; width:max-content;}
+  .ask-sub{position:relative; left:auto; top:auto; transform:none; width:100%; height:var(--count-size); margin-top:16px;
+    line-height:var(--count-size); text-align:center;}
+  .ask-sub .cd-row{position:absolute; left:50%; top:0; transform:translateX(-50%); margin:0;}
+  .ask-sub .countdown, .ask-sub .cd-row .countdown{margin:0; font-size:var(--count-size); line-height:var(--count-size); height:var(--count-size);}
 }
 /* the language button (the language it switches to) in the top right corner and the sound in the top left, on the title's line; only on the resting
    deck, like the choice of spread. The buttons' padding is taken back by margins: big for a finger, 20px tall */
@@ -356,6 +372,7 @@ body.card-open .card-head, body.car-open .card-head{opacity:1;}
 /* phones, the carousel of the spread: the top card's name stands in the header instead of over its description */
 body.car-open #fName{display:none;}
 .card-head h2{margin:0; font-family:var(--head-font); font-weight:500; color:var(--accent); font-size:20px; line-height:24px; letter-spacing:.16em;}
+.card-head .head-title{display:none;}
 @media (hover:hover) and (pointer:fine){ .card-head{top:calc(64px + env(safe-area-inset-top,0px));} }
 /* narrow phones: a smaller title; fitTitle (app.js) keeps it on one line clear of RU / EN */
 @media (max-width:480px){ body.noir h1.title{font-size:12px; letter-spacing:2.85px;} }
@@ -410,4 +427,129 @@ body.card-open .intro-brand, body.car-open .intro-brand{opacity:0; transition:op
 body.intro-done .intro-brand{transition:opacity .5s ease-in-out;}
 @media (prefers-reduced-motion:reduce){
   body.intro #opening, body.intro .lang-switch{opacity:1; pointer-events:auto;}
+}
+
+/* phones: the version from before the logo and the crime-scene tape */
+@media not all and (hover:hover) and (pointer:fine){
+  .intro-layer{display:none !important;}
+  body.intro #opening, body.intro .lang-switch, body.intro h1.title{opacity:1 !important; pointer-events:auto;}
+  body.intro-done h1.title{opacity:.75 !important;}
+  .lang-switch{width:auto; height:20px; top:calc(14px + env(safe-area-inset-top,0px));
+    color:var(--muted); font-size:11px; font-weight:inherit; letter-spacing:2px; line-height:20px; z-index:6;}
+  .lang-switch button{width:auto; height:auto; margin:-10px 0; padding:10px 4px; border-radius:0; background:none;
+    font:inherit; letter-spacing:inherit; display:inline; box-shadow:none;}
+  .opt{font-size:19px; font-weight:400; letter-spacing:3px; margin-right:-3px;}
+  .cap-pos{font-size:14px; font-weight:400; letter-spacing:3px; color:var(--red);}
+  .cap-name{font-size:14px; font-weight:400; letter-spacing:1.5px;}
+  .cap-title{display:block; font-style:italic; font-size:14px; line-height:1.3; color:var(--ink); opacity:.8;}
+  .cap-title:empty{display:none;}
+  .meaning-panel .pos-label{font-size:14px; font-weight:400; letter-spacing:4px; color:var(--red);}
+  .meaning-panel h2, .card-head h2{font-size:19px; font-weight:500; letter-spacing:1.5px;}
+  .card-head h2{letter-spacing:4px;}
+  .meaning-panel .card-title{font-size:16px; font-weight:400; font-style:italic; letter-spacing:normal; opacity:.8;}
+  .meaning-panel p{font-size:15px; font-weight:400; letter-spacing:normal; line-height:1.4;}
+  .finish-btn{font-size:14px; font-weight:400; letter-spacing:3px; color:var(--accent);}
+  .finish-btn .fill{color:transparent; -webkit-text-fill-color:transparent; -webkit-background-clip:text; background-clip:text;
+    background-image:linear-gradient(90deg, var(--accent) 37.5%, var(--red) 37.5% 62.5%, var(--accent) 62.5%);
+    background-size:400% 100%; background-position:100% 0; animation:call 3.6s ease-in-out infinite;}
+  .end-phrase{font-size:19px;}
+  .return-btn{border:1px solid rgba(var(--accent-rgb),.4); font-size:14px; font-weight:400; letter-spacing:1.5px;
+    padding:9px 20px; border-radius:24px;}
+  .cta, body.noir .cta{background:var(--red); color:#fff; font-size:14px; font-weight:400; letter-spacing:2px;
+    padding:12px 30px; border-radius:26px; box-shadow:0 0 18px rgba(228,36,35,.4);}
+  .link-btn{color:var(--muted); font-size:14px; font-weight:400; letter-spacing:1.5px;}
+  #fDeck{font-family:inherit; font-size:inherit; font-weight:inherit; font-style:inherit; letter-spacing:inherit;}
+}
+
+/* desktop type. Sizes sit on the 1440px frame and stay inside the band discussed for other monitors.
+   Button shapes, fills, the red sweep and the colours are the GitHub ones. Oswald stays on the buttons. */
+@media (hover:hover) and (pointer:fine){
+  /* both asides share one size, a step under the buttons and the card text */
+  .whisper, .end-phrase{font-family:'Cormorant Garamond',Georgia,serif; font-weight:300; font-style:italic; letter-spacing:.05em;
+    font-size:clamp(12px, .9722vw, 16px);}
+  .opt, .finish-btn, .return-btn, .cta, .link-btn{font-family:'Oswald',sans-serif; font-weight:500; letter-spacing:0; line-height:1;
+    font-size:clamp(14px, 1.1111vw, 18px);}
+  .opt{margin-right:0; padding:8px 0; color:var(--accent); background:none; border:none; border-radius:0;
+    text-shadow:0 0 12px rgba(var(--accent-rgb),.45);}
+  .opt::after{left:var(--line-l, 0px); right:var(--line-r, 0px);}
+  .finish-btn{padding:6px 0; color:var(--accent); background:none; border:none; border-radius:0;}
+  .finish-btn .fill{color:transparent; -webkit-text-fill-color:transparent; -webkit-background-clip:text; background-clip:text;
+    background-image:linear-gradient(90deg, var(--accent) 37.5%, var(--red) 37.5% 62.5%, var(--accent) 62.5%);
+    background-size:400% 100%; background-position:100% 0;}
+  .finish-btn:hover, .finish-btn:hover .fill{color:transparent; -webkit-text-fill-color:transparent;}
+  .return-btn{color:var(--accent); background:none; border:1px solid rgba(var(--accent-rgb),.4);
+    padding:9px 20px; border-radius:24px;}
+  .return-btn:hover{color:var(--accent); background:rgba(228,36,35,.15); border-color:var(--red);}
+  /* the same vertical padding and border as Share, so the red pill is the same height */
+  .cta, body.noir .cta{color:#fff; -webkit-text-fill-color:#fff; background:var(--red);
+    border:1px solid transparent; padding:9px 30px; border-radius:26px; box-shadow:0 0 18px rgba(228,36,35,.4);}
+  .cta:hover, body.noir .cta:hover{color:#fff; -webkit-text-fill-color:#fff; transform:translateY(-1px);
+    box-shadow:0 0 28px rgba(228,36,35,.65);}
+  .link-btn{color:var(--muted); background:none; border:none; border-radius:0; padding:9px 6px; box-shadow:none;}
+  .link-btn:hover{color:var(--ink);}
+  .cap-pos, .meaning-panel .pos-label{font-family:'Trispace',sans-serif; font-weight:400; letter-spacing:0;
+    font-size:clamp(13px, .9722vw, 16px);}
+  .cap-name, .meaning-panel h2, .card-head h2{font-family:'Trispace',sans-serif; font-weight:500; letter-spacing:0;
+    font-size:clamp(16px, 1.25vw, 22px);}
+  .meaning-panel .card-title, .card-head .head-title{font-family:'Cormorant Garamond',Georgia,serif; font-weight:500; font-style:italic; letter-spacing:.05em;
+    font-size:clamp(16px, 1.25vw, 22px);}
+  #mText, #fText, .finale .summary{font-family:'Trispace',sans-serif; font-weight:300; letter-spacing:0;
+    font-size:clamp(14px, 1.1111vw, 18px);}
+  #fDeck{font-family:'Cormorant Garamond',Georgia,serif; font-weight:300; font-style:italic; letter-spacing:0;
+    font-size:clamp(16px, 1.25vw, 20px); color:var(--muted); opacity:.8;}
+  #fDeck b{color:inherit; font-weight:inherit;}
+}
+@media (hover:hover) and (pointer:fine){
+  html[lang=ru] .cap-pos, html[lang=ru] .meaning-panel .pos-label{font-family:'IBM Plex Mono',monospace; font-weight:400; letter-spacing:.05em;}
+  html[lang=ru] .cap-name, html[lang=ru] .meaning-panel h2, html[lang=ru] .card-head h2{font-family:'IBM Plex Mono',monospace; font-weight:500; letter-spacing:.05em;}
+  html[lang=ru] #mText, html[lang=ru] #fText, html[lang=ru] .finale .summary{font-family:'IBM Plex Mono',monospace; font-weight:400; letter-spacing:.05em;}
+  html[lang=ru] #fDeck{font-family:'Cormorant Garamond',Georgia,serif; font-weight:300; font-style:italic; letter-spacing:0;}
+}
+/* desktop card of the day: name, a reserved quote, the card, then the reading across the screen,
+   the whisper, and a finish button 80px off the bottom */
+@media (hover:hover) and (pointer:fine){
+  body.day-open .card-head{white-space:normal; display:flex; flex-direction:column; align-items:center;}
+  body.day-open .card-head h2{white-space:nowrap;}
+  body.day-open .card-head .head-title{display:block; min-height:1.2em; line-height:1.2; margin-top:8px; white-space:nowrap;}
+  body.day-open #mTitle{display:none;}
+  body.day-open #meaningPanel{left:0; right:0; bottom:80px; top:auto; transform:none; max-width:none; width:100%;}
+  body.day-open #mText{width:100%; max-width:none; padding:0 24px; box-sizing:border-box;}
+  body.day-open #meaningPanel .meaning-end{flex-direction:column-reverse; gap:16px; margin-top:0;}
+  body.day-open #endRule, body.day-open .finish-btn .arrow{display:none;}
+  body.day-open .finish-btn{padding:8px 0; color:var(--red); text-shadow:none;
+    font-size:clamp(16px, 1.25vw, 20px);}
+  /* red sits on the button, then on hover drains downward onto the whisper */
+  body.day-open .finish-btn .fill{color:transparent; -webkit-text-fill-color:transparent;
+    background-image:linear-gradient(to bottom, #fff 0 50%, var(--red) 50% 100%);
+    background-size:100% 200%; background-position:0 100%; background-repeat:no-repeat;
+    -webkit-background-clip:text; background-clip:text;
+    transition:background-position .6s ease;}
+  body.day-open .finish-btn:hover .fill{background-position:0 0;}
+  body.day-open .end-phrase{font-size:clamp(14px, 1.1111vw, 18px); opacity:0;
+    color:transparent; -webkit-text-fill-color:transparent;
+    background-image:linear-gradient(to bottom, color-mix(in srgb, var(--muted) 80%, transparent) 0 50%, var(--red) 50% 100%);
+    background-size:100% 200%; background-position:0 0; background-repeat:no-repeat;
+    -webkit-background-clip:text; background-clip:text;
+    transition:background-position 1.8s ease;}
+  body.day-open .meaning-end:has(.finish-btn:hover) .end-phrase{background-position:0 100%; transition-delay:.35s;}
+  /* after Finish the same screen stays; the closing row takes the button's place, 80px off the bottom */
+  body.day-open.day-done #meaningPanel .meaning-end{display:none;}
+  body.day-open.day-done #mText{margin-bottom:0;}
+  body.day-open.day-done #finale{left:0; right:0; top:auto; bottom:80px; width:100%; max-width:none; transform:none;}
+  body.day-open.day-done #finale #fDeck{order:2; max-width:none; white-space:normal; padding:0 24px; margin:16px 0 0;
+    font-size:clamp(18px, 1.3889vw, 22px);}
+  body.day-open.day-done #finale .finale-row{order:1;}
+  body.day-open.day-done #finale .finale-row{display:flex; justify-content:center; align-items:center; column-gap:22px; width:auto;}
+  body.day-open.day-done #finale .return-btn,
+  body.day-open.day-done #finale .cta,
+  body.day-open.day-done #finale .link-btn{font-size:clamp(16px, 1.25vw, 20px);}
+  body.day-open.day-done #finale .finale-row .return-btn{order:0; justify-self:auto;}
+  body.day-open.day-done #finale .finale-row .cta{order:1; justify-self:auto;}
+  body.day-open.day-done #finale .finale-row .link-btn{order:2; justify-self:auto; position:relative;
+    color:var(--accent); text-shadow:0 0 12px rgba(var(--accent-rgb),.45);}
+  body.day-open.day-done #finale .finale-row .link-btn::after{content:''; position:absolute; left:6px; right:6px; bottom:0;
+    height:1px; background:var(--red); transform:scaleX(0); transition:transform .35s ease;}
+  body.day-open.day-done #finale .finale-row .link-btn:hover{color:var(--accent);}
+  body.day-open.day-done #finale .finale-row .link-btn:hover::after{transform:scaleX(1);}
+  body.day-open.day-done #finale .row-break{display:none;}
 }

@@ -206,10 +206,10 @@ for(let i=0;i<78;i++){
 
 /* ---------- language ---------- */
 const UI={
-ru:{title:'Таро Лидии Хаит', comeBack:'возвращайся через', whisper:'хочешь знать?',
+ru:{title:'Таро Лидии Хаит', whisper:'хочешь знать?',
   optDay:'Карта дня', optThree:'Три карты', positions:['Прошлое','Настоящее','Будущее'],
   upright:'Прямое положение', reversed:'Перевёрнутое положение', pickHint:'выбери три карты', reveal:'Узнать',
-  next:'Далее', finish:'Завершить', nowYouKnow:'Теперь ты знаешь',
+  next:'Далее', finish:'Завершить', nowYouKnow:'теперь ты знаешь',
   deckOne:'Эта карта — из колоды <b>Bloody Feast Tarot</b>: все 78 карт с авторской графикой в файле для печати на Etsy.',
   deckMany:'Эти карты — из колоды <b>Bloody Feast Tarot</b>: все 78 карт с авторской графикой в файле для печати на Etsy.',
   etsy:'Купить колоду', etsyPrint:'Колода для печати · купить на Etsy', rotate:'Поверни телефон вертикально', touchDeck:'коснись колоды', heading:'Таро «Кровавый пир» от Лидии Хаит', share:'Поделиться', gather:'Собрать колоду', onceMore:'Ещё раз',
@@ -227,10 +227,10 @@ ru:{title:'Таро Лидии Хаит', comeBack:'возвращайся че�
     n=>`${n} легла перевёрнутой — здесь энергия застревает.`,
     'Две карты перевёрнуты — сначала стоит разобраться с тем, что мешает.',
     'Все карты перевёрнуты — время посмотреть внутрь себя, прежде чем действовать.']},
-en:{title:'Tarot by Lidiia Khait', comeBack:'come back in', whisper:'want to know?',
+en:{title:'Tarot by Lidiia Khait', whisper:'want to know?',
   optDay:'Card of the day', optThree:'Three cards', positions:['Past','Present','Future'],
   upright:'Upright', reversed:'Reversed', pickHint:'choose three cards', reveal:'Reveal',
-  next:'Next', finish:'Finish', nowYouKnow:'Now you know',
+  next:'Next', finish:'Finish', nowYouKnow:'now you know',
   deckOne:'This card comes from the <b>Bloody Feast Tarot</b> deck: all 78 cards with original artwork in a printable file on Etsy.',
   deckMany:'These cards come from the <b>Bloody Feast Tarot</b> deck: all 78 cards with original artwork in a printable file on Etsy.',
   etsy:'Buy the deck', etsyPrint:'Printable deck · buy on Etsy', rotate:'Turn your phone upright', touchDeck:'touch the deck', heading:'Bloody Feast Tarot deck by Lidiia Khait', share:'Share', gather:'Gather the deck', onceMore:'Once more',
@@ -783,8 +783,11 @@ function openedPose(el, card){
   loadFace(el); el.querySelector('.fart').classList.toggle('reversed', reversed);
   // fill the description first so its real height is known
   document.getElementById('mPos').textContent=spread ? POSITIONS[spread.i] : '';
+  document.body.classList.toggle('day-open', isDesktop() && !spread);
   document.getElementById('mName').textContent=card.name;
-  document.getElementById('mTitle').textContent=card.title ? tr('q')(card.title) : '';
+  const quote=card.title ? tr('q')(card.title) : '';
+  document.getElementById('mTitle').textContent=quote;
+  document.getElementById('mQuote').textContent=quote;
   document.getElementById('mText').textContent=reversed?card.rev:card.up;
   fitCardHead();
   return fitAbove(meaningPanel);
@@ -793,18 +796,58 @@ function openedPose(el, card){
 const cardHead=document.getElementById('cardHead');
 function fitCardHead(){
   const h=document.getElementById('mName'); h.style.fontSize=h.style.letterSpacing='';
-  for(let f=20; f>=12 && cardHead.offsetWidth>innerWidth-28; f-=.5){ h.style.fontSize=f+'px'; h.style.letterSpacing=f*.06+'px'; }
+  const start=isDesktop() ? 20 : 19, track=isDesktop() ? .06 : .15;
+  for(let f=start; f>=12 && cardHead.offsetWidth>innerWidth-28; f-=.5){ h.style.fontSize=f+'px'; h.style.letterSpacing=f*track+'px'; }
 }
 // the name takes the title's place for as long as the description is shown
-new MutationObserver(()=>document.body.classList.toggle('card-open', meaningPanel.classList.contains('show')))
-  .observe(meaningPanel, {attributes:true, attributeFilter:['class']});
+new MutationObserver(()=>{
+  const open=meaningPanel.classList.contains('show');
+  document.body.classList.toggle('card-open', open);
+  if(!open){
+    document.body.classList.remove('day-open', 'day-done');
+    meaningPanel.style.bottom=meaningPanel.style.top='';
+    finale.style.top=finale.style.bottom='';
+    const end=meaningPanel.querySelector('.meaning-end'); if(end) end.hidden=false;
+  }
+}).observe(meaningPanel, {attributes:true, attributeFilter:['class']});
 // pose of a face-up card that, together with `panel` right under it, fits the viewport minus FIT_MARGIN
 function fitAbove(panel){
   const GAP=16, panelH=panel.offsetHeight, ASPECT=CARD_ASPECT;
   const availW=innerWidth-2*FIT_MARGIN;
+  // phones keep the layout from before the logo: the name stays in the top bar, the card sits under it
+  if(!isDesktop()){
+    const head=panel===meaningPanel || document.body.classList.contains('car-open') ? cardHead : document.querySelector('h1.title');
+    const minTop=Math.max(FIT_MARGIN, head.getBoundingClientRect().bottom+24);
+    if(panel===finale){
+      const room=panel.getBoundingClientRect().top-GAP-minTop, h=Math.min(room, availW/ASPECT), w=h*ASPECT;
+      return {x:innerWidth/2, y:minTop+room/2, rot:0, w, h, ry:180, tx:0, ty:0};
+    }
+    const availH=innerHeight-minTop-FIT_MARGIN-GAP-panelH;
+    const h=Math.min(availH, availW/ASPECT), w=h*ASPECT;
+    const top=Math.max(minTop, (innerHeight-(h+GAP+panelH))/2);
+    panel.style.top=(top+h+GAP)+'px'; panel.style.bottom='auto';
+    return {x:innerWidth/2, y:top+h/2, rot:0, w, h, ry:180, tx:0, ty:0};
+  }
+  // card of the day: name and a reserved quote above the card, the text full width underneath,
+  // and the finish button 80px off the bottom of the screen
+  if(panel===meaningPanel && !spread){
+    panel.style.top='auto'; panel.style.bottom='80px';
+    panel.style.left='0'; panel.style.right='0'; panel.style.width='100%'; panel.style.maxWidth='none';
+    panel.style.transform='none';
+    const nameGap=18, minTop=24, nameH=Math.max(cardHead.offsetHeight, 24);
+    const panelTop=panel.getBoundingClientRect().top;
+    const space=panelTop-GAP-minTop;
+    const room=space-nameH-nameGap;
+    const h=Math.min(Math.max(room, 120), availW/ASPECT), w=h*ASPECT;
+    const top=minTop+Math.max(0, (space-(nameH+nameGap+h))/2);
+    cardHead.style.top=top+'px';
+    const cardTop=top+nameH+nameGap;
+    return {x:innerWidth/2, y:cardTop+h/2, rot:0, w, h, ry:180, tx:0, ty:0};
+  }
   // an open card is one column, as in the frames: the name sits on the card, the text sits under it,
   // and the whole column is centred. The phone carousel keeps the name in the top bar.
   if(panel===meaningPanel){
+    panel.style.left=panel.style.right=panel.style.width=panel.style.maxWidth=panel.style.transform=panel.style.bottom='';
     const nameH=Math.max(cardHead.offsetHeight, 24), nameGap=18, minTop=24;
     const availH=innerHeight-minTop-FIT_MARGIN-nameH-nameGap-GAP-panelH;
     const h=Math.min(Math.max(availH, 120), availW/ASPECT), w=h*ASPECT;
@@ -1174,26 +1217,39 @@ function onCardOpened(el){
   if(spread && !el._fromDeck) setDim(2, el);
   meaningPanel.classList.add('show'); busy=false;
   inkReveal(document.getElementById('mName'), {delay:.3});
-  const mTitle=document.getElementById('mTitle'); if(mTitle.textContent) inkReveal(mTitle, {delay:.45});
+  const quoteEl=document.body.classList.contains('day-open') ? document.getElementById('mQuote') : document.getElementById('mTitle');
+  if(quoteEl.textContent) inkReveal(quoteEl, {delay:.45});
   const mText=document.getElementById('mText'), words=mText.textContent.trim().split(/\s+/).length;
   inkReveal(mText, {byWord:true, delay:.6, stagger:.03, dur:.7});
   revealEnd(Math.max(.6+.03*(words-1)+.7, showBigName(el)||0));
 }
 
-// "Теперь ты знаешь" and the way out appear only once everything above has surfaced
+// the way out appears once everything above has surfaced; the whisper follows the button
 const endPhrase=document.getElementById('endPhrase'), endRule=document.getElementById('endRule');
 // between the cards of a spread there is only the way on to the next one
 function setEndRow(next){
+  if(!isDesktop()){
+    endPhrase.style.display=endRule.style.display=next ? 'none' : '';
+    document.querySelector('#finishBtn .fill').textContent=tr(next ? 'next' : 'finish');
+    return;
+  }
   endPhrase.style.display=endRule.style.display=spread ? 'none' : '';
   document.querySelector('#finishBtn .fill').textContent=tr(spread || !next ? 'finish' : 'next');
 }
 function revealEnd(at){
   const btn=document.getElementById('finishBtn');
-  gsap.killTweensOf([endRule, btn]);
+  gsap.killTweensOf([endRule, btn, endPhrase]);
   gsap.set(btn,{autoAlpha:0}); gsap.set(endRule,{scaleY:0}); btn.classList.remove('tap');
-  inkReveal(endPhrase, {delay:at, stagger:.035, dur:.7});
-  gsap.to(endRule,{scaleY:1, duration:.45, ease:'power2.out', delay:at+.5});
+  // the day-card whisper is painted by a text clip, so hiding its letters does not hide it
+  if(document.body.classList.contains('day-open')){
+    gsap.set(endPhrase,{autoAlpha:0});
+    gsap.fromTo(btn,{x:-10},{autoAlpha:1, x:0, duration:.6, ease:'power2.out', delay:at+.75,
+      onComplete(){ gsap.to(endPhrase,{autoAlpha:1, duration:.6, ease:'power2.out'}); }});
+    return;
+  }
   gsap.fromTo(btn,{x:-10},{autoAlpha:1, x:0, duration:.6, ease:'power2.out', delay:at+.75});
+  gsap.to(endRule,{scaleY:1, duration:.45, ease:'power2.out', delay:at+1.15});
+  inkReveal(endPhrase, {delay:at+1.45, stagger:.035, dur:.7});
 }
 
 // Text surfaces like ink soaking into paper: letter by letter (or word by word), first blurred and
@@ -1233,11 +1289,12 @@ function showBigName(el){
   bigName.style.zIndex=BIG_BEHIND;
   const FRONT=1.1; // its scale while in front of the card; it ends at 1
   fan.appendChild(bigName);
-  // it spans the whole visible width: sized to it, up to 60% of the card's height; a shorter name has
-  // its letters spread out to the full width
+  // sized from the screen width alone, so a shorter card does not shrink the letters.
+  // the word fills 96% of the viewport; a name that still falls short is tracked out to that width
   const FILL=innerWidth*.96, n=bigName.textContent.length;
   bigName.style.fontSize='100px';
-  bigName.style.fontSize=Math.min(s.h*.6, 100*FILL/bigName.scrollWidth)+'px'; bigName.style.top=s.y+'px';
+  bigName.style.fontSize=(100*FILL/Math.max(bigName.scrollWidth,1))+'px';
+  bigName.style.top=s.y+'px';
   if(bigName.scrollWidth<FILL && n>1){
     const sp=(FILL-bigName.scrollWidth)/(n+1);
     bigName.style.letterSpacing=sp+'px'; bigName.style.paddingLeft=sp+'px'; // balances the space after the last letter
@@ -1392,8 +1449,25 @@ document.getElementById('finishBtn').addEventListener('click', e=>{
     return;
   }
   if(spread){ spread.i<POSITIONS.length-1 ? nextSpreadCard() : showSpreadSummary(); return; }
+  // desktop card of the day keeps the updated screen; only the closing row replaces the finish button
+  if(isDesktop()){
+    busy=true; const el=activeCard;
+    const text=document.getElementById('mText'), box=text.getBoundingClientRect();
+    setFinale([el]);
+    meaningPanel.querySelector('.meaning-end').hidden=true;
+    document.body.classList.add('day-done');
+    finale.classList.add('show');
+    meaningPanel.style.top=box.top+'px';
+    meaningPanel.style.bottom='auto';
+    finale.style.top=(text.getBoundingClientRect().bottom+16)+'px';
+    finale.style.bottom='auto';
+    showShowcase(el);
+    busy=false;
+    return;
+  }
   busy=true; const el=activeCard, s=el._state;
   meaningPanel.classList.remove('show');
+  document.body.classList.remove('day-open');
   setFinale([el]);
   hideBigName();
   const pose=fitAbove(finale);
@@ -1419,8 +1493,13 @@ function setFinale(els){
   prepareStory(els);
   document.getElementById('etsyBtn').href=etsyLink(els[0]._card);
   document.getElementById('fDeck').innerHTML=tr(one ? 'deckOne' : 'deckMany');
-  document.getElementById('fDeck').hidden=!one || !!els[0]._fromDeck; // the three-card row is the summary and the buttons, as in the spread screens
-  document.getElementById('etsyBtn').textContent=tr(!one || !document.getElementById('fDeck').hidden ? 'etsy' : 'etsyPrint');
+  if(!isDesktop()){
+    document.getElementById('fDeck').hidden=!!els[0]._fromDeck && !one;
+    document.getElementById('etsyBtn').textContent=tr(document.getElementById('fDeck').hidden ? 'etsyPrint' : 'etsy');
+  }else{
+    document.getElementById('fDeck').hidden=!one || !!els[0]._fromDeck;
+    document.getElementById('etsyBtn').textContent=tr(!one || !document.getElementById('fDeck').hidden ? 'etsy' : 'etsyPrint');
+  }
   shareBtnEl.textContent=tr('share');
   document.getElementById('gatherBtn').innerHTML=tr(one ? 'gather' : 'onceMore');
   sum.hidden=one; sum.textContent=one ? '' : spreadSummary(els);
@@ -1462,7 +1541,17 @@ function returnToArc(el){
 document.getElementById('gatherBtn').addEventListener('click', ()=>{
   if(!activeCard || busy) return;
   busy=true; const el=activeCard;
+  // the closing row and the description fade on a delay; dropping the day-card layout first
+  // would show the old finish button for that whole delay. Hide both before the layout returns.
+  if(document.body.classList.contains('day-done')){
+    meaningPanel.style.transition=finale.style.transition='none';
+    meaningPanel.style.opacity=finale.style.opacity='0';
+  }
   finale.classList.remove('show'); hideBigName();
+  meaningPanel.classList.remove('show');
+  void meaningPanel.offsetWidth;
+  meaningPanel.style.transition=finale.style.transition='';
+  meaningPanel.style.opacity=finale.style.opacity='';
   el.classList.remove('lit');
   const els=spread ? spread.cards : [el];
   els.forEach(c=>c.classList.remove('lit'));
@@ -1566,10 +1655,21 @@ function setAskSub(){
   const sub=askSub;
   spreadOpts.querySelector('[data-mode=day]').classList.toggle('done', dayDone);
   if(!dayDone){ sub.textContent=''; return false; }
-  sub.innerHTML=`<span class="cd-phrase">${tr('comeBack')}</span>`+
-    `<span class="cd-row"><span class="countdown"></span></span>`;
+  sub.innerHTML=`<span class="cd-row"><span class="countdown"></span></span>`;
   tickCountdown();
+  fitCountdown();
   return true;
+}
+// the digits stay inside the width of "Карта дня"; tabular figures keep that width as they tick
+function fitCountdown(){
+  if(!isDesktop()) return;
+  const btn=document.querySelector('.opt[data-mode=day]');
+  const cd=document.querySelector('#askSub .countdown');
+  if(!cd) return;
+  cd.style.transform='';
+  if(!btn || !cd.textContent) return;
+  const max=btn.getBoundingClientRect().width, w=cd.getBoundingClientRect().width;
+  if(w>max && max>0){ cd.style.transform=`scale(${max/w})`; cd.style.transformOrigin='center'; }
 }
 function tickCountdown(){
   if(dayDone && dayDrawn!==dayKey()){ dayDone=false; setAskSub(); return; }
@@ -1696,7 +1796,7 @@ function applyLang(){
   document.querySelectorAll('[data-i18n]').forEach(e=>e.textContent=tr(e.dataset.i18n));
   const other=lang==='ru' ? 'en' : 'ru';
   langBtn.textContent=other.toUpperCase(); langBtn.dataset.lang=other;
-  setAskSub(); fitTitle();
+  setAskSub(); fitTitle(); fitOptLines();
 }
 // the title stays on one line, centred on the screen; its letters shrink until it clears the language
 // button on both sides alike
@@ -1710,6 +1810,30 @@ function fitTitle(){
   }
 }
 document.fonts.ready.then(fitTitle); addEventListener('resize', fitTitle);
+// the red line under a reading grows to the ink of the word, the same distance past both sides
+function fitOptLines(){
+  if(!isDesktop()) return;
+  document.querySelectorAll('.opt').forEach(btn=>{
+    const cs=getComputedStyle(btn);
+    const raw=btn.textContent.trim();
+    const text=cs.textTransform==='uppercase' ? raw.toLocaleUpperCase(lang==='ru' ? 'ru' : 'en') : raw;
+    const c=fitOptLines.canvas || (fitOptLines.canvas=document.createElement('canvas'));
+    const x=c.getContext('2d');
+    const font=`${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
+    x.font=font;
+    const adv=x.measureText(text).width, pad=4;
+    c.width=Math.ceil(adv)+pad*2; c.height=Math.ceil(parseFloat(cs.fontSize)*3)||40;
+    x.font=font; x.fillStyle='#fff'; x.textBaseline='alphabetic';
+    x.fillText(text, pad, c.height*.72);
+    const data=x.getImageData(0,0,c.width,c.height).data;
+    let min=c.width, max=0;
+    for(let i=0;i<data.length;i+=4) if(data[i+3]>128){ const px=(i/4)%c.width; if(px<min) min=px; if(px>max) max=px; }
+    btn.style.setProperty('--line-l', Math.max(0, min-pad)+'px');
+    btn.style.setProperty('--line-r', Math.max(0, pad+adv-(max+1))+'px');
+  });
+}
+document.fonts.ready.then(fitOptLines); addEventListener('resize', fitOptLines);
+document.fonts.ready.then(()=>fitCountdown()); addEventListener('resize', ()=>fitCountdown());
 // one button, showing the language it switches to
 const langBtn=document.getElementById('langBtn');
 langBtn.addEventListener('click', ()=>{
@@ -1729,6 +1853,12 @@ document.addEventListener('dragstart', e=>{ if(e.target.tagName==='IMG') e.preve
 
 /* ---------- intro: large logo → top-left, tape slides until a label hits center, then swaps ---------- */
 (async function runIntro(){
+  // phones stay as they were before the logo and the tape: the text title, no brand
+  if(!isDesktop()){
+    document.body.classList.remove('intro');
+    document.getElementById('intro')?.remove();
+    return;
+  }
   const brand=document.getElementById('introBrand'), logo=document.getElementById('introLogo'),
     tape=document.getElementById('introTapeWrap'), tapeHost=document.getElementById('introTape'),
     layer=document.getElementById('intro');
