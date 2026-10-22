@@ -1048,7 +1048,9 @@ function openSpreadCard(i){
   tl.call(()=>{ el.style.zIndex=1000; sfx.slide(1, .7); })
     .to(s,{...pose, duration:1.3, ease:'power2.inOut', onUpdate:render, onComplete:()=>onCardOpened(el)});
 }
-// the white plate on the tape reads the period while the card is opening, then leaves with the header
+// the white plate on the tape reads the period of the card that is opening, in the same face as
+// "Tarot by Lidia Khait" (those letters are outlines; Montserrat is the Cyrillic match), and as large
+// as that plate allows. It leaves with the header when the card's name appears.
 function setTapePeriod(text){
   if(!isDesktop()) return;
   const zoom=document.querySelector('.tape-zoom');
@@ -1057,10 +1059,26 @@ function setTapePeriod(text){
   if(!lab){ lab=document.createElement('div'); lab.className='tape-label'; zoom.appendChild(lab); }
   if(!text){ document.body.classList.remove('tape-period'); return; }
   lab.textContent=text;
-  let size=Math.max(8, zoom.offsetHeight*0.5);
-  lab.style.fontSize=size+'px';
-  const maxW=Math.max(1, zoom.offsetWidth*0.86);
-  while(lab.scrollWidth>maxW && size>6){ size*=0.92; lab.style.fontSize=size+'px'; }
+  const fit=()=>{
+    const plate=zoom.querySelector('rect.st2');
+    const box=plate ? plate.getBoundingClientRect() : zoom.getBoundingClientRect();
+    if(box.width<2 || box.height<2) return;
+    let size=Math.max(8, zoom.offsetHeight);
+    lab.style.fontSize=size+'px';
+    for(let i=0;i<6;i++){
+      const range=document.createRange();
+      range.selectNodeContents(lab);
+      const ink=range.getBoundingClientRect();
+      range.detach();
+      if(!ink.width || !ink.height) return;
+      const k=Math.min(box.width*0.92/ink.width, box.height*0.9/ink.height);
+      if(k>0.97 && k<1.03) break;
+      size=Math.max(6, size*k);
+      lab.style.fontSize=size+'px';
+    }
+  };
+  fit();
+  document.fonts.load('600 16px Montserrat').then(()=>{ if(lab.textContent===text) fit(); });
   document.body.classList.add('tape-period');
 }
 // "Далее": desktop - the open card lies back face up just out of its arc slot and the next one opens;
@@ -1070,7 +1088,10 @@ function nextSpreadCard(){
   // the sheet drops its day-card layout the moment it closes; hide it first so that snap is not seen
   const sheet=document.body.classList.contains('step-open');
   if(sheet){ meaningPanel.style.transition='none'; meaningPanel.style.opacity='0'; }
-  meaningPanel.classList.remove('show'); hideBigName(); setTapePeriod(''); el.classList.remove('lit');
+  // the header comes back for the next flight already naming that card, not the brand
+  meaningPanel.classList.remove('show'); hideBigName();
+  setTapePeriod(isDesktop() && !el._fromDeck ? POSITIONS[spread.i+1] : '');
+  el.classList.remove('lit');
   if(sheet){ void meaningPanel.offsetWidth; meaningPanel.style.transition=meaningPanel.style.opacity=''; }
   gsap.killTweensOf(s);
   if(!el._fromDeck) setDim(1, el);
@@ -1098,23 +1119,29 @@ function showSpreadSummary(){
   if(sheet) document.body.classList.add('spread-row');
   setFinale(els);
   if(el._fromDeck){ showCarousel(); return; }
-  const poses=fitRow(finale, els.length);
+  // desktop: as large as the gap between the captions and the reading, and centred in it
+  const laid=isDesktop() ? spreadRowPoses(els) : null;
+  const poses=laid ? laid.poses : fitRow(finale, els.length);
   els.forEach((c,i)=>{
     const s=c._state; gsap.killTweensOf(s); c.classList.remove('dim');
     // the cards put away come back
     if(+c.style.zIndex<1000) c.style.zIndex=1000+i;
     if(c.classList.contains('away')) fadeInCard(c);
-    spread.caps[i].querySelector('.cap-name').textContent=c._card.name;
-    spread.caps[i].querySelector('.cap-title').textContent=c._card.title ? tr('q')(c._card.title) : '';
-    spread.caps[i].style.width=poses[i].w*1.1+'px'; // a long name wraps instead of running into the next one
-    const capTop=Math.max(72, (document.querySelector('.tape-zoom')?.getBoundingClientRect().bottom)||0)+16;
-    placeCap(i, poses[i].x, capTop, false);
+    if(!laid){
+      spread.caps[i].querySelector('.cap-name').textContent=c._card.name;
+      spread.caps[i].querySelector('.cap-title').textContent=c._card.title ? tr('q')(c._card.title) : '';
+      spread.caps[i].style.width=poses[i].w*1.1+'px'; // a long name wraps instead of running into the next one
+      const capTop=Math.max(72, (document.querySelector('.tape-zoom')?.getBoundingClientRect().bottom)||0)+16;
+      placeCap(i, poses[i].x, capTop, false);
+    }
     gsap.to(s,{...poses[i], duration:1, delay:.08*i, ease:'power2.inOut', onUpdate:()=>renderCard(c,s)});
   });
-  // captions of one height, so the positions line up whether or not a card has a title
-  spread.caps.forEach(c=>c.style.height='');
-  const capH=Math.max(...spread.caps.map(c=>c.offsetHeight));
-  spread.caps.forEach(c=>c.style.height=capH+'px');
+  if(!laid){
+    // captions of one height, so the positions line up whether or not a card has a title
+    spread.caps.forEach(c=>c.style.height='');
+    const capH=Math.max(...spread.caps.map(c=>c.offsetHeight));
+    spread.caps.forEach(c=>c.style.height=capH+'px');
+  }
   gsap.delayedCall(1.2, ()=>{ spread.summary=true; showCaps(true); finale.classList.add('show'); busy=false; });
 }
 // phones: the three cards lie face up in a small stack, the past on top; a swipe to the left (or a tap)
@@ -1209,6 +1236,39 @@ fan.addEventListener('pointerup', e=>{
   if(Math.abs(dx)>40) turnStack(dx<0 ? 1 : -1);
   else if(inCard(spread.cards[spread.carousel.order[0]]._state, e.clientX, e.clientY)) turnStack(1);
 });
+// desktop three-up: the cards fill the band between the caption block and the reading, and sit in its middle
+function spreadRowPoses(els){
+  const n=els.length, SP=.12, side=36, GAP=16;
+  const capTop=Math.max(72, (document.querySelector('.tape-zoom')?.getBoundingClientRect().bottom)||0)+16;
+  const sum=document.getElementById('fSummary');
+  const availW=innerWidth-2*side, maxH=availW/(CARD_ASPECT*(n+(n-1)*SP));
+  let w=maxH*CARD_ASPECT, capH=0, descTop=0;
+  const place=()=>{
+    els.forEach((c,i)=>{
+      const cap=spread.caps[i];
+      cap.querySelector('.cap-name').textContent=c._card.name;
+      cap.querySelector('.cap-title').textContent=c._card.title ? tr('q')(c._card.title) : '';
+      cap.style.width=w*1.1+'px';
+      cap.style.height='';
+      placeCap(i, innerWidth/2+(i-(n-1)/2)*w*(1+SP), capTop, false);
+    });
+    capH=Math.max(...spread.caps.map(c=>c.offsetHeight));
+    spread.caps.forEach(c=>c.style.height=capH+'px');
+    descTop=sum.getBoundingClientRect().top;
+  };
+  for(let pass=0; pass<4; pass++){
+    place();
+    const room=descTop-(capTop+capH)-2*GAP;
+    const h=Math.min(Math.max(room, 80), maxH), next=h*CARD_ASPECT;
+    if(Math.abs(next-w)<1){ w=next; break; }
+    w=next;
+  }
+  place();
+  const h=w/CARD_ASPECT, mid=(capTop+capH+descTop)/2;
+  return {poses:els.map((_,i)=>({
+    x:innerWidth/2+(i-(n-1)/2)*w*(1+SP), y:mid, rot:0, w, h, ry:180, tx:0, ty:0
+  }))};
+}
 // poses of n face-up cards side by side that, with their captions above and `panel` under them, fit the viewport
 function fitRow(panel, n){
   const GAP=16, CAP=isDesktop() ? 128 : 66, SP=.14, side=isPortraitMobile() ? 16 : FIT_MARGIN;
