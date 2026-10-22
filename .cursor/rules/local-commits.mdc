@@ -1,0 +1,16 @@
+---
+description: Make local git commits of finished work so a window restart does not drop progress
+alwaysApply: true
+---
+
+# Local commits
+
+The user asked for local commits on a steady cadence so progress survives a Cursor window restart. This overrides the default of committing only when a message says "commit", for this project only.
+
+- Commit locally after a finished slice: a request is done, the files are saved, and the change is whole enough to keep. Do not commit mid-edit, a broken halfway state, or an empty tree.
+- Several small edits that belong to one request can share one commit at the end of that request. A long request gets a commit at each coherent checkpoint.
+- Local only. Do not push unless the user asks in that message.
+- Use `/Library/Developer/CommandLineTools/usr/bin/git`. Do not update git config, skip hooks, force-push, or amend.
+- Message style: `Cursor: …`, one or two sentences on why.
+- Do not commit secrets (`.env`, credentials).
+- If the window dies before the next checkpoint, only what is already committed is safe. Uncommitted edits in the working tree can still be lost.
