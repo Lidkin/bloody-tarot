@@ -208,7 +208,8 @@ for(let i=0;i<78;i++){
 const UI={
 ru:{title:'Таро Лидии Хаит', whisper:'хочешь знать?',
   optDay:'Карта дня', optThree:'Три карты', positions:['Прошлое','Настоящее','Будущее'],
-  upright:'Прямое положение', reversed:'Перевёрнутое положение', pickHint:'выбери три карты', reveal:'Узнать',
+  upright:'Прямое положение', reversed:'Перевёрнутое положение',
+  pickAsk:['выбери три карты','выбери настоящее','выбери будущее'], pickDone:'выбор сделан', reveal:'Узнать',
   next:'Далее', finish:'Завершить', nowYouKnow:'теперь ты знаешь',
   deckOne:'Эта карта — из колоды <b>Bloody Feast Tarot</b>: все 78 карт с авторской графикой в файле для печати на Etsy.',
   deckMany:'Эти карты — из колоды <b>Bloody Feast Tarot</b>: все 78 карт с авторской графикой в файле для печати на Etsy.',
@@ -229,7 +230,8 @@ ru:{title:'Таро Лидии Хаит', whisper:'хочешь знать?',
     'Все карты перевёрнуты — время посмотреть внутрь себя, прежде чем действовать.']},
 en:{title:'Tarot by Lidiia Khait', whisper:'want to know?',
   optDay:'Card of the day', optThree:'Three cards', positions:['Past','Present','Future'],
-  upright:'Upright', reversed:'Reversed', pickHint:'choose three cards', reveal:'Reveal',
+  upright:'Upright', reversed:'Reversed',
+  pickAsk:['choose three cards','choose the present','choose the future'], pickDone:'the choice is made', reveal:'Reveal',
   next:'Next', finish:'Finish', nowYouKnow:'now you know',
   deckOne:'This card comes from the <b>Bloody Feast Tarot</b> deck: all 78 cards with original artwork in a printable file on Etsy.',
   deckMany:'These cards come from the <b>Bloody Feast Tarot</b> deck: all 78 cards with original artwork in a printable file on Etsy.',
@@ -534,7 +536,7 @@ function flyToFan(){
 }
 /* Cards deal out from the common centre of two concentric arcs (a downward-opening rainbow):
    the outer band first, then the inner band. */
-let fanLayout=null, dealTl=null;
+let fanLayout=null, dealTl=null, gatherTl=null, introTl=null, introRush=false;
 function layoutFan(){
   const n=DECK.length, nOuter=Math.ceil(n/2)+10, nInner=n-nOuter;
 
@@ -764,12 +766,27 @@ function setHover(el){
   if(el){ el.classList.add('lit'); if(!el.classList.contains('picked')) animateCard(el, arcState(el, cardH/2), {duration:.3, ease:'power2.out'}); }
 }
 const fanIdle=()=>!busy && !activeCard;
-fan.addEventListener('pointermove', e=>{ if(fanIdle() && e.pointerType==='mouse') setHover(cardAt(e.clientX, e.clientY)); });
-fan.addEventListener('pointerleave', ()=>{ if(fanIdle()) setHover(null); });
-const SKIP_TIME=.4;
+fan.addEventListener('pointermove', e=>{
+  if(!(fanIdle() && e.pointerType==='mouse')) return;
+  const el=cardAt(e.clientX, e.clientY);
+  setHover(el);
+  if(!spread?.list) return;
+  // the period names the next card, never the one just clicked
+  if(el && !el.classList.contains('picked') && spread.cards.length<POSITIONS.length) showPickPeriod();
+  else showPickAsk();
+});
+fan.addEventListener('pointerleave', ()=>{ if(fanIdle()){ setHover(null); if(spread?.list) showPickAsk(); } });
+// a mouse click anywhere while the opening plays, while the fan is dealing, or while it is gathered
+// back into the deck, plays that motion at double speed instead of choosing a card
+addEventListener('pointerdown', e=>{
+  if(e.pointerType && e.pointerType!=='mouse') return;
+  if(dealTl) dealTl.timeScale(2);
+  if(gatherTl) gatherTl.timeScale(2);
+  if(introTl) introTl.timeScale(2);
+  else if(document.body.classList.contains('intro')) introRush=true;
+});
 fan.addEventListener('click', e=>{
-  // a tap while the cards are being dealt fast-forwards the dealing instead of picking a card
-  if(dealTl){ dealTl.timeScale(Math.max(1, (dealTl.duration()-dealTl.time())/SKIP_TIME)); return; }
+  if(dealTl){ dealTl.timeScale(2); return; }
   if(!fanIdle()) return;
   const el=cardAt(e.clientX, e.clientY);
   if(el) spread ? pickCard(el) : openCard(el, el._card);
@@ -783,7 +800,10 @@ function openedPose(el, card){
   loadFace(el); el.querySelector('.fart').classList.toggle('reversed', reversed);
   // fill the description first so its real height is known
   document.getElementById('mPos').textContent=spread ? POSITIONS[spread.i] : '';
-  document.body.classList.toggle('day-open', isDesktop() && !spread);
+  // past and present use the day card's sheet; the last card keeps the spread's own column
+  const stepOpen=isDesktop() && !!spread && spread.i<POSITIONS.length-1;
+  document.body.classList.toggle('day-open', (isDesktop() && !spread) || stepOpen);
+  document.body.classList.toggle('step-open', stepOpen);
   document.getElementById('mName').textContent=card.name;
   const quote=card.title ? tr('q')(card.title) : '';
   document.getElementById('mTitle').textContent=quote;
@@ -804,7 +824,7 @@ new MutationObserver(()=>{
   const open=meaningPanel.classList.contains('show');
   document.body.classList.toggle('card-open', open);
   if(!open){
-    document.body.classList.remove('day-open', 'day-done');
+    document.body.classList.remove('day-open', 'day-done', 'step-open');
     meaningPanel.style.bottom=meaningPanel.style.top='';
     finale.style.top=finale.style.bottom='';
     const end=meaningPanel.querySelector('.meaning-end'); if(end) end.hidden=false;
@@ -828,9 +848,9 @@ function fitAbove(panel){
     panel.style.top=(top+h+GAP)+'px'; panel.style.bottom='auto';
     return {x:innerWidth/2, y:top+h/2, rot:0, w, h, ry:180, tx:0, ty:0};
   }
-  // card of the day: name and a reserved quote above the card, the text full width underneath,
-  // and the finish button 80px off the bottom of the screen
-  if(panel===meaningPanel && !spread){
+  // card of the day, and past and present: name and a reserved quote above the card, the text full
+  // width underneath, and the button 80px off the bottom of the screen
+  if(panel===meaningPanel && document.body.classList.contains('day-open')){
     panel.style.top='auto'; panel.style.bottom='80px';
     panel.style.left='0'; panel.style.right='0'; panel.style.width='100%'; panel.style.maxWidth='none';
     panel.style.transform='none';
@@ -913,14 +933,15 @@ function placeCap(i, x, y, above){
   cap.style.left=x+'px'; cap.style.top=y+'px'; cap.classList.toggle('above', above);
 }
 const showCaps=on=>spread && spread.caps.forEach(c=>c.classList.toggle('on', on));
-// desktop: in the hollow under the lower arc, "выбери три карты", then the position of the card just picked. It stands where
+// desktop: in the hollow under the lower arc, "выбери три карты", then "выбери настоящее", then
+// "выбери будущее". The period itself shows only while the cursor is on a card. It stands where
 // the column of all three positions with a button under it would begin; that column (kept in the layout
 // but never shown) is fitted inside the circle the slid-out cards of the lower arc leave free: as big as
 // fits there, as low as the screen allows
 function buildPickList(){
   const {rInner, pivotX, pivotY}=fanLayout, R=rInner-cardH-8;
   const list=document.createElement('div'); list.className='pick-list';
-  list.innerHTML=`<div class="pick-hint"><span class="pick-word pick-ask">${tr('pickHint')}</span>${POSITIONS.map(p=>`<span class="pick-word">${p}</span>`).join('')}</div>`+
+  list.innerHTML=`<div class="pick-hint"><span class="pick-word pick-ask">${tr('pickAsk')[0]}</span>${POSITIONS.map(p=>`<span class="pick-word">${p}</span>`).join('')}</div>`+
     POSITIONS.map(p=>`<div class="pick-line">${p}</div>`).join('')+`<div class="pick-go">${tr('reveal')}</div>`;
   list.style.left=pivotX+'px';
   fan.appendChild(list); spread.list=list;
@@ -937,13 +958,27 @@ function buildPickList(){
   list.style.fontSize=parseFloat(list.style.fontSize)+2+'px';
   list.style.top=bottom-list.offsetHeight+'px';
 }
+function showPickAsk(){
+  if(!spread?.list) return;
+  const n=spread.cards.length, list=spread.list, ask=list.querySelector('.pick-ask');
+  const done=n>=POSITIONS.length;
+  if(ask) ask.textContent=done ? tr('pickDone') : tr('pickAsk')[n];
+  list.querySelectorAll('.pick-word').forEach(w=>w.classList.toggle('on', w.classList.contains('pick-ask')));
+}
+// the period of the card under the cursor; it leaves with the cursor
+function showPickPeriod(){
+  const n=spread?.cards.length;
+  if(!spread?.list || n>=POSITIONS.length) return;
+  spread.list.querySelectorAll('.pick-word').forEach((w,i)=>w.classList.toggle('on', i===n+1));
+}
 function updatePickList(){
   const n=spread.cards.length, list=spread.list;
   list.classList.add('on');
-  list.querySelectorAll('.pick-word').forEach((w,i)=>w.classList.toggle('on', i===n)); // the hint, then each position as its card is picked
-  // the reading opens by itself a moment after the last card is picked, unless one is put back meanwhile
+  // the click brings the next "выбери…", or "выбор сделан" once all three are in; the period waits for a new card
+  showPickAsk();
+  // the reading opens 1.5s after the last card is picked.
   spread.go?.kill(); spread.go=null;
-  if(n===POSITIONS.length) spread.go=gsap.delayedCall(2, ()=>{
+  if(n===POSITIONS.length) spread.go=gsap.delayedCall(1.5*gsap.globalTimeline.timeScale(), ()=>{
     spread.go=null; if(busy) return;
     busy=true; setHover(null); list.classList.remove('on');
     // the fan is cleared away first; under the velvet the past rises above it and comes back out of it
@@ -956,11 +991,9 @@ function updatePickList(){
     });
   });
 }
-// desktop: a picked card stays slid out of the arc; picked again, it goes back
+// desktop: a picked card stays slid out of the arc
 function pickCard(el){
-  const k=spread.cards.indexOf(el);
-  if(k>=0){ spread.cards.splice(k,1); el.classList.remove('picked'); updatePickList(); return; }
-  if(spread.cards.length>=POSITIONS.length) return;
+  if(spread.cards.includes(el) || spread.cards.length>=POSITIONS.length) return;
   spread.cards.push(el); el.classList.add('picked'); loadFace(el); sfx.slide(.5, .25);
   if(hoverCard!==el) animateCard(el, arcState(el, cardH/2), {duration:.3, ease:'power2.out'});
   updatePickList();
@@ -1015,7 +1048,11 @@ function openSpreadCard(i){
 // phones - it is put away off the screen, the deck comes back out of the dark and the next one is drawn
 function nextSpreadCard(){
   busy=true; const el=activeCard, s=el._state, render=()=>renderCard(el,s);
+  // the sheet drops its day-card layout the moment it closes; hide it first so that snap is not seen
+  const sheet=document.body.classList.contains('step-open');
+  if(sheet){ meaningPanel.style.transition='none'; meaningPanel.style.opacity='0'; }
   meaningPanel.classList.remove('show'); hideBigName(); el.classList.remove('lit');
+  if(sheet){ void meaningPanel.offsetWidth; meaningPanel.style.transition=meaningPanel.style.opacity=''; }
   gsap.killTweensOf(s);
   if(!el._fromDeck) setDim(1, el);
   if(el._fromDeck){
@@ -1233,8 +1270,11 @@ function setEndRow(next){
     document.querySelector('#finishBtn .fill').textContent=tr(next ? 'next' : 'finish');
     return;
   }
-  endPhrase.style.display=endRule.style.display=spread ? 'none' : '';
-  document.querySelector('#finishBtn .fill').textContent=tr(spread || !next ? 'finish' : 'next');
+  endRule.style.display=spread ? 'none' : '';
+  // past and present keep the whisper's line in the stack, empty, so the button stays where the day card puts it
+  endPhrase.style.display=spread && !next ? 'none' : '';
+  endPhrase.setAttribute('aria-hidden', next ? 'true' : 'false');
+  document.querySelector('#finishBtn .fill').textContent=tr(next ? 'next' : 'finish');
 }
 function revealEnd(at){
   const btn=document.getElementById('finishBtn');
@@ -1243,8 +1283,13 @@ function revealEnd(at){
   // the day-card whisper is painted by a text clip, so hiding its letters does not hide it
   if(document.body.classList.contains('day-open')){
     gsap.set(endPhrase,{autoAlpha:0});
-    gsap.fromTo(btn,{x:-10},{autoAlpha:1, x:0, duration:.6, ease:'power2.out', delay:at+.75,
-      onComplete(){ gsap.to(endPhrase,{autoAlpha:1, duration:.6, ease:'power2.out'}); }});
+    // the button no longer waits out the whole reading; the whisper still starts only once the button has arrived.
+    // past and present have no whisper: the line stays, and stays empty
+    gsap.fromTo(btn,{x:-10},{autoAlpha:1, x:0, duration:.6, ease:'power2.out', delay:1.2,
+      onComplete(){
+        if(document.body.classList.contains('step-open')) return;
+        gsap.to(endPhrase,{autoAlpha:1, duration:.6, ease:'power2.out'});
+      }});
     return;
   }
   gsap.fromTo(btn,{x:-10},{autoAlpha:1, x:0, duration:.6, ease:'power2.out', delay:at+.75});
@@ -1610,7 +1655,7 @@ function gatherDeck(el, extras=[]){
   const sweepDur=count=>Math.max(.45, count*.022);
   const t=angleStart*Math.PI/180;
   const laid={x:pivotX+rInner*Math.sin(t), y:pivotY-rInner*Math.cos(t), w:cardW, h:cardH, rot:angleStart, ry:0, tx:0, ty:0};
-  const tl=gsap.timeline({onComplete:()=>flyHome(el)});
+  const tl=gatherTl=gsap.timeline({onComplete:()=>flyHome(el)});
   el.style.zIndex=1000;
   extras.forEach((c,i)=>{
     const cs=c._state; gsap.killTweensOf(cs); c.style.zIndex=997+i;
@@ -1637,11 +1682,18 @@ function flyHome(el){
   gsap.set(deckStack.children,{rotation:0, x:0, y:0, borderRadius:`${rad/sx}px / ${rad/sy}px`});
   fanScreen.hidden=true; fan.innerHTML=''; fan.appendChild(dimOverlay);
   const DUR=1.2, EASE='power3.inOut';
-  [...deckStack.children].forEach((c,i)=>gsap.to(c,{...DECK_REST[i], borderRadius:restR, duration:DUR, ease:EASE,
-    onComplete:()=>gsap.set(c,{clearProps:'borderRadius'})}));
-  tweenDeckEdge(rest.x, rest.y, {duration:DUR, ease:EASE});
-  gsap.to(deckStack,{x:0, y:0, rotation:0, scaleX:1, scaleY:1, duration:DUR, ease:EASE,
-    onComplete:()=>{ activeCard=null; hoverCard=null; shufflePhase='idle'; busy=false; endReading(); }});
+  const carried=gatherTl ? gatherTl.timeScale() : 1;
+  const tl=gatherTl=gsap.timeline();
+  tl.timeScale(carried);
+  [...deckStack.children].forEach((c,i)=>tl.to(c,{...DECK_REST[i], borderRadius:restR, duration:DUR, ease:EASE,
+    onComplete:()=>gsap.set(c,{clearProps:'borderRadius'})}, 0));
+  const edge=deckEdge();
+  tl.to(edge,{x:rest.x, y:rest.y, duration:DUR, ease:EASE, onUpdate:()=>{
+    deckStack.style.setProperty('--ex', edge.x.toFixed(2)+'px'); deckStack.style.setProperty('--ey', edge.y.toFixed(2)+'px');
+  }}, 0);
+  tl.to(deckStack,{x:0, y:0, rotation:0, scaleX:1, scaleY:1, duration:DUR, ease:EASE, onComplete:()=>{
+    gatherTl=null; activeCard=null; hoverCard=null; shufflePhase='idle'; busy=false; endReading();
+  }}, 0);
 }
 // the deck is back on the velvet: after the card of the day the time left until the next one is shown
 function endReading(){
@@ -1998,11 +2050,14 @@ document.addEventListener('dragstart', e=>{ if(e.target.tagName==='IMG') e.preve
     else if(slideTween && slideTween.isActive()){
       const rest=Math.max(.05, slideTween.duration()*(1-slideTween.progress()));
       const spec=dockTarget();
+      const speed=introTl ? introTl.timeScale() : 1;
       slideTween.kill();
       slideTween=gsap.to(tapeHost,{xPercent:p, duration:rest, ease:'none'});
+      slideTween.timeScale(speed);
       if(logoTween && logoTween.isActive()){
         logoTween.kill();
         logoTween=gsap.to(brand,{left:spec.left, duration:rest, ease:'none'});
+        logoTween.timeScale(speed);
       }
     }
   };
@@ -2035,7 +2090,8 @@ document.addEventListener('dragstart', e=>{ if(e.target.tagName==='IMG') e.preve
 
   const dockDur=1.0, unrollDur=2.5;
   const riseLeft=(innerWidth-end.width)/2;
-  gsap.timeline({defaults:{ease:'power2.inOut'}, onComplete:()=>{
+  introTl=gsap.timeline({defaults:{ease:'power2.inOut'}, onComplete:()=>{
+    introTl=null;
     document.body.classList.add('intro-done');
     document.body.classList.remove('intro');
     gsap.set(brand,{clearProps:'left,top,width,xPercent,yPercent,transform'});
@@ -2056,4 +2112,5 @@ document.addEventListener('dragstart', e=>{ if(e.target.tagName==='IMG') e.preve
       onStart(){ slideTween=this; }}, `dock+=${dockDur}`)
     .to([openingEl, langSwitch].filter(Boolean), {opacity:1, duration:.9, ease:'power1.out',
       onStart:()=>{ openingEl.style.pointerEvents='auto'; if(langSwitch) langSwitch.style.pointerEvents=''; }}, `dock+=${dockDur + 0.1}`);
+  if(introRush) introTl.timeScale(2);
 })();

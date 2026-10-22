@@ -122,7 +122,7 @@ body:not(.fonts-ready) .spread-options{visibility:hidden;}
 
 /* ---------- FAN ---------- */
 #fanScreen{justify-content:flex-start; padding-top:calc(48px + env(safe-area-inset-top,0px));}
-/* three cards, desktop: under the lower arc, "выбери три карты", then the position of the card just picked (app.js, buildPickList) */
+/* three cards, desktop: under the lower arc, "выбери…" at rest; the period only while the cursor is on a card */
 .pick-list{position:fixed; z-index:1500; transform:translateX(-50%); display:flex; flex-direction:column; align-items:center;
   opacity:0; transition:opacity .5s ease-in-out; pointer-events:none;}
 .pick-list.on{opacity:1;}
@@ -487,8 +487,12 @@ body.intro-done .intro-brand{transition:opacity .5s ease-in-out;}
     box-shadow:0 0 28px rgba(228,36,35,.65);}
   .link-btn{color:var(--muted); background:none; border:none; border-radius:0; padding:9px 6px; box-shadow:none;}
   .link-btn:hover{color:var(--ink);}
-  .cap-pos, .meaning-panel .pos-label{font-family:'Trispace',sans-serif; font-weight:400; letter-spacing:0;
+  .cap-pos, .meaning-panel .pos-label, .pick-word:not(.pick-ask){font-family:'Trispace',sans-serif; font-weight:400; letter-spacing:0;
     font-size:clamp(13px, .9722vw, 16px);}
+  .pick-word:not(.pick-ask){letter-spacing:.12em; margin-right:-.12em; font-size:clamp(20px, 1.667vw, 28px); color:var(--accent);}
+  /* the ask stays the whisper; the position is the row caption's mono, both sized from the screen */
+  .pick-word.pick-ask{font-family:'Cormorant Garamond',Georgia,serif; font-weight:300; font-style:italic; letter-spacing:.05em;
+    font-size:clamp(16px, 1.25vw, 22px); color:var(--ink); margin-right:0;}
   .cap-name, .meaning-panel h2, .card-head h2{font-family:'Trispace',sans-serif; font-weight:500; letter-spacing:0;
     font-size:clamp(16px, 1.25vw, 22px);}
   .meaning-panel .card-title, .card-head .head-title{font-family:'Cormorant Garamond',Georgia,serif; font-weight:500; font-style:italic; letter-spacing:.05em;
@@ -500,7 +504,8 @@ body.intro-done .intro-brand{transition:opacity .5s ease-in-out;}
   #fDeck b{color:inherit; font-weight:inherit;}
 }
 @media (hover:hover) and (pointer:fine){
-  html[lang=ru] .cap-pos, html[lang=ru] .meaning-panel .pos-label{font-family:'IBM Plex Mono',monospace; font-weight:400; letter-spacing:.05em;}
+  html[lang=ru] .cap-pos, html[lang=ru] .meaning-panel .pos-label, html[lang=ru] .pick-word:not(.pick-ask){font-family:'IBM Plex Mono',monospace; font-weight:400; letter-spacing:.05em;}
+  html[lang=ru] .pick-word:not(.pick-ask){letter-spacing:.12em;}
   html[lang=ru] .cap-name, html[lang=ru] .meaning-panel h2, html[lang=ru] .card-head h2{font-family:'IBM Plex Mono',monospace; font-weight:500; letter-spacing:.05em;}
   html[lang=ru] #mText, html[lang=ru] #fText, html[lang=ru] .finale .summary{font-family:'IBM Plex Mono',monospace; font-weight:400; letter-spacing:.05em;}
   html[lang=ru] #fDeck{font-family:'Cormorant Garamond',Georgia,serif; font-weight:300; font-style:italic; letter-spacing:0;}
@@ -523,8 +528,8 @@ body.intro-done .intro-brand{transition:opacity .5s ease-in-out;}
     background-image:linear-gradient(to bottom, #fff 0 50%, var(--red) 50% 100%);
     background-size:100% 200%; background-position:0 100%; background-repeat:no-repeat;
     -webkit-background-clip:text; background-clip:text;
-    transition:background-position .6s ease;}
-  body.day-open .finish-btn:hover .fill{background-position:0 0;}
+    transition:background-position 1.6s ease;}
+  body.day-open .finish-btn:hover .fill{background-position:0 0; transition-duration:.6s;}
   body.day-open .end-phrase{font-size:clamp(14px, 1.1111vw, 18px); opacity:0;
     color:transparent; -webkit-text-fill-color:transparent;
     background-image:linear-gradient(to bottom, color-mix(in srgb, var(--muted) 80%, transparent) 0 50%, var(--red) 50% 100%);
@@ -532,6 +537,8 @@ body.intro-done .intro-brand{transition:opacity .5s ease-in-out;}
     -webkit-background-clip:text; background-clip:text;
     transition:background-position 1.8s ease;}
   body.day-open .meaning-end:has(.finish-btn:hover) .end-phrase{background-position:0 100%; transition-delay:.35s;}
+  /* past and present keep that line's height and show nothing in it */
+  body.step-open .end-phrase{visibility:hidden;}
   /* after Finish the same screen stays; the closing row takes the button's place, 80px off the bottom */
   body.day-open.day-done #meaningPanel .meaning-end{display:none;}
   body.day-open.day-done #mText{margin-bottom:0;}
