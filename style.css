@@ -421,6 +421,11 @@ body.intro-done .intro-tape-wrap{
 /* the tape's own label, lifted out of the rail after the slide so it can grow past the strip */
 .tape-zoom{position:fixed; z-index:43; pointer-events:none; transform-origin:50% 50%;}
 .tape-zoom svg{display:block; width:100%; height:100%;}
+.tape-label{position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+  color:#ed1c24; font-family:'Oswald',sans-serif; font-weight:700; letter-spacing:.04em;
+  text-transform:uppercase; line-height:1; white-space:nowrap; opacity:0; pointer-events:none;}
+body.tape-period .tape-label{opacity:1;}
+body.tape-period .tape-zoom path.st1{visibility:hidden;}
 body.card-open .tape-zoom, body.car-open .tape-zoom{opacity:0; transition:opacity .5s ease-in-out;}
 /* while a card is open, tuck the brand like the old title */
 body.card-open .intro-brand, body.car-open .intro-brand{opacity:0; transition:opacity .5s ease-in-out;}
@@ -537,8 +542,6 @@ body.intro-done .intro-brand{transition:opacity .5s ease-in-out;}
     -webkit-background-clip:text; background-clip:text;
     transition:background-position 1.8s ease;}
   body.day-open .meaning-end:has(.finish-btn:hover) .end-phrase{background-position:0 100%; transition-delay:.35s;}
-  /* past and present keep that line's height and show nothing in it */
-  body.step-open .end-phrase{visibility:hidden;}
   /* after Finish the same screen stays; the closing row takes the button's place, 80px off the bottom */
   body.day-open.day-done #meaningPanel .meaning-end{display:none;}
   body.day-open.day-done #mText{margin-bottom:0;}
@@ -559,4 +562,30 @@ body.intro-done .intro-brand{transition:opacity .5s ease-in-out;}
   body.day-open.day-done #finale .finale-row .link-btn:hover{color:var(--accent);}
   body.day-open.day-done #finale .finale-row .link-btn:hover::after{transform:scaleX(1);}
   body.day-open.day-done #finale .row-break{display:none;}
+  /* three cards in a row: captions sit up under the tape, the reading is full width, the buttons match the day card */
+  body.spread-row .cap-pos{color:var(--red); letter-spacing:.12em; margin-right:-.12em;
+    font-size:clamp(20px, 1.667vw, 28px);}
+  body.spread-row .spread-cap.hot .cap-pos{color:#fff;}
+  body.spread-row .cap-name{text-transform:none; color:var(--accent);}
+  body.spread-row .cap-title{display:block; font-family:'Cormorant Garamond',Georgia,serif; font-weight:500; font-style:italic;
+    letter-spacing:.05em; font-size:clamp(16px, 1.25vw, 22px); line-height:1.2; color:var(--ink); opacity:1; margin-top:8px;}
+  body.spread-row .cap-title:empty{display:none;}
+  body.spread-row #finale{left:0; right:0; top:auto; bottom:80px; width:100%; max-width:none; transform:none;}
+  body.spread-row #fSummary{max-width:none; width:100%; box-sizing:border-box; padding:14px 24px; margin:0;
+    font-style:normal; border-top:1px solid var(--red); border-bottom:1px solid var(--red);}
+  body.spread-row #fSummary.card-text{border-color:transparent;}
+  body.spread-row #finale #fDeck{display:none;}
+  body.spread-row #finale .finale-row{display:flex; justify-content:center; align-items:center; column-gap:22px; width:auto; margin-top:16px;}
+  body.spread-row #finale .return-btn,
+  body.spread-row #finale .cta,
+  body.spread-row #finale .link-btn{font-size:clamp(16px, 1.25vw, 20px);}
+  body.spread-row #finale .finale-row .return-btn{order:0; justify-self:auto;}
+  body.spread-row #finale .finale-row .cta{order:1; justify-self:auto;}
+  body.spread-row #finale .finale-row .link-btn{order:2; justify-self:auto; position:relative;
+    color:var(--accent); text-shadow:0 0 12px rgba(var(--accent-rgb),.45);}
+  body.spread-row #finale .finale-row .link-btn::after{content:''; position:absolute; left:6px; right:6px; bottom:0;
+    height:1px; background:var(--red); transform:scaleX(0); transition:transform .35s ease;}
+  body.spread-row #finale .finale-row .link-btn:hover{color:var(--accent);}
+  body.spread-row #finale .finale-row .link-btn:hover::after{transform:scaleX(1);}
+  body.spread-row #finale .row-break{display:none;}
 }

@@ -209,7 +209,8 @@ const UI={
 ru:{title:'Таро Лидии Хаит', whisper:'хочешь знать?',
   optDay:'Карта дня', optThree:'Три карты', positions:['Прошлое','Настоящее','Будущее'],
   upright:'Прямое положение', reversed:'Перевёрнутое положение',
-  pickAsk:['выбери три карты','выбери настоящее','выбери будущее'], pickDone:'выбор сделан', reveal:'Узнать',
+  pickAsk:['выбери три карты','выбери настоящее','выбери будущее'], pickDone:'выбор сделан',
+  toward:['в настоящее','в будущее'], reveal:'Узнать',
   next:'Далее', finish:'Завершить', nowYouKnow:'теперь ты знаешь',
   deckOne:'Эта карта — из колоды <b>Bloody Feast Tarot</b>: все 78 карт с авторской графикой в файле для печати на Etsy.',
   deckMany:'Эти карты — из колоды <b>Bloody Feast Tarot</b>: все 78 карт с авторской графикой в файле для печати на Etsy.',
@@ -231,7 +232,8 @@ ru:{title:'Таро Лидии Хаит', whisper:'хочешь знать?',
 en:{title:'Tarot by Lidiia Khait', whisper:'want to know?',
   optDay:'Card of the day', optThree:'Three cards', positions:['Past','Present','Future'],
   upright:'Upright', reversed:'Reversed',
-  pickAsk:['choose three cards','choose the present','choose the future'], pickDone:'the choice is made', reveal:'Reveal',
+  pickAsk:['choose three cards','choose the present','choose the future'], pickDone:'the choice is made',
+  toward:['into the present','into the future'], reveal:'Reveal',
   next:'Next', finish:'Finish', nowYouKnow:'now you know',
   deckOne:'This card comes from the <b>Bloody Feast Tarot</b> deck: all 78 cards with original artwork in a printable file on Etsy.',
   deckMany:'These cards come from the <b>Bloody Feast Tarot</b> deck: all 78 cards with original artwork in a printable file on Etsy.',
@@ -800,9 +802,10 @@ function openedPose(el, card){
   loadFace(el); el.querySelector('.fart').classList.toggle('reversed', reversed);
   // fill the description first so its real height is known
   document.getElementById('mPos').textContent=spread ? POSITIONS[spread.i] : '';
-  // past and present use the day card's sheet; the last card keeps the spread's own column
-  const stepOpen=isDesktop() && !!spread && spread.i<POSITIONS.length-1;
-  document.body.classList.toggle('day-open', (isDesktop() && !spread) || stepOpen);
+  // every card of the spread uses the day card's sheet; past and present still step on to the next one
+  const sheet=isDesktop() && !!spread;
+  const stepOpen=sheet && spread.i<POSITIONS.length-1;
+  document.body.classList.toggle('day-open', (isDesktop() && !spread) || sheet);
   document.body.classList.toggle('step-open', stepOpen);
   document.getElementById('mName').textContent=card.name;
   const quote=card.title ? tr('q')(card.title) : '';
@@ -1041,8 +1044,24 @@ function openSpreadCard(i){
   const s=el._state, pose=openedPose(el, el._card), render=()=>renderCard(el,s), tl=gsap.timeline();
   gsap.killTweensOf(s);
   // desktop: the fan is cleared away by now, so the card opens right where it lies
+  if(isDesktop() && !el._fromDeck) setTapePeriod(POSITIONS[i]);
   tl.call(()=>{ el.style.zIndex=1000; sfx.slide(1, .7); })
     .to(s,{...pose, duration:1.3, ease:'power2.inOut', onUpdate:render, onComplete:()=>onCardOpened(el)});
+}
+// the white plate on the tape reads the period while the card is opening, then leaves with the header
+function setTapePeriod(text){
+  if(!isDesktop()) return;
+  const zoom=document.querySelector('.tape-zoom');
+  if(!zoom) return;
+  let lab=zoom.querySelector('.tape-label');
+  if(!lab){ lab=document.createElement('div'); lab.className='tape-label'; zoom.appendChild(lab); }
+  if(!text){ document.body.classList.remove('tape-period'); return; }
+  lab.textContent=text;
+  let size=Math.max(8, zoom.offsetHeight*0.5);
+  lab.style.fontSize=size+'px';
+  const maxW=Math.max(1, zoom.offsetWidth*0.86);
+  while(lab.scrollWidth>maxW && size>6){ size*=0.92; lab.style.fontSize=size+'px'; }
+  document.body.classList.add('tape-period');
 }
 // "Далее": desktop - the open card lies back face up just out of its arc slot and the next one opens;
 // phones - it is put away off the screen, the deck comes back out of the dark and the next one is drawn
@@ -1051,7 +1070,7 @@ function nextSpreadCard(){
   // the sheet drops its day-card layout the moment it closes; hide it first so that snap is not seen
   const sheet=document.body.classList.contains('step-open');
   if(sheet){ meaningPanel.style.transition='none'; meaningPanel.style.opacity='0'; }
-  meaningPanel.classList.remove('show'); hideBigName(); el.classList.remove('lit');
+  meaningPanel.classList.remove('show'); hideBigName(); setTapePeriod(''); el.classList.remove('lit');
   if(sheet){ void meaningPanel.offsetWidth; meaningPanel.style.transition=meaningPanel.style.opacity=''; }
   gsap.killTweensOf(s);
   if(!el._fromDeck) setDim(1, el);
@@ -1072,7 +1091,11 @@ function nextSpreadCard(){
 // shop; phones - the carousel
 function showSpreadSummary(){
   busy=true; const el=activeCard, els=spread.cards;
-  meaningPanel.classList.remove('show'); hideBigName(); el.classList.remove('lit');
+  const sheet=isDesktop() && !el._fromDeck && document.body.classList.contains('day-open');
+  if(sheet){ meaningPanel.style.transition='none'; meaningPanel.style.opacity='0'; }
+  meaningPanel.classList.remove('show'); hideBigName(); setTapePeriod(''); el.classList.remove('lit');
+  if(sheet){ void meaningPanel.offsetWidth; meaningPanel.style.transition=meaningPanel.style.opacity=''; }
+  if(sheet) document.body.classList.add('spread-row');
   setFinale(els);
   if(el._fromDeck){ showCarousel(); return; }
   const poses=fitRow(finale, els.length);
@@ -1084,7 +1107,8 @@ function showSpreadSummary(){
     spread.caps[i].querySelector('.cap-name').textContent=c._card.name;
     spread.caps[i].querySelector('.cap-title').textContent=c._card.title ? tr('q')(c._card.title) : '';
     spread.caps[i].style.width=poses[i].w*1.1+'px'; // a long name wraps instead of running into the next one
-    placeCap(i, poses[i].x, poses[i].y-poses[i].h/2-10, true);
+    const capTop=Math.max(72, (document.querySelector('.tape-zoom')?.getBoundingClientRect().bottom)||0)+16;
+    placeCap(i, poses[i].x, capTop, false);
     gsap.to(s,{...poses[i], duration:1, delay:.08*i, ease:'power2.inOut', onUpdate:()=>renderCard(c,s)});
   });
   // captions of one height, so the positions line up whether or not a card has a title
@@ -1187,7 +1211,7 @@ fan.addEventListener('pointerup', e=>{
 });
 // poses of n face-up cards side by side that, with their captions above and `panel` under them, fit the viewport
 function fitRow(panel, n){
-  const GAP=16, CAP=66, SP=.14, side=isPortraitMobile() ? 16 : FIT_MARGIN;
+  const GAP=16, CAP=isDesktop() ? 128 : 66, SP=.14, side=isPortraitMobile() ? 16 : FIT_MARGIN;
   const minTop=Math.max(FIT_MARGIN, document.querySelector('h1.title').getBoundingClientRect().bottom+24)+CAP;
   // the panel (the closing block) stands on the bottom of the screen: the row is centred in the room above it
   const room=panel.getBoundingClientRect().top-GAP-minTop, availW=innerWidth-2*side;
@@ -1271,9 +1295,10 @@ function setEndRow(next){
     return;
   }
   endRule.style.display=spread ? 'none' : '';
-  // past and present keep the whisper's line in the stack, empty, so the button stays where the day card puts it
-  endPhrase.style.display=spread && !next ? 'none' : '';
-  endPhrase.setAttribute('aria-hidden', next ? 'true' : 'false');
+  endPhrase.style.display='';
+  // past and present point at the next period; the last card keeps the day card's whisper
+  endPhrase.textContent=spread && next ? tr('toward')[spread.i] : tr('nowYouKnow');
+  endPhrase.setAttribute('aria-hidden', 'false');
   document.querySelector('#finishBtn .fill').textContent=tr(next ? 'next' : 'finish');
 }
 function revealEnd(at){
@@ -1283,13 +1308,9 @@ function revealEnd(at){
   // the day-card whisper is painted by a text clip, so hiding its letters does not hide it
   if(document.body.classList.contains('day-open')){
     gsap.set(endPhrase,{autoAlpha:0});
-    // the button no longer waits out the whole reading; the whisper still starts only once the button has arrived.
-    // past and present have no whisper: the line stays, and stays empty
+    // the button no longer waits out the whole reading; the whisper still starts only once the button has arrived
     gsap.fromTo(btn,{x:-10},{autoAlpha:1, x:0, duration:.6, ease:'power2.out', delay:1.2,
-      onComplete(){
-        if(document.body.classList.contains('step-open')) return;
-        gsap.to(endPhrase,{autoAlpha:1, duration:.6, ease:'power2.out'});
-      }});
+      onComplete(){ gsap.to(endPhrase,{autoAlpha:1, duration:.6, ease:'power2.out'}); }});
     return;
   }
   gsap.fromTo(btn,{x:-10},{autoAlpha:1, x:0, duration:.6, ease:'power2.out', delay:at+.75});
@@ -1532,6 +1553,7 @@ function showSummaryText(el){
   const sum=document.getElementById('fSummary'), text=el ? cardMeaning(el) : spreadSummary(spread.cards);
   gsap.killTweensOf(sum);
   gsap.to(sum,{opacity:0, duration:.15, onComplete:()=>{ sum.textContent=text; sum.classList.toggle('card-text', !!el); gsap.to(sum,{opacity:1, duration:.25}); }});
+  spread.caps?.forEach((c,i)=>c.classList.toggle('hot', !!el && spread.cards[i]===el));
 }
 function setFinale(els){
   const one=els.length===1, sum=document.getElementById('fSummary');
@@ -1698,7 +1720,7 @@ function flyHome(el){
 // the deck is back on the velvet: after the card of the day the time left until the next one is shown
 function endReading(){
   if(mode==='day') dayDone=true;
-  spread=null; fan.classList.remove('carousel'); document.body.classList.remove('car-open'); fan.querySelectorAll('.spread-cap, .pick-list').forEach(e=>e.remove());
+  spread=null; fan.classList.remove('carousel'); document.body.classList.remove('car-open', 'spread-row', 'tape-period'); fan.querySelectorAll('.spread-cap, .pick-list').forEach(e=>e.remove());
   setAskSub(); showStart(true);
 }
 // once the card of the day is drawn, the line under the options counts down to the next one, at local
