@@ -2246,16 +2246,17 @@ document.addEventListener('dragstart', e=>{ if(e.target.tagName==='IMG') e.preve
   addEventListener('resize', onResize);
   visualViewport?.addEventListener('resize', onResize);
 
-  const contour=document.getElementById('chalkContour');
-  // arm up, legs toward the bottom of the screen, a slight lean
-  const chalkRot=-122, palmAt={u:.70, v:.20};
-  const layChalk=()=>({xPercent:-50, yPercent:-50, transformOrigin:'50% 50%', rotateZ:chalkRot});
-  if(contour) gsap.set(contour, layChalk());
+  const frame=document.getElementById('chalkFrame'), plain=document.getElementById('chalkPlain');
+  // the drawn frame, measured on the 300×139 picture: inner hole the deck sits in
+  const frameBox={u:598/1192, v:286/553, w:60/1192};
+  const layChalk=()=>({xPercent:-50, yPercent:-50, transformOrigin:'50% 50%'});
+  if(frame) gsap.set([frame, plain], layChalk());
   if(matchMedia('(prefers-reduced-motion: reduce)').matches){
     document.body.classList.remove('intro');
     document.body.classList.add('intro-done');
     tapeReady=true;
-    if(contour) gsap.set(contour,{...layChalk(), rotateX:0, scale:1, opacity:.16});
+    if(plain) gsap.set(plain,{...layChalk(), rotateX:0, scale:1, opacity:.3});
+    if(frame) gsap.set(frame,{opacity:0});
     requestAnimationFrame(()=>{ syncTape(true); growPlate(false); });
     finish();
     return;
@@ -2300,27 +2301,30 @@ document.addEventListener('dragstart', e=>{ if(e.target.tagName==='IMG') e.preve
       onStart(){ slideTween=this; }}, `dock+=${dockDur}`)
     .to(langSwitch, {opacity:1, duration:.9, ease:'power1.out',
       onStart(){ if(langSwitch) langSwitch.style.pointerEvents=''; }}, `dock+=${dockDur + 0.1}`);
-  // the whole approach lasts as long as the logo's travel into the top-left corner
-  if(contour){
-    const travel=dockDur+unrollDur, rise=travel*.56;
-    const palmShift=()=>{
-      const w=contour.offsetWidth, h=contour.offsetHeight, s=gsap.getProperty(contour,'scale')||1;
-      const dx=(palmAt.u-.5)*w*s, dy=(palmAt.v-.5)*h*s, a=chalkRot*Math.PI/180;
-      const rx=dx*Math.cos(a)-dy*Math.sin(a), ry=dx*Math.sin(a)+dy*Math.cos(a);
+  // small, behind the logo; then it approaches and lies flat (the framed drawing) while the logo takes the corner.
+  // the deck rises out of the frame, the frame disappears, and the outline grows paler
+  if(frame && plain){
+    const travel=dockDur+unrollDur, approach=travel*.58;
+    const placeDeck=()=>{
+      const w=frame.offsetWidth, h=frame.offsetHeight, s=gsap.getProperty(frame,'scale')||1;
+      const rx=(frameBox.u-.5)*w*s, ry=(frameBox.v-.5)*h*s;
       const velvet=document.getElementById('velvet').getBoundingClientRect();
-      return {x:contour.offsetLeft+rx-(velvet.left+velvet.width/2), y:contour.offsetTop+ry-(velvet.top+velvet.height/2)};
+      gsap.set(deckStack,{
+        x:frame.offsetLeft+rx-(velvet.left+velvet.width/2),
+        y:frame.offsetTop+ry-(velvet.top+velvet.height/2),
+        scale:(frameBox.w*w*s)/deckStack.offsetWidth,
+        opacity:1
+      });
     };
-    gsap.set(contour, {...layChalk(), transformPerspective:1200, rotateX:66, scale:.42, opacity:0});
+    gsap.set([frame, plain], {...layChalk(), transformPerspective:1400, rotateX:70, scale:.2, opacity:0});
     gsap.set(deckStack, {opacity:0});
     introTl
-      .to(contour, {opacity:.78, duration:.4, ease:'power1.out'}, 'dock')
-      .to(contour, {rotateX:0, scale:1, duration:rise, ease:'power2.inOut'}, 'dock')
-      .call(()=>{
-        const p=palmShift();
-        gsap.set(deckStack,{x:p.x, y:p.y, scale:.26, opacity:1});
-      }, null, `dock+=${rise}`)
-      .to(deckStack, {x:0, y:0, scale:1, duration:travel-rise-.05, ease:'power2.inOut', immediateRender:false}, `dock+=${rise+.05}`)
-      .to(contour, {opacity:.16, duration:travel-rise, ease:'power1.inOut'}, `dock+=${rise}`);
+      .to(frame, {opacity:1, duration:.4, ease:'power1.out'}, 1.45)
+      .to([frame, plain], {rotateX:0, scale:1, duration:approach, ease:'power2.inOut'}, 'dock')
+      .call(placeDeck, null, `dock+=${approach}`)
+      .to(deckStack, {x:0, y:0, scale:1, duration:travel-approach-.04, ease:'power2.inOut', immediateRender:false}, `dock+=${approach+.04}`)
+      .to(frame, {opacity:0, duration:travel-approach, ease:'power1.inOut'}, `dock+=${approach}`)
+      .to(plain, {opacity:.3, duration:travel-approach, ease:'power1.inOut'}, `dock+=${approach}`);
   }
   if(introRush) introTl.timeScale(2);
 })();

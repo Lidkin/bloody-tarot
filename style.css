@@ -26,11 +26,11 @@ body{color:var(--ink); position:relative;}
 canvas#dust{position:fixed; inset:0; z-index:1; pointer-events:none;}
 .vignette{position:fixed; inset:0; z-index:2; pointer-events:none;
   background:radial-gradient(ellipse at 50% 45%, transparent 30%, rgba(0,0,0,.75) 100%);}
-/* chalk body behind the deck. screen drops the black plate so only the white line shows */
+/* chalk body behind the deck. the drawings are already transparent, so the white line sits on the velvet */
 .chalk{display:none;}
 @media (hover:hover) and (pointer:fine){
   .chalk{display:block; position:fixed; inset:0; z-index:1; pointer-events:none;}
-  .chalk img{position:absolute; left:50%; top:48%; width:min(72vw, 880px); mix-blend-mode:screen; opacity:0;
+  .chalk img{position:absolute; left:50%; top:50%; width:min(92vw, 1120px); opacity:0;
     user-select:none; -webkit-user-drag:none; transform-origin:50% 50%;}
 }
 .glow{position:fixed; inset:0; z-index:0; pointer-events:none;
