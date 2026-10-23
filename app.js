@@ -1624,8 +1624,9 @@ function setFinale(els){
     document.getElementById('fDeck').hidden=!!els[0]._fromDeck && !one;
     document.getElementById('etsyBtn').textContent=tr(document.getElementById('fDeck').hidden ? 'etsyPrint' : 'etsy');
   }else{
-    document.getElementById('fDeck').hidden=!one || !!els[0]._fromDeck;
-    document.getElementById('etsyBtn').textContent=tr(!one || !document.getElementById('fDeck').hidden ? 'etsy' : 'etsyPrint');
+    document.getElementById('fDeck').hidden=!!els[0]._fromDeck;
+    if(!document.getElementById('fDeck').hidden) document.getElementById('fDeck').innerHTML=tr('deckMany');
+    document.getElementById('etsyBtn').textContent=tr(document.getElementById('fDeck').hidden ? 'etsyPrint' : 'etsy');
   }
   shareBtnEl.textContent=tr('share');
   document.getElementById('gatherBtn').innerHTML=tr(one ? 'gather' : 'onceMore');
