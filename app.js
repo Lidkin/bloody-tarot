@@ -1906,9 +1906,9 @@ function storyMark(){
 }
 // the logo in place of the old "BLOODY FEAST TAROT" line, with the shop link under it.
 // `top` is the clear line content must stay above.
-function drawStoryFoot(x, text, W){
+function drawStoryFoot(x, text, W, logoScale=1){
   return storyMark().then(mark=>{
-    const url=storyFace('whisper', 28), lw=Math.round(440/1.5), lh=Math.round(lw*mark.naturalHeight/mark.naturalWidth);
+    const url=storyFace('whisper', 28), lw=Math.round(440/1.5*logoScale), lh=Math.round(lw*mark.naturalHeight/mark.naturalWidth);
     const urlY=SAFE.bottom-40, ly=urlY-44-lh;
     // the plate is already clear; screen keeps a dark fringe from showing on the velvet
     x.save(); x.globalCompositeOperation='screen';
@@ -1996,7 +1996,7 @@ async function drawCardStory(el){
 // the spread, as on the row: period, name and quote above each card, then the summary
 async function drawSpreadStory(els){
   const {c, x, W, text}=storyCanvas(tr('storyThree'));
-  const foot=await drawStoryFoot(x, text, W);
+  const foot=await drawStoryFoot(x, text, W, 1/1.5);
   const body=storyFace('body', 26), lh=Math.round(26*1.45);
   const lines=wrapLines(x, spreadSummary(els), body.font, W-160, body.track);
   const per=storyFace('kicker', 22), nm=storyFace('name', 26), qt=storyFace('quote', 24);
