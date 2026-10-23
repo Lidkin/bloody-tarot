@@ -26,6 +26,13 @@ body{color:var(--ink); position:relative;}
 canvas#dust{position:fixed; inset:0; z-index:1; pointer-events:none;}
 .vignette{position:fixed; inset:0; z-index:2; pointer-events:none;
   background:radial-gradient(ellipse at 50% 45%, transparent 30%, rgba(0,0,0,.75) 100%);}
+/* chalk body behind the deck. screen drops the black plate so only the white line shows */
+.chalk{display:none;}
+@media (hover:hover) and (pointer:fine){
+  .chalk{display:block; position:fixed; inset:0; z-index:1; pointer-events:none;}
+  .chalk img{position:absolute; left:50%; top:58%; width:min(86vw, 1040px); mix-blend-mode:screen; opacity:0;
+    user-select:none; -webkit-user-drag:none; transform-origin:50% 50%;}
+}
 .glow{position:fixed; inset:0; z-index:0; pointer-events:none;
   background:radial-gradient(ellipse 55% 40% at 50% 42%, var(--glow), transparent 70%);
   animation:flicker 5s infinite ease-in-out;}

@@ -382,6 +382,12 @@ function showStart(on){
   if(on) spreadOpts.querySelectorAll('.opt').forEach(o=>o.classList.remove('tap'));
   [askSub, spreadOpts, langSwitch, soundBtn, whisper].forEach(e=>e?.classList.toggle('gone', !on));
 }
+// the chalk outline belongs to the main screen; it leaves with the deck and comes back with it
+function showChalk(on){
+  const el=document.getElementById('chalk');
+  if(!el || !isDesktop()) return;
+  gsap.to(el,{autoAlpha:on?1:0, duration:.6, overwrite:true});
+}
 spreadOpts.querySelectorAll('.opt').forEach(o=>o.addEventListener('click', ()=>{
   if(shufflePhase!=='idle' || busy || !deckAtRest()) return;
   if(o.dataset.mode==='day' && dayDone && DAY_LOCK) return;
@@ -517,6 +523,7 @@ function returnToDeck(el, onBack){
 
 // The deck flies from the velvet to the first slot of the upper arc; dealing starts from there.
 function flyToFan(){
+  showChalk(false);
   fanScreen.hidden=false;
   const L=layoutFan(), a=L.angleStart*Math.PI/180;
   const tx=L.pivotX+L.rOuter*Math.sin(a), ty=L.pivotY-L.rOuter*Math.cos(a);
@@ -1806,6 +1813,7 @@ function gatherDeck(el, extras=[]){
 function flyHome(el){
   const s=el._state;
   openingEl.hidden=false; gsap.set(openingEl,{opacity:1});
+  showChalk(true);
   resetDeckStack();
   const r=deckStack.getBoundingClientRect(), w=deckStack.offsetWidth, h=deckStack.offsetHeight;
   const restR=getComputedStyle(deckStack.firstElementChild).borderRadius;
@@ -2238,10 +2246,15 @@ document.addEventListener('dragstart', e=>{ if(e.target.tagName==='IMG') e.preve
   addEventListener('resize', onResize);
   visualViewport?.addEventListener('resize', onResize);
 
+  const sceneMark=document.getElementById('chalkScene'), sceneFull=document.getElementById('chalkScene1'),
+    contour=document.getElementById('chalkContour');
+  const placeChalk=el=>{ if(el) gsap.set(el,{xPercent:-50, yPercent:-50, transformOrigin:'50% 50%'}); };
+  [sceneMark, sceneFull, contour].forEach(placeChalk);
   if(matchMedia('(prefers-reduced-motion: reduce)').matches){
     document.body.classList.remove('intro');
     document.body.classList.add('intro-done');
     tapeReady=true;
+    if(contour) gsap.set(contour,{scale:1, opacity:.4});
     requestAnimationFrame(()=>{ syncTape(true); growPlate(false); });
     finish();
     return;
@@ -2286,5 +2299,18 @@ document.addEventListener('dragstart', e=>{ if(e.target.tagName==='IMG') e.preve
       onStart(){ slideTween=this; }}, `dock+=${dockDur}`)
     .to([openingEl, langSwitch].filter(Boolean), {opacity:1, duration:.9, ease:'power1.out',
       onStart:()=>{ openingEl.style.pointerEvents='auto'; if(langSwitch) langSwitch.style.pointerEvents=''; }}, `dock+=${dockDur + 0.1}`);
+  // scene and scene 1 are the two ends of one camera move: side view, then straight overhead. The handoff
+  // happens while the plate is still edge-on, so the two drawings never stack; then the camera rises.
+  if(sceneMark && sceneFull && contour){
+    const grow=dockDur+1, lay={xPercent:-50, yPercent:-50, transformPerspective:1400};
+    gsap.set(sceneFull, {...lay, rotateX:70, opacity:0});
+    introTl
+      .to(sceneMark, {opacity:1, duration:grow*.12, ease:'power1.out'}, 'dock')
+      .to(sceneFull, {opacity:1, duration:grow*.16, ease:'none'}, `dock+=${grow*.28}`)
+      .to(sceneMark, {opacity:0, duration:grow*.16, ease:'none'}, `dock+=${grow*.3}`)
+      .to(sceneFull, {rotateX:0, duration:grow*.62, ease:'power2.inOut'}, `dock+=${grow*.38}`)
+      .to(sceneFull, {opacity:0, duration:.65, ease:'power1.inOut'}, `dock+=${grow}`)
+      .to(contour, {opacity:.4, duration:.8, ease:'power1.out'}, `dock+=${grow}`);
+  }
   if(introRush) introTl.timeScale(2);
 })();
