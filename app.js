@@ -1866,6 +1866,15 @@ function tickCountdown(){
 }
 setInterval(tickCountdown, 1000);
 
+// faces from the open card, sized for the 1080-wide story rather than the 1440 screen
+function storyFace(kind, px){
+  const ru=lang==='ru';
+  if(kind==='kicker') return {font:`400 ${px}px ${ru?'"IBM Plex Mono"':'Trispace'}`, track:px*.12};
+  if(kind==='name') return {font:`500 ${px}px ${ru?'"IBM Plex Mono"':'Trispace'}`, track:ru?px*.05:0};
+  if(kind==='body') return ru ? {font:`400 ${px}px "IBM Plex Mono"`, track:px*.05} : {font:`300 ${px}px Trispace`, track:0};
+  if(kind==='ask') return {font:`500 ${px}px Oswald`, track:0};
+  return {font:`italic 300 ${px}px "Cormorant Garamond"`, track:px*.05};
+}
 // A story-sized (9:16) picture of the card of the day (or of the spread) with the deck's name and shop -
 // shared through the system share sheet where files can be shared (phones), otherwise downloaded.
 // Everything on it stays inside the middle 4:5 (SAFE), which a post keeps when it crops the picture.
@@ -1882,9 +1891,12 @@ function storyCanvas(title){
     if(maxW){ const m=x.measureText(str).width; if(m>maxW) x.font=font.replace(/(\d+)px/, (_,n)=>Math.floor(n*maxW/m)+'px'); }
     x.fillText(str, cx, y);
   };
-  text(title, SAFE.top+80, '700 40px Trispace', '#e9e6e1', 9.5);
-  text('BLOODY FEAST TAROT', SAFE.bottom-92, '700 40px Trispace', '#e9e6e1', 9.5);
-  text('illusbyme.etsy.com', SAFE.bottom-40, 'italic 500 34px "Cormorant Garamond"', '#8a8784');
+  // the same faces as the open card, at the story's own size: the label is the period kicker,
+  // the shop line is the whisper under the button, both a step smaller than on the screen
+  const kick=storyFace('kicker', 34), foot=storyFace('kicker', 30), url=storyFace('whisper', 28);
+  text(title, SAFE.top+80, kick.font, '#e9e6e1', kick.track);
+  text('BLOODY FEAST TAROT', SAFE.bottom-92, foot.font, '#e9e6e1', foot.track);
+  text('illusbyme.etsy.com', SAFE.bottom-40, url.font, '#8a8784', url.track);
   return {c, x, W, H, text};
 }
 // a card face (only what lies inside its cut line) at cx, cy, cw wide
@@ -1902,9 +1914,10 @@ async function drawStoryCard(x, card, reversed, cx, cy, cw){
   } else {
     x.strokeStyle='#111'; x.lineWidth=3*k; x.beginPath(); x.roundRect(cx+cw*.06, cy+cw*.06, cw*.88, ch-cw*.12, cw*.05); x.stroke();
     x.textAlign='center'; x.letterSpacing='0px';
-    if(card.num){ x.font=`700 ${96*k}px Trispace`; x.fillStyle='#e42423'; x.fillText(card.num, cx+cw/2, cy+ch/2-60*k); }
-    x.font=`700 ${72*k}px Trispace`; x.fillStyle='#111';
-    const m=x.measureText(card.name).width; if(m>cw*.8) x.font=`700 ${72*k*cw*.8/m}px Trispace`;
+    const num=storyFace('kicker', Math.round(80*k)), nm=storyFace('name', Math.round(56*k));
+    if(card.num){ x.font=num.font; x.letterSpacing=num.track+'px'; x.fillStyle='#e42423'; x.fillText(card.num, cx+cw/2, cy+ch/2-60*k); }
+    x.font=nm.font; x.letterSpacing=nm.track+'px'; x.fillStyle='#111';
+    const m=x.measureText(card.name).width; if(m>cw*.8) x.font=nm.font.replace(/(\d+)px/, (_,n)=>Math.floor(n*cw*.8/m)+'px');
     x.fillText(card.name, cx+cw/2, cy+ch/2+50*k);
   }
   x.restore();
@@ -1934,8 +1947,8 @@ async function shareStory(){
   showToast(tr('saved'));
 }
 // the lines of `str` in `font`, each at most maxW wide
-function wrapLines(x, str, font, maxW){
-  x.font=font; x.letterSpacing='0px';
+function wrapLines(x, str, font, maxW, spacing=0){
+  x.font=font; x.letterSpacing=spacing+'px';
   const lines=[''];
   str.split(' ').forEach(w=>{ const t=(lines.at(-1)+' '+w).trim(); x.measureText(t).width>maxW ? lines.push(w) : lines[lines.length-1]=t; });
   return lines;
@@ -1944,17 +1957,19 @@ function wrapLines(x, str, font, maxW){
 async function drawCardStory(el){
   const card=el._card, reversed=el.dataset.reversed==='true';
   const {c, x, W, text}=storyCanvas(tr('storyDay'));
-  text(card.name.toUpperCase(), SAFE.top+162, '700 72px Trispace', '#f2efea', 5.7, W/2, W-120);
+  const name=storyFace('name', 52);
+  text(card.name, SAFE.top+156, name.font, '#f2efea', name.track, W/2, W-160);
   const meaning=reversed ? card.rev : card.up;
-  let font='italic 500 42px "Cormorant Garamond"', lh=54, lines=wrapLines(x, meaning, font, W-200);
-  if(lines.length>2){ font='italic 500 38px "Cormorant Garamond"'; lh=48; lines=wrapLines(x, meaning, font, W-180); }
+  let body=storyFace('body', 32), lh=Math.round(32*1.45), lines=wrapLines(x, meaning, body.font, W-200, body.track);
+  if(lines.length>2){ body=storyFace('body', 28); lh=Math.round(28*1.45); lines=wrapLines(x, meaning, body.font, W-180, body.track); }
   // the card gives up height to a longer meaning, so the invitation stays clear of the deck's name below
   const cy=SAFE.top+200, askY=h=>cy+h+72+(lines.length-1)*lh+100;
   const cw=Math.min(420, (SAFE.bottom-205-askY(0))*CARD_ASPECT);
   const ch=await drawStoryCard(x, card, reversed, (W-cw)/2, cy, cw);
-  lines.forEach((l,i)=>text(l, cy+ch+72+i*lh, font, '#d9d4ce'));
-  // an invitation to whoever sees the story, in the red of the card backs
-  text(tr('storyAsk'), askY(ch), '700 44px Trispace', '#e42423', 5.7, W/2, W-160);
+  lines.forEach((l,i)=>text(l, cy+ch+72+i*lh, body.font, '#d9d4ce', body.track));
+  // an invitation to whoever sees the story, in the face of the finish button, a step smaller
+  const ask=storyFace('ask', 36);
+  text(tr('storyAsk'), askY(ch), ask.font, '#e42423', ask.track, W/2, W-160);
   return {c, name:`card-of-the-day-${isoDay()}.jpg`, title:tr('optDay'), text:`${tr('shareDay')(card.name)} Bloody Feast Tarot: ${ETSY_URL}`};
 }
 // the spread: its three cards side by side, each under its position and over its name, then the summary
@@ -1964,13 +1979,14 @@ async function drawSpreadStory(els){
   let ch=0;
   for(const [i, el] of els.entries()){
     const cx=left+i*(cw+gap), mid=cx+cw/2;
-    text(POSITIONS[i].toUpperCase(), cy-40, '700 30px Trispace', '#e42423', 5.7, mid);
+    const per=storyFace('kicker', 24), nm=storyFace('name', 26);
+    text(POSITIONS[i].toUpperCase(), cy-36, per.font, '#e42423', per.track, mid, cw+20);
     ch=await drawStoryCard(x, el._card, el.dataset.reversed==='true', cx, cy, cw);
-    text(el._card.name.toUpperCase(), cy+ch+64, '700 32px Trispace', '#f2efea', 1.9, mid, cw+gap-10);
+    text(el._card.name, cy+ch+56, nm.font, '#f2efea', nm.track, mid, cw+gap-16);
   }
-  // the summary, wrapped to the width of the row
-  const font='italic 500 40px "Cormorant Garamond"';
-  wrapLines(x, spreadSummary(els), font, W-160).forEach((l,i)=>text(l, cy+ch+150+i*54, font, '#d9d4ce'));
+  // the summary, the same face as the reading under an open card, a step smaller than on the screen
+  const body=storyFace('body', 28), lh=Math.round(28*1.45);
+  wrapLines(x, spreadSummary(els), body.font, W-160, body.track).forEach((l,i)=>text(l, cy+ch+130+i*lh, body.font, '#d9d4ce', body.track));
   return {c, name:`three-cards-${isoDay()}-${spreadNo||1}.jpg`, title:tr('optThree'),
     text:`${tr('shareSpreadText')(els.map((e,i)=>POSITIONS[i]+' — '+e._card.name).join(', '))} Bloody Feast Tarot: ${ETSY_URL}`};
 }
