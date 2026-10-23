@@ -2247,12 +2247,15 @@ document.addEventListener('dragstart', e=>{ if(e.target.tagName==='IMG') e.preve
   visualViewport?.addEventListener('resize', onResize);
 
   const contour=document.getElementById('chalkContour');
-  if(contour) gsap.set(contour,{xPercent:-50, yPercent:-50, transformOrigin:'50% 50%'});
+  // arm up, legs toward the bottom of the screen, a slight lean
+  const chalkRot=-122, palmAt={u:.70, v:.20};
+  const layChalk=()=>({xPercent:-50, yPercent:-50, transformOrigin:'50% 50%', rotateZ:chalkRot});
+  if(contour) gsap.set(contour, layChalk());
   if(matchMedia('(prefers-reduced-motion: reduce)').matches){
     document.body.classList.remove('intro');
     document.body.classList.add('intro-done');
     tapeReady=true;
-    if(contour) gsap.set(contour,{rotateX:0, opacity:.4});
+    if(contour) gsap.set(contour,{...layChalk(), rotateX:0, scale:1, opacity:.16});
     requestAnimationFrame(()=>{ syncTape(true); growPlate(false); });
     finish();
     return;
@@ -2295,16 +2298,29 @@ document.addEventListener('dragstart', e=>{ if(e.target.tagName==='IMG') e.preve
     .to(brand,{left:end.left, duration:unrollDur, ease:'none', onStart(){ logoTween=this; }}, `dock+=${dockDur}`)
     .fromTo(tapeHost,{xPercent:-100},{xPercent:()=>endP, duration:unrollDur, ease:'none',
       onStart(){ slideTween=this; }}, `dock+=${dockDur}`)
-    .to([openingEl, langSwitch].filter(Boolean), {opacity:1, duration:.9, ease:'power1.out',
-      onStart:()=>{ openingEl.style.pointerEvents='auto'; if(langSwitch) langSwitch.style.pointerEvents=''; }}, `dock+=${dockDur + 0.1}`);
-  // one outline: the camera starts low and to the side, then rises until it looks straight down
+    .to(langSwitch, {opacity:1, duration:.9, ease:'power1.out',
+      onStart(){ if(langSwitch) langSwitch.style.pointerEvents=''; }}, `dock+=${dockDur + 0.1}`);
+  // the whole approach lasts as long as the logo's travel into the top-left corner
   if(contour){
-    const grow=dockDur+1, lay={xPercent:-50, yPercent:-50, transformPerspective:1200};
-    gsap.set(contour, {...lay, rotateX:68, opacity:0});
+    const travel=dockDur+unrollDur, rise=travel*.56;
+    const palmShift=()=>{
+      const w=contour.offsetWidth, h=contour.offsetHeight, s=gsap.getProperty(contour,'scale')||1;
+      const dx=(palmAt.u-.5)*w*s, dy=(palmAt.v-.5)*h*s, a=chalkRot*Math.PI/180;
+      const rx=dx*Math.cos(a)-dy*Math.sin(a), ry=dx*Math.sin(a)+dy*Math.cos(a);
+      const velvet=document.getElementById('velvet').getBoundingClientRect();
+      return {x:contour.offsetLeft+rx-(velvet.left+velvet.width/2), y:contour.offsetTop+ry-(velvet.top+velvet.height/2)};
+    };
+    gsap.set(contour, {...layChalk(), transformPerspective:1200, rotateX:66, scale:.42, opacity:0});
+    gsap.set(deckStack, {opacity:0});
     introTl
-      .to(contour, {opacity:.85, duration:grow*.18, ease:'power1.out'}, 'dock')
-      .to(contour, {rotateX:0, duration:grow, ease:'power2.inOut'}, 'dock')
-      .to(contour, {opacity:.4, duration:.7, ease:'power1.out'}, `dock+=${grow}`);
+      .to(contour, {opacity:.78, duration:.4, ease:'power1.out'}, 'dock')
+      .to(contour, {rotateX:0, scale:1, duration:rise, ease:'power2.inOut'}, 'dock')
+      .call(()=>{
+        const p=palmShift();
+        gsap.set(deckStack,{x:p.x, y:p.y, scale:.26, opacity:1});
+      }, null, `dock+=${rise}`)
+      .to(deckStack, {x:0, y:0, scale:1, duration:travel-rise-.05, ease:'power2.inOut', immediateRender:false}, `dock+=${rise+.05}`)
+      .to(contour, {opacity:.16, duration:travel-rise, ease:'power1.inOut'}, `dock+=${rise}`);
   }
   if(introRush) introTl.timeScale(2);
 })();
