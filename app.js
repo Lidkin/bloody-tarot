@@ -1908,14 +1908,14 @@ function storyMark(){
 // `top` is the clear line content must stay above.
 function drawStoryFoot(x, text, W){
   return storyMark().then(mark=>{
-    const url=storyFace('whisper', 28), lw=440, lh=Math.round(lw*mark.naturalHeight/mark.naturalWidth);
-    const urlY=SAFE.bottom-48, ly=urlY-56-lh;
+    const url=storyFace('whisper', 28), lw=Math.round(440/1.5), lh=Math.round(lw*mark.naturalHeight/mark.naturalWidth);
+    const urlY=SAFE.bottom-40, ly=urlY-44-lh;
     // the plate is already clear; screen keeps a dark fringe from showing on the velvet
     x.save(); x.globalCompositeOperation='screen';
     x.drawImage(mark, (W-lw)/2, ly, lw, lh);
     x.restore();
     text('illusbyme.etsy.com', urlY, url.font, '#8a8784', url.track);
-    return {top:ly-56};
+    return {top:ly-36};
   });
 }
 // a card face (only what lies inside its cut line) at cx, cy, cw wide
@@ -1978,19 +1978,19 @@ async function drawCardStory(el){
   const {c, x, W, text}=storyCanvas(tr('storyDay'));
   const foot=await drawStoryFoot(x, text, W);
   const name=storyFace('name', 52);
-  const nameY=SAFE.top+148;
+  const nameY=SAFE.top+116;
   text(card.name, nameY, name.font, '#f2efea', name.track, W/2, W-160);
   const meaning=reversed ? card.rev : card.up;
   let body=storyFace('body', 32), lh=Math.round(32*1.45), lines=wrapLines(x, meaning, body.font, W-200, body.track);
   if(lines.length>2){ body=storyFace('body', 28); lh=Math.round(28*1.45); lines=wrapLines(x, meaning, body.font, W-180, body.track); }
-  // the card gives up height so the invitation stays clear of the logo
-  const cy=nameY+48, tail=72+(lines.length-1)*lh+100+8;
-  const cw=Math.min(420, Math.max(220, (foot.top-tail-cy)*CARD_ASPECT));
+  // the smaller logo leaves the height to the card; the meaning and the invitation keep a gap under it
+  const cy=nameY+36, tail=56+(lines.length-1)*lh+72+20;
+  const cw=Math.min(520, Math.max(220, (foot.top-tail-cy)*CARD_ASPECT));
   const ch=await drawStoryCard(x, card, reversed, (W-cw)/2, cy, cw);
-  lines.forEach((l,i)=>text(l, cy+ch+72+i*lh, body.font, '#d9d4ce', body.track));
+  lines.forEach((l,i)=>text(l, cy+ch+56+i*lh, body.font, '#d9d4ce', body.track));
   // an invitation to whoever sees the story, in the face of the finish button, a step smaller
   const ask=storyFace('ask', 36);
-  text(tr('storyAsk'), cy+ch+72+(lines.length-1)*lh+100, ask.font, '#e42423', ask.track, W/2, W-160);
+  text(tr('storyAsk'), cy+ch+56+(lines.length-1)*lh+72, ask.font, '#e42423', ask.track, W/2, W-160);
   return {c, name:`card-of-the-day-${isoDay()}.jpg`, title:tr('optDay'), text:`${tr('shareDay')(card.name)} Bloody Feast Tarot: ${ETSY_URL}`};
 }
 // the spread, as on the row: period, name and quote above each card, then the summary
@@ -2002,8 +2002,8 @@ async function drawSpreadStory(els){
   const per=storyFace('kicker', 22), nm=storyFace('name', 26), qt=storyFace('quote', 24);
   const titleY=SAFE.top+64, periodY=titleY+78, nameY=periodY+42, quoteY=nameY+38, cy=quoteY+32;
   const maxCh=foot.top-(lines.length*lh+20)-cy;
-  const cw=Math.min(300, Math.floor(maxCh*CARD_ASPECT));
-  const gap=36, left=(W-3*cw-2*gap)/2;
+  const gap=32, cw=Math.min(Math.floor((W-48-2*gap)/3), Math.floor(maxCh*CARD_ASPECT));
+  const left=(W-3*cw-2*gap)/2;
   let ch=0;
   for(const [i, el] of els.entries()){
     const cx=left+i*(cw+gap), mid=cx+cw/2, card=el._card;
