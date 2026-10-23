@@ -569,8 +569,8 @@ body.intro-done .intro-brand{transition:opacity .5s ease-in-out;}
   body.day-open.day-done #finale .finale-row .link-btn:hover::after{transform:scaleX(1);}
   body.day-open.day-done #finale .row-break{display:none;}
   /* three cards in a row: captions sit up under the tape, the reading is full width, the buttons match the day card */
-  body.spread-row .cap-pos{color:var(--red); letter-spacing:.12em; margin-right:-.12em;
-    font-size:clamp(20px, 1.667vw, 28px); transition:color .9s ease;}
+  body.spread-row .cap-pos{color:var(--red); letter-spacing:.12em; margin-right:-.12em; line-height:1.2;
+    font-size:clamp(13px, 1.15vw, 20px); transition:color .9s ease;}
   body.spread-row .spread-cap.hot .cap-pos{color:#fff;}
   body.spread-row .cap-name{text-transform:none; color:var(--accent);}
   body.spread-row .cap-title{display:block; font-family:'Cormorant Garamond',Georgia,serif; font-weight:500; font-style:italic;

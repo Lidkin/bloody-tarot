@@ -937,11 +937,9 @@ function placeCap(i, x, y, above){
   cap.style.left=x+'px'; cap.style.top=y+'px'; cap.classList.toggle('above', above);
 }
 const showCaps=on=>spread && spread.caps.forEach(c=>c.classList.toggle('on', on));
-// desktop: in the hollow under the lower arc, "выбери три карты", then "выбери настоящее", then
-// "выбери будущее". The period itself shows only while the cursor is on a card. It stands where
-// the column of all three positions with a button under it would begin; that column (kept in the layout
-// but never shown) is fitted inside the circle the slid-out cards of the lower arc leave free: as big as
-// fits there, as low as the screen allows
+// desktop: "выбери три карты", then "выбери настоящее", then "выбери будущее".
+// The period itself shows only while the cursor is on a card. Wide screens keep the words
+// in the hollow; narrower ones set them immediately under the lower arc.
 function buildPickList(){
   const {pivotX}=fanLayout;
   const list=document.createElement('div'); list.className='pick-list';
@@ -962,28 +960,43 @@ function cardBox(s){
   }
   return {left, right, top, bottom};
 }
-// the words under the arcs stay small with the screen, and drop below a card that would cover them
-// once that card has slid out of the lower arc
+// wide screens keep the words where they stood in the hollow. Narrower ones set them
+// immediately under the lower arc, clear of the cards
 function placePickList(){
   const list=spread?.list; if(!list || !fanLayout) return;
+  const hint=list.querySelector('.pick-hint');
+  if(innerWidth>1200){ hint.style.top='1.1em'; placePickListWide(); return; }
+  hint.style.top='0';
   list.style.fontSize='';
   const {pivotX, pivotY, rInner, angleStart, angleEnd, nInner}=fanLayout;
-  const hint=list.querySelector('.pick-hint');
-  const half=Math.max(48, hint.scrollWidth/2), n=nInner, r=rInner-cardH/2;
   let floor=-Infinity;
-  for(let i=0;i<n;i++){
-    const f=n>1 ? i/(n-1) : 0, angle=angleEnd-(angleEnd-angleStart)*f, rad=angle*Math.PI/180;
-    const box=cardBox({x:pivotX+r*Math.sin(rad), y:pivotY-r*Math.cos(rad), rot:angle, w:cardW, h:cardH});
-    if(box.right<pivotX-half-10 || box.left>pivotX+half+10) continue;
+  for(let i=0;i<nInner;i++){
+    const f=nInner>1 ? i/(nInner-1) : 0, angle=angleEnd-(angleEnd-angleStart)*f, rad=angle*Math.PI/180;
+    const box=cardBox({x:pivotX+rInner*Math.sin(rad), y:pivotY-rInner*Math.cos(rad), rot:angle, w:cardW, h:cardH});
     floor=Math.max(floor, box.bottom);
   }
-  const hintH=hint.offsetHeight||28, gap=16;
-  let top=Math.min(innerHeight-hintH-Math.max(28, innerHeight*.06), pivotY+(rInner-cardH)*.28);
-  if(floor>top-8) top=floor+gap;
+  const hintH=hint.offsetHeight||28, gap=10;
+  let top=floor+gap;
   const limit=innerHeight-hintH-12;
   if(top>limit) top=Math.max(12, limit);
   list.style.left=pivotX+'px';
   list.style.top=top+'px';
+}
+// the column of positions, kept in the layout but never shown, is fitted inside the circle the
+// slid-out cards of the lower arc leave free: as big as fits there, as low as the screen allows
+function placePickListWide(){
+  const {rInner, pivotX, pivotY}=fanLayout, R=rInner-cardH-8, list=spread.list;
+  const rows=[...list.querySelectorAll('.pick-line, .pick-go')];
+  for(let f=30;f>=11;f--){
+    list.style.fontSize=f+'px';
+    const H=list.offsetHeight, top=Math.min(innerHeight-Math.max(32, innerHeight*.045), pivotY+R*.35)-H;
+    list.style.top=top+'px';
+    if(rows.every(r=>Math.hypot(r.offsetWidth/2, pivotY-(top+r.offsetTop))<=R)) break;
+  }
+  const bottom=list.offsetTop+list.offsetHeight;
+  list.style.fontSize=parseFloat(list.style.fontSize)+2+'px';
+  list.style.top=bottom-list.offsetHeight+'px';
+  list.style.left=pivotX+'px';
 }
 addEventListener('resize', ()=>{ if(spread?.list) placePickList(); });
 function showPickAsk(){
