@@ -1880,7 +1880,7 @@ function storyFace(kind, px){
 // shared through the system share sheet where files can be shared (phones), otherwise downloaded.
 // Everything on it stays inside the middle 4:5 (SAFE), which a post keeps when it crops the picture.
 const SAFE={top:(1920-1350)/2, bottom:(1920+1350)/2};
-function storyCanvas(title){
+function storyCanvas(title, titlePx=34){
   const W=1080, H=1920, c=document.createElement('canvas'); c.width=W; c.height=H;
   const x=c.getContext('2d');
   const bg=x.createRadialGradient(W/2, H*.42, 0, W/2, H*.42, H*.7);
@@ -1893,7 +1893,7 @@ function storyCanvas(title){
     x.fillText(str, cx, y);
   };
   // the label is the period kicker, a step smaller than on the screen
-  const kick=storyFace('kicker', 34);
+  const kick=storyFace('kicker', titlePx);
   text(title, SAFE.top+64, kick.font, '#e9e6e1', kick.track);
   return {c, x, W, H, text};
 }
@@ -1975,16 +1975,16 @@ function wrapLines(x, str, font, maxW, spacing=0){
 // the card lies as it fell; the meaning given is the one of that position
 async function drawCardStory(el){
   const card=el._card, reversed=el.dataset.reversed==='true';
-  const {c, x, W, text}=storyCanvas(tr('storyDay'));
+  const {c, x, W, text}=storyCanvas(tr('storyDay'), 26);
   const foot=await drawStoryFoot(x, text, W);
-  const name=storyFace('name', 52);
-  const nameY=SAFE.top+116;
+  const name=storyFace('name', 40);
+  const nameY=SAFE.top+132;
   text(card.name, nameY, name.font, '#f2efea', name.track, W/2, W-160);
   const meaning=reversed ? card.rev : card.up;
   let body=storyFace('body', 32), lh=Math.round(32*1.45), lines=wrapLines(x, meaning, body.font, W-200, body.track);
   if(lines.length>2){ body=storyFace('body', 28); lh=Math.round(28*1.45); lines=wrapLines(x, meaning, body.font, W-180, body.track); }
   // the card takes the height under the name; the meaning keeps a gap above the logo
-  const cy=nameY+36, tail=56+(lines.length-1)*lh+48;
+  const cy=nameY+40, tail=56+(lines.length-1)*lh+48;
   const cw=Math.min(520, Math.max(220, (foot.top-tail-cy)*CARD_ASPECT));
   const ch=await drawStoryCard(x, card, reversed, (W-cw)/2, cy, cw);
   lines.forEach((l,i)=>text(l, cy+ch+56+i*lh, body.font, '#d9d4ce', body.track));
