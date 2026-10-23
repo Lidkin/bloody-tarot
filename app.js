@@ -382,11 +382,17 @@ function showStart(on){
   if(on) spreadOpts.querySelectorAll('.opt').forEach(o=>o.classList.remove('tap'));
   [askSub, spreadOpts, langSwitch, soundBtn, whisper].forEach(e=>e?.classList.toggle('gone', !on));
 }
-// the chalk outline stays behind the arcs and leaves when they do
+// the chalk outline stays behind the arcs and leaves when they do.
+// under the arcs it sits paler than on the main screen
 function showChalk(on){
   const el=document.getElementById('chalk');
   if(!el || !isDesktop()) return;
   gsap.to(el,{autoAlpha:on?1:0, duration:.6, overwrite:true});
+}
+function chalkWeight(arc){
+  const plain=document.getElementById('chalkPlain');
+  if(!plain || !isDesktop()) return;
+  gsap.to(plain,{opacity:arc ? .15 : .3, duration:.6, overwrite:true});
 }
 spreadOpts.querySelectorAll('.opt').forEach(o=>o.addEventListener('click', ()=>{
   if(shufflePhase!=='idle' || busy || !deckAtRest()) return;
@@ -523,6 +529,7 @@ function returnToDeck(el, onBack){
 
 // The deck flies from the velvet to the first slot of the upper arc; dealing starts from there.
 function flyToFan(){
+  chalkWeight(true);
   fanScreen.hidden=false;
   const L=layoutFan(), a=L.angleStart*Math.PI/180;
   const tx=L.pivotX+L.rOuter*Math.sin(a), ty=L.pivotY-L.rOuter*Math.cos(a);
@@ -1356,6 +1363,7 @@ function setDim(level, except, onCovered){
     gsap.to(dimOverlay,{opacity:.6, duration:.8, ease:'sine.inOut', overwrite:true});
   } else if(level===0){
     showChalk(true);
+    chalkWeight(true);
     const away=[...fan.querySelectorAll('.fcard.away')].filter(c=>!spread?.cards.includes(c));
     tableCleared=false;
     if(!away.length){ gsap.to(dimOverlay,{opacity:0, duration:.8, ease:'sine.inOut', overwrite:true}); return; }
@@ -1815,6 +1823,7 @@ function flyHome(el){
   const s=el._state;
   openingEl.hidden=false; gsap.set(openingEl,{opacity:1});
   showChalk(true);
+  chalkWeight(false);
   resetDeckStack();
   const r=deckStack.getBoundingClientRect(), w=deckStack.offsetWidth, h=deckStack.offsetHeight;
   const restR=getComputedStyle(deckStack.firstElementChild).borderRadius;
