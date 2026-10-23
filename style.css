@@ -571,9 +571,16 @@ body.intro-done .intro-brand{transition:opacity .5s ease-in-out;}
     letter-spacing:.05em; font-size:clamp(16px, 1.25vw, 22px); line-height:1.2; color:var(--ink); opacity:1; margin-top:8px;}
   body.spread-row .cap-title:empty{display:none;}
   body.spread-row #finale{left:0; right:0; top:auto; bottom:80px; width:100%; max-width:none; transform:none;}
-  body.spread-row #fSummary{max-width:none; width:100%; box-sizing:border-box; padding:14px 24px; margin:0;
-    font-style:normal; border-top:0.5px solid var(--red); border-bottom:0.5px solid var(--red);}
-  body.spread-row #fSummary.card-text{border-color:transparent;}
+  body.spread-row #fSummary{position:relative; max-width:none; width:100%; box-sizing:border-box; padding:14px 24px; margin:0;
+    font-style:normal; border:none;}
+  /* a scaled hairline: a 1px rule is the thinnest border the browser will keep, so this draws half of that */
+  body.spread-row #fSummary::before,
+  body.spread-row #fSummary::after{content:''; position:absolute; left:0; right:0; height:1px; background:var(--red);
+    transform:scaleY(.5); pointer-events:none;}
+  body.spread-row #fSummary::before{top:0; transform-origin:top center;}
+  body.spread-row #fSummary::after{bottom:0; transform-origin:bottom center;}
+  body.spread-row #fSummary.card-text::before,
+  body.spread-row #fSummary.card-text::after{background:transparent;}
   body.spread-row #finale #fDeck{display:none;}
   body.spread-row #finale .finale-row{display:flex; justify-content:center; align-items:center; column-gap:22px; width:auto; margin-top:16px;}
   body.spread-row #finale .return-btn,
