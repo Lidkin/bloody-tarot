@@ -129,7 +129,7 @@ body:not(.fonts-ready) .spread-options{visibility:hidden;}
 .pick-line, .pick-go{visibility:hidden;}
 .pick-line{font-family:var(--head-font); font-size:1em; font-weight:700; line-height:1.38; letter-spacing:.19em; text-transform:uppercase;}
 .pick-go{margin-top:.5em; font-size:max(13px, .5em); line-height:1.6;}
-.pick-hint{position:absolute; top:1.1em; display:grid; justify-items:center;}
+.pick-hint{position:absolute; top:0; display:grid; justify-items:center;}
 .pick-word{grid-area:1/1; font-family:var(--head-font); font-size:1.3em; font-weight:700; letter-spacing:.19em; margin-right:-.19em; white-space:nowrap;
   color:var(--accent); text-transform:uppercase; text-shadow:0 0 12px #000, 0 0 4px #000;
   opacity:0; transform:translateY(8px); transition:opacity .5s ease, transform .5s ease;}
@@ -373,6 +373,7 @@ body.card-open .card-head, body.car-open .card-head{opacity:1;}
 body.car-open #fName{display:none;}
 .card-head h2{margin:0; font-family:var(--head-font); font-weight:500; color:var(--accent); font-size:20px; line-height:24px; letter-spacing:.16em;}
 .card-head .head-title{display:none;}
+.card-head .head-pos{display:none;}
 @media (hover:hover) and (pointer:fine){ .card-head{top:calc(64px + env(safe-area-inset-top,0px));} }
 /* narrow phones: a smaller title; fitTitle (app.js) keeps it on one line clear of RU / EN */
 @media (max-width:480px){ body.noir h1.title{font-size:12px; letter-spacing:2.85px;} }
@@ -494,10 +495,10 @@ body.intro-done .intro-brand{transition:opacity .5s ease-in-out;}
   .link-btn:hover{color:var(--ink);}
   .cap-pos, .meaning-panel .pos-label, .pick-word:not(.pick-ask){font-family:'Trispace',sans-serif; font-weight:400; letter-spacing:0;
     font-size:clamp(13px, .9722vw, 16px);}
-  .pick-word:not(.pick-ask){letter-spacing:.12em; margin-right:-.12em; font-size:clamp(20px, 1.667vw, 28px); color:var(--accent);}
+  .pick-word:not(.pick-ask){letter-spacing:.12em; margin-right:-.12em; font-size:clamp(13px, 1.15vw, 20px); color:var(--accent);}
   /* the ask stays the whisper; the position is the row caption's mono, both sized from the screen */
   .pick-word.pick-ask{font-family:'Cormorant Garamond',Georgia,serif; font-weight:300; font-style:italic; letter-spacing:.05em;
-    font-size:clamp(16px, 1.25vw, 22px); color:var(--ink); margin-right:0;}
+    font-size:clamp(12px, 1vw, 17px); color:var(--ink); margin-right:0;}
   .cap-name, .meaning-panel h2, .card-head h2{font-family:'Trispace',sans-serif; font-weight:500; letter-spacing:0;
     font-size:clamp(16px, 1.25vw, 22px);}
   .meaning-panel .card-title, .card-head .head-title{font-family:'Cormorant Garamond',Georgia,serif; font-weight:500; font-style:italic; letter-spacing:.05em;
@@ -509,8 +510,10 @@ body.intro-done .intro-brand{transition:opacity .5s ease-in-out;}
   #fDeck b{color:inherit; font-weight:inherit;}
 }
 @media (hover:hover) and (pointer:fine){
-  html[lang=ru] .cap-pos, html[lang=ru] .meaning-panel .pos-label, html[lang=ru] .pick-word:not(.pick-ask){font-family:'IBM Plex Mono',monospace; font-weight:400; letter-spacing:.05em;}
-  html[lang=ru] .pick-word:not(.pick-ask){letter-spacing:.12em;}
+  html[lang=ru] .cap-pos, html[lang=ru] .meaning-panel .pos-label, html[lang=ru] .pick-word:not(.pick-ask),
+  html[lang=ru] body.day-open .card-head .head-pos{font-family:'IBM Plex Mono',monospace; font-weight:400; letter-spacing:.05em;}
+  html[lang=ru] .pick-word:not(.pick-ask),
+  html[lang=ru] body.day-open .card-head .head-pos{letter-spacing:.12em;}
   html[lang=ru] .cap-name, html[lang=ru] .meaning-panel h2, html[lang=ru] .card-head h2{font-family:'IBM Plex Mono',monospace; font-weight:500; letter-spacing:.05em;}
   html[lang=ru] #mText, html[lang=ru] #fText, html[lang=ru] .finale .summary{font-family:'IBM Plex Mono',monospace; font-weight:400; letter-spacing:.05em;}
   html[lang=ru] #fDeck{font-family:'Cormorant Garamond',Georgia,serif; font-weight:300; font-style:italic; letter-spacing:0;}
@@ -519,6 +522,9 @@ body.intro-done .intro-brand{transition:opacity .5s ease-in-out;}
    the whisper, and a finish button 80px off the bottom */
 @media (hover:hover) and (pointer:fine){
   body.day-open .card-head{white-space:normal; display:flex; flex-direction:column; align-items:center;}
+  body.day-open .card-head .head-pos:not(:empty){display:block; font-family:'Trispace',sans-serif; font-weight:400;
+    letter-spacing:.12em; margin:0 -.12em 8px 0; text-transform:uppercase; color:var(--red); line-height:1.2;
+    font-size:clamp(13px, 1.15vw, 20px);}
   body.day-open .card-head h2{white-space:nowrap;}
   body.day-open .card-head .head-title{display:block; min-height:1.2em; line-height:1.2; margin-top:8px; white-space:nowrap;}
   body.day-open #mTitle{display:none;}
@@ -564,7 +570,7 @@ body.intro-done .intro-brand{transition:opacity .5s ease-in-out;}
   body.day-open.day-done #finale .row-break{display:none;}
   /* three cards in a row: captions sit up under the tape, the reading is full width, the buttons match the day card */
   body.spread-row .cap-pos{color:var(--red); letter-spacing:.12em; margin-right:-.12em;
-    font-size:clamp(20px, 1.667vw, 28px);}
+    font-size:clamp(20px, 1.667vw, 28px); transition:color .9s ease;}
   body.spread-row .spread-cap.hot .cap-pos{color:#fff;}
   body.spread-row .cap-name{text-transform:none; color:var(--accent);}
   body.spread-row .cap-title{display:block; font-family:'Cormorant Garamond',Georgia,serif; font-weight:500; font-style:italic;

@@ -581,7 +581,7 @@ function layoutFan(){
   const rOuter=best.rOut*cardH, rInner=best.rIn*cardH;
   const pivotX=sideMargin+(availW-(best.maxX-best.minX)*cardH)/2-best.minX*cardH;
   const pivotY=topMargin-best.minY*cardH;
-  return fanLayout={nOuter, angleStart, angleEnd, rOuter, rInner, pivotX, pivotY};
+  return fanLayout={nOuter, nInner, angleStart, angleEnd, rOuter, rInner, pivotX, pivotY};
 }
 
 // A card element (back + face) placed at (pivotX, pivotY); in the fan that is the arcs' centre.
@@ -808,6 +808,7 @@ function openedPose(el, card){
   document.body.classList.toggle('day-open', (isDesktop() && !spread) || sheet);
   document.body.classList.toggle('step-open', stepOpen);
   document.getElementById('mName').textContent=card.name;
+  document.getElementById('mKicker').textContent=isDesktop() && spread && !el._fromDeck ? POSITIONS[spread.i] : '';
   const quote=card.title ? tr('q')(card.title) : '';
   document.getElementById('mTitle').textContent=quote;
   document.getElementById('mQuote').textContent=quote;
@@ -942,25 +943,49 @@ const showCaps=on=>spread && spread.caps.forEach(c=>c.classList.toggle('on', on)
 // but never shown) is fitted inside the circle the slid-out cards of the lower arc leave free: as big as
 // fits there, as low as the screen allows
 function buildPickList(){
-  const {rInner, pivotX, pivotY}=fanLayout, R=rInner-cardH-8;
+  const {pivotX}=fanLayout;
   const list=document.createElement('div'); list.className='pick-list';
   list.innerHTML=`<div class="pick-hint"><span class="pick-word pick-ask">${tr('pickAsk')[0]}</span>${POSITIONS.map(p=>`<span class="pick-word">${p}</span>`).join('')}</div>`+
     POSITIONS.map(p=>`<div class="pick-line">${p}</div>`).join('')+`<div class="pick-go">${tr('reveal')}</div>`;
   list.style.left=pivotX+'px';
   fan.appendChild(list); spread.list=list;
-  const rows=[...list.querySelectorAll('.pick-line, .pick-go')];
-  for(let f=30;f>=11;f--){
-    list.style.fontSize=f+'px';
-    const H=list.offsetHeight, top=Math.min(innerHeight-Math.max(32, innerHeight*.045), pivotY+R*.35)-H;
-    list.style.top=top+'px';
-    // the top corners of every row must lie inside the free circle
-    if(rows.every(r=>Math.hypot(r.offsetWidth/2, pivotY-(top+r.offsetTop))<=R)) break;
-  }
-  // a touch larger than the fit, growing upwards from the same bottom line
-  const bottom=list.offsetTop+list.offsetHeight;
-  list.style.fontSize=parseFloat(list.style.fontSize)+2+'px';
-  list.style.top=bottom-list.offsetHeight+'px';
+  placePickList();
 }
+// the axis-aligned box of a card at pose s
+function cardBox(s){
+  const t=s.rot*Math.PI/180, c=Math.cos(t), sn=Math.sin(t), hw=s.w/2, hh=s.h/2;
+  let left=Infinity, right=-Infinity, top=Infinity, bottom=-Infinity;
+  for(const [x,y] of [[-hw,-hh],[hw,-hh],[hw,hh],[-hw,hh]]){
+    const rx=x*c-y*sn, ry=x*sn+y*c;
+    left=Math.min(left, s.x+rx); right=Math.max(right, s.x+rx);
+    top=Math.min(top, s.y+ry); bottom=Math.max(bottom, s.y+ry);
+  }
+  return {left, right, top, bottom};
+}
+// the words under the arcs stay small with the screen, and drop below a card that would cover them
+// once that card has slid out of the lower arc
+function placePickList(){
+  const list=spread?.list; if(!list || !fanLayout) return;
+  list.style.fontSize='';
+  const {pivotX, pivotY, rInner, angleStart, angleEnd, nInner}=fanLayout;
+  const hint=list.querySelector('.pick-hint');
+  const half=Math.max(48, hint.scrollWidth/2), n=nInner, r=rInner-cardH/2;
+  let floor=-Infinity;
+  for(let i=0;i<n;i++){
+    const f=n>1 ? i/(n-1) : 0, angle=angleEnd-(angleEnd-angleStart)*f, rad=angle*Math.PI/180;
+    const box=cardBox({x:pivotX+r*Math.sin(rad), y:pivotY-r*Math.cos(rad), rot:angle, w:cardW, h:cardH});
+    if(box.right<pivotX-half-10 || box.left>pivotX+half+10) continue;
+    floor=Math.max(floor, box.bottom);
+  }
+  const hintH=hint.offsetHeight||28, gap=16;
+  let top=Math.min(innerHeight-hintH-Math.max(28, innerHeight*.06), pivotY+(rInner-cardH)*.28);
+  if(floor>top-8) top=floor+gap;
+  const limit=innerHeight-hintH-12;
+  if(top>limit) top=Math.max(12, limit);
+  list.style.left=pivotX+'px';
+  list.style.top=top+'px';
+}
+addEventListener('resize', ()=>{ if(spread?.list) placePickList(); });
 function showPickAsk(){
   if(!spread?.list) return;
   const n=spread.cards.length, list=spread.list, ask=list.querySelector('.pick-ask');
@@ -1044,13 +1069,10 @@ function openSpreadCard(i){
   const s=el._state, pose=openedPose(el, el._card), render=()=>renderCard(el,s), tl=gsap.timeline();
   gsap.killTweensOf(s);
   // desktop: the fan is cleared away by now, so the card opens right where it lies
-  if(isDesktop() && !el._fromDeck) setTapePeriod(POSITIONS[i]);
   tl.call(()=>{ el.style.zIndex=1000; sfx.slide(1, .7); })
     .to(s,{...pose, duration:1.3, ease:'power2.inOut', onUpdate:render, onComplete:()=>onCardOpened(el)});
 }
-// the white plate on the tape reads the period of the card that is opening, in the same face as
-// "Tarot by Lidia Khait" (those letters are outlines; Montserrat is the Cyrillic match), and as large
-// as that plate allows. It leaves with the header when the card's name appears.
+// the tape stays "Tarot by Lidia Khait". This only clears a period that an older build may have left on the plate.
 function setTapePeriod(text){
   if(!isDesktop()) return;
   const zoom=document.querySelector('.tape-zoom');
@@ -1088,9 +1110,7 @@ function nextSpreadCard(){
   // the sheet drops its day-card layout the moment it closes; hide it first so that snap is not seen
   const sheet=document.body.classList.contains('step-open');
   if(sheet){ meaningPanel.style.transition='none'; meaningPanel.style.opacity='0'; }
-  // the header comes back for the next flight already naming that card, not the brand
   meaningPanel.classList.remove('show'); hideBigName();
-  setTapePeriod(isDesktop() && !el._fromDeck ? POSITIONS[spread.i+1] : '');
   el.classList.remove('lit');
   if(sheet){ void meaningPanel.offsetWidth; meaningPanel.style.transition=meaningPanel.style.opacity=''; }
   gsap.killTweensOf(s);
