@@ -2246,15 +2246,13 @@ document.addEventListener('dragstart', e=>{ if(e.target.tagName==='IMG') e.preve
   addEventListener('resize', onResize);
   visualViewport?.addEventListener('resize', onResize);
 
-  const sceneMark=document.getElementById('chalkScene'), sceneFull=document.getElementById('chalkScene1'),
-    contour=document.getElementById('chalkContour');
-  const placeChalk=el=>{ if(el) gsap.set(el,{xPercent:-50, yPercent:-50, transformOrigin:'50% 50%'}); };
-  [sceneMark, sceneFull, contour].forEach(placeChalk);
+  const contour=document.getElementById('chalkContour');
+  if(contour) gsap.set(contour,{xPercent:-50, yPercent:-50, transformOrigin:'50% 50%'});
   if(matchMedia('(prefers-reduced-motion: reduce)').matches){
     document.body.classList.remove('intro');
     document.body.classList.add('intro-done');
     tapeReady=true;
-    if(contour) gsap.set(contour,{scale:1, opacity:.4});
+    if(contour) gsap.set(contour,{rotateX:0, opacity:.4});
     requestAnimationFrame(()=>{ syncTape(true); growPlate(false); });
     finish();
     return;
@@ -2299,18 +2297,14 @@ document.addEventListener('dragstart', e=>{ if(e.target.tagName==='IMG') e.preve
       onStart(){ slideTween=this; }}, `dock+=${dockDur}`)
     .to([openingEl, langSwitch].filter(Boolean), {opacity:1, duration:.9, ease:'power1.out',
       onStart:()=>{ openingEl.style.pointerEvents='auto'; if(langSwitch) langSwitch.style.pointerEvents=''; }}, `dock+=${dockDur + 0.1}`);
-  // scene and scene 1 are the two ends of one camera move: side view, then straight overhead. The handoff
-  // happens while the plate is still edge-on, so the two drawings never stack; then the camera rises.
-  if(sceneMark && sceneFull && contour){
-    const grow=dockDur+1, lay={xPercent:-50, yPercent:-50, transformPerspective:1400};
-    gsap.set(sceneFull, {...lay, rotateX:70, opacity:0});
+  // one outline: the camera starts low and to the side, then rises until it looks straight down
+  if(contour){
+    const grow=dockDur+1, lay={xPercent:-50, yPercent:-50, transformPerspective:1200};
+    gsap.set(contour, {...lay, rotateX:68, opacity:0});
     introTl
-      .to(sceneMark, {opacity:1, duration:grow*.12, ease:'power1.out'}, 'dock')
-      .to(sceneFull, {opacity:1, duration:grow*.16, ease:'none'}, `dock+=${grow*.28}`)
-      .to(sceneMark, {opacity:0, duration:grow*.16, ease:'none'}, `dock+=${grow*.3}`)
-      .to(sceneFull, {rotateX:0, duration:grow*.62, ease:'power2.inOut'}, `dock+=${grow*.38}`)
-      .to(sceneFull, {opacity:0, duration:.65, ease:'power1.inOut'}, `dock+=${grow}`)
-      .to(contour, {opacity:.4, duration:.8, ease:'power1.out'}, `dock+=${grow}`);
+      .to(contour, {opacity:.85, duration:grow*.18, ease:'power1.out'}, 'dock')
+      .to(contour, {rotateX:0, duration:grow, ease:'power2.inOut'}, 'dock')
+      .to(contour, {opacity:.4, duration:.7, ease:'power1.out'}, `dock+=${grow}`);
   }
   if(introRush) introTl.timeScale(2);
 })();

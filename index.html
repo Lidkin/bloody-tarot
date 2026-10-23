@@ -25,11 +25,9 @@
 <div class="glow"></div>
 <canvas id="dust"></canvas>
 <div class="vignette"></div>
-<!-- desktop: the camera rises from the side view (scene) to straight above (scene 1), then only the outline stays -->
+<!-- desktop: the contour itself tilts from a low side view up to straight overhead -->
 <div class="chalk" id="chalk" aria-hidden="true">
-  <img class="chalk-scene" id="chalkScene" src="assets/SVG/scene.svg" alt="">
-  <img class="chalk-full" id="chalkScene1" src="assets/SVG/scene1.svg" alt="">
-  <img class="chalk-full" id="chalkContour" src="assets/SVG/contour.svg" alt="">
+  <img id="chalkContour" src="assets/SVG/contour.svg" alt="">
 </div>
 
 <!-- splash: large logo → top-left, then crime-scene tape unrolls across the width -->
@@ -100,6 +98,6 @@
 </div>
 <div class="rotate-note"><span class="rot-ic">↻</span><span data-i18n="rotate">Поверни телефон вертикально</span></div>
 
-<script src="app.js?v=110"></script>
+<script src="app.js?v=111"></script>
 </body>
 </html>
