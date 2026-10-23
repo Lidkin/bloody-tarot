@@ -2247,15 +2247,13 @@ document.addEventListener('dragstart', e=>{ if(e.target.tagName==='IMG') e.preve
   visualViewport?.addEventListener('resize', onResize);
 
   const frame=document.getElementById('chalkFrame'), plain=document.getElementById('chalkPlain');
-  // the drawn frame, measured on the 300×139 picture: inner hole the deck sits in
-  const frameBox={u:598/1192, v:286/553, w:60/1192};
   const layChalk=()=>({xPercent:-50, yPercent:-50, transformOrigin:'50% 50%'});
   if(frame) gsap.set([frame, plain], layChalk());
   if(matchMedia('(prefers-reduced-motion: reduce)').matches){
     document.body.classList.remove('intro');
     document.body.classList.add('intro-done');
     tapeReady=true;
-    if(plain) gsap.set(plain,{...layChalk(), rotateX:0, scale:1, opacity:.3});
+    if(plain) gsap.set(plain,{...layChalk(), rotateX:0, scale:1, opacity:1});
     if(frame) gsap.set(frame,{opacity:0});
     requestAnimationFrame(()=>{ syncTape(true); growPlate(false); });
     finish();
@@ -2301,30 +2299,15 @@ document.addEventListener('dragstart', e=>{ if(e.target.tagName==='IMG') e.preve
       onStart(){ slideTween=this; }}, `dock+=${dockDur}`)
     .to(langSwitch, {opacity:1, duration:.9, ease:'power1.out',
       onStart(){ if(langSwitch) langSwitch.style.pointerEvents=''; }}, `dock+=${dockDur + 0.1}`);
-  // small, behind the logo; then it approaches and lies flat (the framed drawing) while the logo takes the corner.
-  // the deck rises out of the frame, the frame disappears, and the outline grows paler
+  // the deck is already in place, behind the logo. the outline then comes in from fully transparent
+  // and is solid exactly when it has settled
   if(frame && plain){
-    const travel=dockDur+unrollDur, approach=travel*.58;
-    const placeDeck=()=>{
-      const w=frame.offsetWidth, h=frame.offsetHeight, s=gsap.getProperty(frame,'scale')||1;
-      const rx=(frameBox.u-.5)*w*s, ry=(frameBox.v-.5)*h*s;
-      const velvet=document.getElementById('velvet').getBoundingClientRect();
-      gsap.set(deckStack,{
-        x:frame.offsetLeft+rx-(velvet.left+velvet.width/2),
-        y:frame.offsetTop+ry-(velvet.top+velvet.height/2),
-        scale:(frameBox.w*w*s)/deckStack.offsetWidth,
-        opacity:1
-      });
-    };
+    const travel=dockDur+unrollDur;
     gsap.set([frame, plain], {...layChalk(), transformPerspective:1400, rotateX:70, scale:.2, opacity:0});
-    gsap.set(deckStack, {opacity:0});
+    gsap.set(deckStack, {x:0, y:0, scale:1, opacity:0});
     introTl
-      .to(frame, {opacity:1, duration:.4, ease:'power1.out'}, 1.45)
-      .to([frame, plain], {rotateX:0, scale:1, duration:approach, ease:'power2.inOut'}, 'dock')
-      .call(placeDeck, null, `dock+=${approach}`)
-      .to(deckStack, {x:0, y:0, scale:1, duration:travel-approach-.04, ease:'power2.inOut', immediateRender:false}, `dock+=${approach+.04}`)
-      .to(frame, {opacity:0, duration:travel-approach, ease:'power1.inOut'}, `dock+=${approach}`)
-      .to(plain, {opacity:.3, duration:travel-approach, ease:'power1.inOut'}, `dock+=${approach}`);
+      .set(deckStack, {opacity:1}, 1.35)
+      .to(plain, {opacity:1, rotateX:0, scale:1, duration:travel, ease:'power2.inOut'}, 'dock');
   }
   if(introRush) introTl.timeScale(2);
 })();
