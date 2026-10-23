@@ -2301,11 +2301,11 @@ document.addEventListener('dragstart', e=>{ if(e.target.tagName==='IMG') e.preve
       onStart(){ slideTween=this; }}, `dock+=${dockDur}`)
     .to(langSwitch, {opacity:1, duration:.9, ease:'power1.out',
       onStart(){ if(langSwitch) langSwitch.style.pointerEvents=''; }}, `dock+=${dockDur + 0.1}`);
-  // the deck sits in the drawn frame from the start. both are invisible when the logo begins
-  // to leave, and fully solid exactly when the outline has settled. then the deck grows
-  // out to its place and the framed drawing gives way to the plain one
+  // behind the logo as it starts upward: a small side view, deck in the frame, fully transparent.
+  // the viewpoint rises with the logo, so the outline and the deck grow and are solid
+  // exactly when the view is overhead. then the deck grows out and the frame gives way
   if(frame && plain){
-    const travel=dockDur+unrollDur, approach=travel*.58, persp=1400;
+    const travel=dockDur+unrollDur, approach=dockDur, persp=1400;
     const guide=document.createElement('div');
     guide.setAttribute('aria-hidden','true');
     guide.style.cssText='position:absolute;left:50%;top:50%;pointer-events:none;visibility:hidden;';
@@ -2333,8 +2333,8 @@ document.addEventListener('dragstart', e=>{ if(e.target.tagName==='IMG') e.preve
     gsap.set([frame, plain], {...layChalk(), transformPerspective:persp, rotateX:70, scale:.2, opacity:0});
     syncDeck();
     introTl
-      .to([frame, plain], {rotateX:0, scale:1, duration:approach, ease:'power2.inOut', onUpdate:syncDeck}, 'dock')
-      .to(frame, {opacity:1, duration:approach, ease:'power2.inOut', onUpdate:syncDeck}, 'dock')
+      .to([frame, plain], {rotateX:0, scale:1, duration:approach, ease:'power2.out', onUpdate:syncDeck}, 'dock')
+      .to(frame, {opacity:1, duration:approach, ease:'power2.out', onUpdate:syncDeck}, 'dock')
       .to(deckStack, {x:0, y:0, scale:1, rotateX:0, duration:travel-approach-.04, ease:'power2.inOut', immediateRender:false}, `dock+=${approach+.04}`)
       .to(frame, {opacity:0, duration:travel-approach, ease:'power1.inOut'}, `dock+=${approach}`)
       .to(plain, {opacity:.3, duration:travel-approach, ease:'power1.inOut', onComplete(){ guide.remove(); }}, `dock+=${approach}`);
