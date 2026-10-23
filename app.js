@@ -1093,6 +1093,7 @@ function drawSpreadCard(i){
 function openSpreadCard(i){
   const el=spread.cards[i]; spread.i=i;
   busy=true; activeCard=el;
+  if(!el._fromDeck) showChalk(false);
   setDim(2, el); showCaps(false); el.classList.remove('lit');
   if(el.classList.contains('away')) fadeInCard(el);
   const s=el._state, pose=openedPose(el, el._card), render=()=>renderCard(el,s), tl=gsap.timeline();
@@ -1143,7 +1144,12 @@ function nextSpreadCard(){
   el.classList.remove('lit');
   if(sheet){ void meaningPanel.offsetWidth; meaningPanel.style.transition=meaningPanel.style.opacity=''; }
   gsap.killTweensOf(s);
-  if(!el._fromDeck) setDim(1, el);
+  if(!el._fromDeck){
+    setDim(1, el);
+    // back on the ground between cards: the outline stays, paler, as it did under the arcs
+    showChalk(true);
+    chalkWeight(true);
+  }
   if(el._fromDeck){
     gsap.to(s,{x:-s.w*.7, rot:-14, tx:0, ty:0, duration:.8, ease:'power2.in', onUpdate:render, onComplete:()=>{
       el.style.visibility='hidden';
