@@ -818,13 +818,14 @@ function openedPose(el, card){
   loadFace(el); el.querySelector('.fart').classList.toggle('reversed', reversed);
   // fill the description first so its real height is known
   document.getElementById('mPos').textContent=spread ? POSITIONS[spread.i] : '';
-  // every card of the spread uses the day card's sheet; past and present still step on to the next one
-  const sheet=isDesktop() && !!spread;
-  const stepOpen=sheet && spread.i<POSITIONS.length-1;
-  document.body.classList.toggle('day-open', (isDesktop() && !spread) || sheet);
+  // every described card uses the day card's sheet, on the phone as on the desktop:
+  // the period, the name and the quote sit above the card, the reading under it
+  const sheet=!!spread;
+  const stepOpen=isDesktop() && sheet && spread.i<POSITIONS.length-1;
+  document.body.classList.toggle('day-open', true);
   document.body.classList.toggle('step-open', stepOpen);
   document.getElementById('mName').textContent=card.name;
-  document.getElementById('mKicker').textContent=isDesktop() && spread && !el._fromDeck ? POSITIONS[spread.i] : '';
+  document.getElementById('mKicker').textContent=sheet ? POSITIONS[spread.i] : '';
   const quote=card.title ? tr('q')(card.title) : '';
   document.getElementById('mTitle').textContent=quote;
   document.getElementById('mQuote').textContent=quote;
@@ -836,7 +837,7 @@ function openedPose(el, card){
 const cardHead=document.getElementById('cardHead');
 function fitCardHead(){
   const h=document.getElementById('mName'); h.style.fontSize=h.style.letterSpacing='';
-  const start=isDesktop() ? 20 : 19, track=isDesktop() ? .06 : .15;
+  const start=isDesktop() ? 20 : 18, track=isDesktop() ? .06 : 0;
   for(let f=start; f>=12 && cardHead.offsetWidth>innerWidth-28; f-=.5){ h.style.fontSize=f+'px'; h.style.letterSpacing=f*track+'px'; }
 }
 // the name takes the title's place for as long as the description is shown
@@ -854,8 +855,24 @@ new MutationObserver(()=>{
 function fitAbove(panel){
   const GAP=16, panelH=panel.offsetHeight, ASPECT=CARD_ASPECT;
   const availW=innerWidth-2*FIT_MARGIN;
-  // phones keep the layout from before the logo: the name stays in the top bar, the card sits under it
+  // phones draw the same way they always have. The settled inscriptions sit as they do on the desktop:
+  // period, name and quote above the card, the reading and the button under it.
   if(!isDesktop()){
+    if(panel===meaningPanel && document.body.classList.contains('day-open')){
+      panel.style.top='auto';
+      panel.style.bottom='calc(24px + env(safe-area-inset-bottom, 0px))';
+      panel.style.left='0'; panel.style.right='0'; panel.style.width='100%';
+      panel.style.maxWidth='none'; panel.style.transform='none';
+      const nameGap=14, minTop=12, nameH=Math.max(cardHead.offsetHeight, 24);
+      const panelTop=panel.getBoundingClientRect().top;
+      const space=panelTop-12-minTop;
+      const room=space-nameH-nameGap;
+      const h=Math.min(Math.max(room, 96), availW/ASPECT), w=h*ASPECT;
+      const top=minTop+Math.max(0, (space-(nameH+nameGap+h))/2);
+      cardHead.style.top=top+'px';
+      const cardTop=top+nameH+nameGap;
+      return {x:innerWidth/2, y:cardTop+h/2, rot:0, w, h, ry:180, tx:0, ty:0};
+    }
     const head=panel===meaningPanel || document.body.classList.contains('car-open') ? cardHead : document.querySelector('h1.title');
     const minTop=Math.max(FIT_MARGIN, head.getBoundingClientRect().bottom+24);
     if(panel===finale){
@@ -1249,10 +1266,14 @@ function stackPose(d){
 }
 function fillCarouselText(el){
   const card=el._card, rev=el.dataset.reversed==='true';
-  document.getElementById('fPos').textContent=POSITIONS[spread.cards.indexOf(el)];
+  const i=spread.cards.indexOf(el);
+  const quote=card.title ? tr('q')(card.title) : '';
+  document.getElementById('fPos').textContent=POSITIONS[i];
+  document.getElementById('mKicker').textContent=POSITIONS[i];
   document.getElementById('fName').textContent=document.getElementById('mName').textContent=card.name;
   fitCardHead();
-  document.getElementById('fTitle').textContent=card.title ? tr('q')(card.title) : '';
+  document.getElementById('fTitle').textContent=quote;
+  document.getElementById('mQuote').textContent=quote;
   document.getElementById('fText').textContent=rev ? card.rev : card.up;
 }
 // dir 1: the top card goes under the stack; -1: the bottom card comes on top
@@ -1409,7 +1430,9 @@ const endPhrase=document.getElementById('endPhrase'), endRule=document.getElemen
 // between the cards of a spread there is only the way on to the next one
 function setEndRow(next){
   if(!isDesktop()){
-    endPhrase.style.display=endRule.style.display=next ? 'none' : '';
+    endRule.style.display='none';
+    endPhrase.style.display='';
+    endPhrase.textContent=spread && next ? tr('toward')[spread.i] : tr('nowYouKnow');
     document.querySelector('#finishBtn .fill').textContent=tr(next ? 'next' : 'finish');
     return;
   }
@@ -2101,12 +2124,79 @@ if(!isDesktop()) screen.orientation?.lock?.('portrait').catch(()=>{});
 document.addEventListener('contextmenu', e=>{ if(e.target.closest('img, .card, canvas')) e.preventDefault(); });
 document.addEventListener('dragstart', e=>{ if(e.target.tagName==='IMG') e.preventDefault(); });
 
+/* ---------- phone: the logo is the first thing, then the deck screen replaces it.
+   The tape stays across the top, its red words on the center of the screen. ---------- */
+async function phoneSplash(){
+  const logo=document.getElementById('introLogo'), tape=document.getElementById('introTapeWrap'),
+    tapeHost=document.getElementById('introTape'), layer=document.getElementById('intro');
+  let svgEl=null, redFrac=0;
+  try{
+    const raw=await fetch(encodeURI('assets/SVG/Border LIne.svg')).then(r=>r.text());
+    const doc=new DOMParser().parseFromString(raw, 'image/svg+xml');
+    svgEl=doc.querySelector('svg');
+    if(svgEl && tapeHost){
+      svgEl.setAttribute('preserveAspectRatio','xMinYMid meet');
+      tapeHost.replaceChildren(svgEl);
+    }
+  }catch(e){}
+  if(svgEl){
+    const letters=[...svgEl.querySelectorAll('path.st1')];
+    const vb=svgEl.viewBox.baseVal.width;
+    let minX=Infinity, maxX=-Infinity, minY=Infinity, maxY=-Infinity;
+    for(const letter of letters){
+      const b=letter.getBBox();
+      minX=Math.min(minX, b.x); maxX=Math.max(maxX, b.x+b.width);
+      minY=Math.min(minY, b.y); maxY=Math.max(maxY, b.y+b.height);
+    }
+    if(vb && maxX>minX) redFrac=(minX+maxX)/2/vb;
+    const textCx=(minX+maxX)/2, textCy=(minY+maxY)/2;
+    const plate=[...svgEl.querySelectorAll('rect.st2')].find(rect=>{
+      const x=+rect.getAttribute('x'), w=+rect.getAttribute('width');
+      return textCx>=x && textCx<=x+w;
+    });
+    if(plate && letters.length){
+      const px=+plate.getAttribute('x'), py=+plate.getAttribute('y');
+      const pw=+plate.getAttribute('width'), ph=+plate.getAttribute('height');
+      const dx=(px+pw/2)-textCx, dy=(py+ph/2)-textCy;
+      const group=document.createElementNS('http://www.w3.org/2000/svg','g');
+      const shift=document.createElementNS('http://www.w3.org/2000/svg','g');
+      if(dx || dy) shift.setAttribute('transform', `translate(${dx} ${dy})`);
+      svgEl.appendChild(group);
+      shift.append(...letters);
+      group.append(plate, shift);
+      redFrac=(px+pw/2)/vb;
+    }
+  }
+  const placeTape=()=>{
+    if(!svgEl || !redFrac || !tape || !tapeHost) return;
+    const H=32;
+    tape.style.height=H+'px';
+    void tapeHost.offsetWidth;
+    const hostW=tapeHost.offsetWidth||1;
+    const L=tape.getBoundingClientRect().left;
+    const p=100*(innerWidth/2-L-redFrac*hostW)/hostW;
+    gsap.set(tapeHost,{xPercent:p});
+  };
+  const done=()=>{
+    document.body.classList.remove('intro');
+    document.body.classList.add('intro-done');
+    gsap.set(logo,{opacity:0});
+    layer?.setAttribute('aria-hidden','true');
+    requestAnimationFrame(()=>{ placeTape(); showStart(true); });
+    addEventListener('resize', placeTape);
+  };
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches){ done(); return; }
+  gsap.set(logo,{opacity:0});
+  gsap.timeline({onComplete:done})
+    .to(logo,{opacity:1, duration:.55, ease:'power2.out'})
+    .to(logo,{opacity:0, duration:.4, ease:'power2.in'}, '+=.75');
+}
+
 /* ---------- intro: large logo → top-left, tape slides until a label hits center, then swaps ---------- */
 (async function runIntro(){
-  // phones stay as they were before the logo and the tape: the text title, no brand
+  // phones: logo first, then the deck. The tape stays, with the words centered. No chalk, no corner logo.
   if(!isDesktop()){
-    document.body.classList.remove('intro');
-    document.getElementById('intro')?.remove();
+    phoneSplash();
     return;
   }
   const brand=document.getElementById('introBrand'), logo=document.getElementById('introLogo'),
