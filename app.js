@@ -1483,27 +1483,41 @@ function tuckCard(c, then){
   gsap.to(cs,{x:s.x, y:s.y, rot:0, duration:.6, ease:'power2.inOut', onUpdate:()=>renderCard(c,cs), onComplete:then});
 }
 
-// desktop: pointing at "Поделиться картой" previews what gets shared - the showcase slips under the card
-// of the day, which straightens up, holds still and shows its pure white
-let sharePreview=false;
+// desktop: pointing at "Поделиться" previews what gets shared - the showcase slips under the card
+// of the day, which straightens up, holds still and shows its pure white. Next and Finish do the same
+// straighten and white, without the showcase.
+let sharePreview=false, holdFlat=false;
 const shareBtnEl=document.getElementById('shareBtn');
-shareBtnEl.addEventListener('pointerenter', e=>{
-  if(e.pointerType!=='mouse' || !activeCard || busy || spread) return;
-  sharePreview=true;
-  const el=activeCard, s=el._state;
+const straightenCard=()=>{
+  const el=activeCard, s=el?._state; if(!s) return;
   gsap.to(s,{tx:0, ty:0, duration:.5, ease:'power2.out', overwrite:'auto', onUpdate:()=>renderCard(el,s)});
   el.classList.add('lit');
+};
+shareBtnEl.addEventListener('pointerenter', e=>{
+  if(e.pointerType!=='mouse' || !activeCard || busy || spread) return;
+  sharePreview=true; holdFlat=true;
+  straightenCard();
   showcase.forEach(c=>tuckCard(c));
 });
 shareBtnEl.addEventListener('pointerleave', ()=>{
   if(!sharePreview) return;
-  sharePreview=false;
+  sharePreview=false; holdFlat=false;
   if(activeCard) activeCard.classList.remove('lit');
   showcase.forEach((c,k)=>fanOutCard(c, .08*k));
 });
+document.getElementById('finishBtn').addEventListener('pointerenter', e=>{
+  if(e.pointerType!=='mouse' || !activeCard || busy || sharePreview) return;
+  holdFlat=true;
+  straightenCard();
+});
+document.getElementById('finishBtn').addEventListener('pointerleave', ()=>{
+  if(sharePreview || !holdFlat) return;
+  holdFlat=false;
+  if(activeCard) activeCard.classList.remove('lit');
+});
 // the showcase slips under the card of the day and is gone; `then` runs once all of it is under
 function hideShowcase(then){
-  sharePreview=false;
+  sharePreview=false; holdFlat=false;
   const cards=showcase; showcase=[];
   if(!cards.length){ then&&then(); return; }
   let left=cards.length;
@@ -1531,7 +1545,7 @@ window.addEventListener('pointermove', e=>{
     if(isDesktop() && !spread.carousel) showSummaryText(over); // the stack already shows its top card's meaning
     return;
   }
-  const s=activeCard._state; if(!s || sharePreview) return;
+  const s=activeCard._state; if(!s || holdFlat) return;
   // under the cursor the warm paper of the illustration turns pure white
   const over=e.pointerType==='mouse' && inCard(s, e.clientX, e.clientY);
   activeCard.classList.toggle('lit', over);
@@ -1550,7 +1564,7 @@ window.addEventListener('deviceorientation', e=>{
   if(!tiltBase) tiltBase={b:e.beta, g:e.gamma};
   tiltBase.b+=(e.beta-tiltBase.b)*.01; tiltBase.g+=(e.gamma-tiltBase.g)*.01;
   const nx=clamp1((e.gamma-tiltBase.g)/18), ny=clamp1((e.beta-tiltBase.b)/18);
-  onDeck ? tiltDeck(nx, ny, .4) : tiltTo(nx, ny, .4);
+  onDeck ? tiltDeck(nx, ny, .4) : (!holdFlat && tiltTo(nx, ny, .4));
 });
 // iOS lets a page read the phone's tilt only after asking, from a tap
 function askTiltPermission(){
