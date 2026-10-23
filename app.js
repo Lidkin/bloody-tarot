@@ -695,13 +695,16 @@ const EDGE=.005, EDGE_PAPER='#d6cfc6', EDGE_DARK='#6f675f'; // card thickness, a
 function renderCard(el, s){
   // positioned by a transform, not left/top: those snap to whole pixels, and slow motion turns jerky
   el.style.left='0px'; el.style.top='0px';
-  // a card changing size is laid out in steps (each a quarter larger than the last) and scaled in between:
-  // laying out and repainting its artwork at a new size every frame is what made the motion stutter
-  const lw=Math.max(8, Math.pow(1.25, Math.ceil(Math.log(s.w)/Math.log(1.25)))), k=s.w/lw;
+  // while a card is changing size it is laid out in steps (each a quarter larger than the last) and scaled
+  // in between: laying the artwork out at a new size every frame is what made the motion stutter.
+  // once it lies open that scale is what softens it — the picture is painted, then shrunk. The settled
+  // card is laid out at its real size, so nothing is scaled. One layout, then only the tilt moves.
+  const tx=s.tx||0, ty=s.ty||0, tilted=tx||ty;
+  const exact=el===activeCard && s.ry>90 && !busy;
+  const lw=exact ? s.w : Math.max(8, Math.pow(1.25, Math.ceil(Math.log(s.w)/Math.log(1.25)))), k=exact ? 1 : s.w/lw;
   if(el._lw!==lw){ el._lw=lw; el.style.setProperty('--cw', lw+'px'); el.style.setProperty('--ch', lw*s.h/s.w+'px'); }
   const up=s.ry>1; if(el._up!==up){ el._up=up; el.classList.toggle('up', up); }
-  const tilted=s.tx||s.ty;
-  el.style.transform=`translate3d(${s.x}px,${s.y}px,0) rotate(${s.rot}deg)`+(tilted ? ` perspective(${s.h*3}px) rotateX(${s.tx}deg) rotateY(${s.ty}deg)` : '')+
+  el.style.transform=`translate3d(${s.x}px,${s.y}px,0) rotate(${s.rot}deg)`+(tilted ? ` perspective(${s.h*3}px) rotateX(${tx}deg) rotateY(${ty}deg)` : '')+
     (k!==1 ? ` scale(${k.toFixed(5)})` : '');
   el.firstElementChild.style.transform=`perspective(${s.h*4}px) rotateY(${s.ry}deg)`;
   // the thickness of a face-up card: its paper edge shows on the sides tilted towards the viewer,
@@ -1370,6 +1373,7 @@ function onCardOpened(el){
   setEndRow(spread && spread.i<POSITIONS.length-1);
   if(spread && !el._fromDeck) setDim(2, el);
   meaningPanel.classList.add('show'); busy=false;
+  if(el._state) renderCard(el, el._state);
   inkReveal(document.getElementById('mName'), {delay:.3});
   const quoteEl=document.body.classList.contains('day-open') ? document.getElementById('mQuote') : document.getElementById('mTitle');
   if(quoteEl.textContent) inkReveal(quoteEl, {delay:.45});
