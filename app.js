@@ -2247,13 +2247,15 @@ document.addEventListener('dragstart', e=>{ if(e.target.tagName==='IMG') e.preve
   visualViewport?.addEventListener('resize', onResize);
 
   const frame=document.getElementById('chalkFrame'), plain=document.getElementById('chalkPlain');
+  // inner hole of the drawn frame, measured on the 1192×553 picture
+  const frameBox={u:600/1192, v:284/553, w:64/1192};
   const layChalk=()=>({xPercent:-50, yPercent:-50, transformOrigin:'50% 50%'});
   if(frame) gsap.set([frame, plain], layChalk());
   if(matchMedia('(prefers-reduced-motion: reduce)').matches){
     document.body.classList.remove('intro');
     document.body.classList.add('intro-done');
     tapeReady=true;
-    if(plain) gsap.set(plain,{...layChalk(), rotateX:0, scale:1, opacity:1});
+    if(plain) gsap.set(plain,{...layChalk(), rotateX:0, scale:1, opacity:.3});
     if(frame) gsap.set(frame,{opacity:0});
     requestAnimationFrame(()=>{ syncTape(true); growPlate(false); });
     finish();
@@ -2299,15 +2301,43 @@ document.addEventListener('dragstart', e=>{ if(e.target.tagName==='IMG') e.preve
       onStart(){ slideTween=this; }}, `dock+=${dockDur}`)
     .to(langSwitch, {opacity:1, duration:.9, ease:'power1.out',
       onStart(){ if(langSwitch) langSwitch.style.pointerEvents=''; }}, `dock+=${dockDur + 0.1}`);
-  // the deck is already in place, behind the logo. the outline then comes in from fully transparent
-  // and is solid exactly when it has settled
+  // the deck sits in the drawn frame from the start. both are invisible when the logo begins
+  // to leave, and fully solid exactly when the outline has settled. then the deck grows
+  // out to its place and the framed drawing gives way to the plain one
   if(frame && plain){
-    const travel=dockDur+unrollDur;
-    gsap.set([frame, plain], {...layChalk(), transformPerspective:1400, rotateX:70, scale:.2, opacity:0});
-    gsap.set(deckStack, {x:0, y:0, scale:1, opacity:0});
+    const travel=dockDur+unrollDur, approach=travel*.58, persp=1400;
+    const guide=document.createElement('div');
+    guide.setAttribute('aria-hidden','true');
+    guide.style.cssText='position:absolute;left:50%;top:50%;pointer-events:none;visibility:hidden;';
+    const mark=document.createElement('div');
+    const edge=document.createElement('div');
+    mark.style.cssText=`position:absolute;width:0;height:0;left:${frameBox.u*100}%;top:${frameBox.v*100}%;`;
+    edge.style.cssText=`position:absolute;width:0;height:0;left:${(frameBox.u+frameBox.w/2)*100}%;top:${frameBox.v*100}%;`;
+    guide.append(mark, edge);
+    frame.parentElement.appendChild(guide);
+    const syncDeck=()=>{
+      const w=frame.offsetWidth, h=frame.offsetHeight||w*553/1192;
+      const rot=+gsap.getProperty(frame,'rotateX')||0, sc=+gsap.getProperty(frame,'scale')||1;
+      gsap.set(guide,{width:w, height:h, xPercent:-50, yPercent:-50, transformOrigin:'50% 50%',
+        transformPerspective:persp, rotateX:rot, scale:sc});
+      const m=mark.getBoundingClientRect(), e=edge.getBoundingClientRect();
+      const velvet=document.getElementById('velvet').getBoundingClientRect();
+      gsap.set(deckStack,{
+        x:m.left-(velvet.left+velvet.width/2),
+        y:m.top-(velvet.top+velvet.height/2),
+        scale:Math.max(1, Math.abs(e.left-m.left)*2)/deckStack.offsetWidth,
+        rotateX:rot, transformPerspective:persp,
+        opacity:+gsap.getProperty(frame,'opacity')||0
+      });
+    };
+    gsap.set([frame, plain], {...layChalk(), transformPerspective:persp, rotateX:70, scale:.2, opacity:0});
+    syncDeck();
     introTl
-      .set(deckStack, {opacity:1}, 1.35)
-      .to(plain, {opacity:1, rotateX:0, scale:1, duration:travel, ease:'power2.inOut'}, 'dock');
+      .to([frame, plain], {rotateX:0, scale:1, duration:approach, ease:'power2.inOut', onUpdate:syncDeck}, 'dock')
+      .to(frame, {opacity:1, duration:approach, ease:'power2.inOut', onUpdate:syncDeck}, 'dock')
+      .to(deckStack, {x:0, y:0, scale:1, rotateX:0, duration:travel-approach-.04, ease:'power2.inOut', immediateRender:false}, `dock+=${approach+.04}`)
+      .to(frame, {opacity:0, duration:travel-approach, ease:'power1.inOut'}, `dock+=${approach}`)
+      .to(plain, {opacity:.3, duration:travel-approach, ease:'power1.inOut', onComplete(){ guide.remove(); }}, `dock+=${approach}`);
   }
   if(introRush) introTl.timeScale(2);
 })();
