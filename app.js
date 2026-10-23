@@ -382,7 +382,7 @@ function showStart(on){
   if(on) spreadOpts.querySelectorAll('.opt').forEach(o=>o.classList.remove('tap'));
   [askSub, spreadOpts, langSwitch, soundBtn, whisper].forEach(e=>e?.classList.toggle('gone', !on));
 }
-// the chalk outline belongs to the main screen; it leaves with the deck and comes back with it
+// the chalk outline stays behind the arcs and leaves when they do
 function showChalk(on){
   const el=document.getElementById('chalk');
   if(!el || !isDesktop()) return;
@@ -523,7 +523,6 @@ function returnToDeck(el, onBack){
 
 // The deck flies from the velvet to the first slot of the upper arc; dealing starts from there.
 function flyToFan(){
-  showChalk(false);
   fanScreen.hidden=false;
   const L=layoutFan(), a=L.angleStart*Math.PI/180;
   const tx=L.pivotX+L.rOuter*Math.sin(a), ty=L.pivotY-L.rOuter*Math.cos(a);
@@ -1345,6 +1344,7 @@ function setDim(level, except, onCovered){
   dimOverlay.classList.toggle('on', level>0);
   if(level===2 && !tableCleared){
     tableCleared=true;
+    showChalk(false);
     gsap.to(dimOverlay,{opacity:1, duration:.7, ease:'sine.inOut', overwrite:true, onComplete:()=>{
       if(!tableCleared) return;
       fan.querySelectorAll('.fcard').forEach(c=>{ if(c!==activeCard && c!==except) c.classList.add('away'); });
@@ -1355,6 +1355,7 @@ function setDim(level, except, onCovered){
   } else if(level===1 && !tableCleared){
     gsap.to(dimOverlay,{opacity:.6, duration:.8, ease:'sine.inOut', overwrite:true});
   } else if(level===0){
+    showChalk(true);
     const away=[...fan.querySelectorAll('.fcard.away')].filter(c=>!spread?.cards.includes(c));
     tableCleared=false;
     if(!away.length){ gsap.to(dimOverlay,{opacity:0, duration:.8, ease:'sine.inOut', overwrite:true}); return; }
