@@ -546,7 +546,7 @@ body.intro-done .intro-brand{transition:opacity .5s ease-in-out;}
     background-image:linear-gradient(to bottom, color-mix(in srgb, var(--muted) 80%, transparent) 0 50%, var(--red) 50% 100%);
     background-size:100% 200%; background-position:0 0; background-repeat:no-repeat;
     -webkit-background-clip:text; background-clip:text;
-    transition:background-position 1.8s ease;}
+    transition:background-position 1.4s ease;}
   body.day-open .meaning-end:has(.finish-btn:hover) .end-phrase{background-position:0 100%; transition-delay:.35s;}
   /* after Finish the same screen stays; the closing row takes the button's place, 80px off the bottom */
   body.day-open.day-done #meaningPanel .meaning-end{display:none;}

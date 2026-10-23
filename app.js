@@ -1983,20 +1983,17 @@ async function drawCardStory(el){
   const meaning=reversed ? card.rev : card.up;
   let body=storyFace('body', 32), lh=Math.round(32*1.45), lines=wrapLines(x, meaning, body.font, W-200, body.track);
   if(lines.length>2){ body=storyFace('body', 28); lh=Math.round(28*1.45); lines=wrapLines(x, meaning, body.font, W-180, body.track); }
-  // the smaller logo leaves the height to the card; the meaning and the invitation keep a gap under it
-  const cy=nameY+36, tail=56+(lines.length-1)*lh+72+20;
+  // the card takes the height under the name; the meaning keeps a gap above the logo
+  const cy=nameY+36, tail=56+(lines.length-1)*lh+48;
   const cw=Math.min(520, Math.max(220, (foot.top-tail-cy)*CARD_ASPECT));
   const ch=await drawStoryCard(x, card, reversed, (W-cw)/2, cy, cw);
   lines.forEach((l,i)=>text(l, cy+ch+56+i*lh, body.font, '#d9d4ce', body.track));
-  // an invitation to whoever sees the story, in the face of the finish button, a step smaller
-  const ask=storyFace('ask', 36);
-  text(tr('storyAsk'), cy+ch+56+(lines.length-1)*lh+72, ask.font, '#e42423', ask.track, W/2, W-160);
   return {c, name:`card-of-the-day-${isoDay()}.jpg`, title:tr('optDay'), text:`${tr('shareDay')(card.name)} Bloody Feast Tarot: ${ETSY_URL}`};
 }
 // the spread, as on the row: period, name and quote above each card, then the summary
 async function drawSpreadStory(els){
   const {c, x, W, text}=storyCanvas(tr('storyThree'));
-  const foot=await drawStoryFoot(x, text, W, 1/1.5);
+  const foot=await drawStoryFoot(x, text, W);
   const body=storyFace('body', 26), lh=Math.round(26*1.45);
   const lines=wrapLines(x, spreadSummary(els), body.font, W-160, body.track);
   const per=storyFace('kicker', 22), nm=storyFace('name', 26), qt=storyFace('quote', 24);
