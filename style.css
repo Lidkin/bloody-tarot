@@ -166,10 +166,6 @@ body:not(.fonts-ready) .spread-options{visibility:hidden;}
 .fcard:not(.up) .face{backface-visibility:visible;}
 .fcard.mover{pointer-events:none; box-shadow:0 0 0 1px rgba(0,0,0,.3); transition:none;} /* its fade is GSAP's */
 .fcard-inner{position:relative; width:100%; height:100%; transform-style:preserve-3d;}
-/* a settled phone card lies flat: the 3D turn is only for the flip, and it softens the line art once the card has stopped */
-.fcard.flat .fcard-inner{transform-style:flat;}
-.fcard.flat .face.back{visibility:hidden;}
-.fcard.flat .face.front{transform:none;}
 .face{position:absolute; inset:0; border-radius:calc(var(--cw,69px) * var(--card-r,.07)); overflow:hidden; backface-visibility:hidden;
   border:var(--card-edge); box-shadow:0 7px 16px rgba(20,2,2,.85);}
 /* a card lying face down in an arc: a thin paper edge along its left side, where it overlaps its neighbour */

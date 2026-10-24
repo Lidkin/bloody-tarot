@@ -744,22 +744,23 @@ function renderCard(el, s){
   el.style.left='0px'; el.style.top='0px';
   // while a card is changing size it is laid out in steps (each a quarter larger than the last) and scaled
   // in between: laying the artwork out at a new size every frame is what made the motion stutter.
-  // once it lies open that scale is what softens it — the picture is painted, then shrunk. The settled
-  // card is laid out at its real size, so nothing is scaled. One layout, then only the tilt moves.
+  // on the desktop the settled card is then laid out at its real size, so nothing is scaled.
+  // on a phone that swap, the moment the flip stops, is what softens the line art. The phone keeps
+  // the same stepped picture it had while turning.
   const tx=s.tx||0, ty=s.ty||0, tilted=tx||ty;
-  // a card that has stopped — the one being read, and every card in the phone's stack — is laid out
-  // at its real size. The cards under the top one are not the active card, but their edges show.
   const inStack=!!(spread&&spread.carousel&&spread.cards.includes(el));
-  const exact=s.ry>90 && !busy && (el===activeCard || inStack);
+  const exact=isDesktop() && s.ry>90 && !busy && (el===activeCard || inStack);
   const lw=exact ? s.w : Math.max(8, Math.pow(1.25, Math.ceil(Math.log(s.w)/Math.log(1.25)))), k=exact ? 1 : s.w/lw;
   if(el._lw!==lw){ el._lw=lw; el.style.setProperty('--cw', lw+'px'); el.style.setProperty('--ch', lw*s.h/s.w+'px'); }
   const up=s.ry>1; if(el._up!==up){ el._up=up; el.classList.toggle('up', up); }
-  // once a phone card has stopped face up, drop the 3D turn. That layer is what was left soft after the size settled.
-  const flat=!isDesktop() && exact && !tilted;
-  el.classList.toggle('flat', flat);
+  // the phone's flip is sharp while the picture is moving, and goes soft the moment that layer is dropped
+  if(!isDesktop()){
+    const hold=s.ry>90 ? 'transform' : '';
+    if(el._hold!==hold){ el._hold=hold; el.style.willChange=hold; }
+  }
   el.style.transform=`translate3d(${s.x}px,${s.y}px,0) rotate(${s.rot}deg)`+(tilted ? ` perspective(${s.h*3}px) rotateX(${tx}deg) rotateY(${ty}deg)` : '')+
     (k!==1 ? ` scale(${k.toFixed(5)})` : '');
-  el.firstElementChild.style.transform=flat ? 'none' : `perspective(${s.h*4}px) rotateY(${s.ry}deg)`;
+  el.firstElementChild.style.transform=`perspective(${s.h*4}px) rotateY(${s.ry}deg)`;
   // the thickness of a face-up card: its paper edge shows on the sides tilted towards the viewer,
   // and a little along the bottom even when it lies flat, as if seen from slightly above
   const front=el.querySelector('.face.front');
@@ -891,11 +892,6 @@ new MutationObserver(()=>{
     const end=meaningPanel.querySelector('.meaning-end'); if(end) end.hidden=false;
   }
 }).observe(meaningPanel, {attributes:true, attributeFilter:['class']});
-// the printed face is 520px across. Past the screen's own pixels the line art goes soft, so a phone card stops there.
-function phoneCardW(w){
-  const face=520*(CUT.w/CUT.fileW);
-  return Math.min(w, face/(window.devicePixelRatio||1));
-}
 // pose of a face-up card that, together with `panel` right under it, fits the viewport minus FIT_MARGIN
 function fitAbove(panel){
   const GAP=16, panelH=panel.offsetHeight, ASPECT=CARD_ASPECT;
@@ -911,8 +907,7 @@ function fitAbove(panel){
       const panelTop=panel.getBoundingClientRect().top;
       const space=panelTop-12-minTop;
       const room=space-nameH-nameGap;
-      let h=Math.min(Math.max(room, 96), availW/ASPECT), w=h*ASPECT;
-      w=phoneCardW(w); h=w/ASPECT;
+      const h=Math.min(Math.max(room, 96), availW/ASPECT), w=h*ASPECT;
       const top=minTop+Math.max(0, (space-(nameH+nameGap+h))/2);
       cardHead.style.top=top+'px';
       const cardTop=top+nameH+nameGap;
@@ -920,9 +915,7 @@ function fitAbove(panel){
     }
     if(panel===finale){
       const minTop=18;
-      const room=panel.getBoundingClientRect().top-GAP-minTop;
-      let h=Math.min(room, availW/ASPECT), w=h*ASPECT;
-      w=phoneCardW(w); h=w/ASPECT;
+      const room=panel.getBoundingClientRect().top-GAP-minTop, h=Math.min(room, availW/ASPECT), w=h*ASPECT;
       return {x:innerWidth/2, y:minTop+room/2, rot:0, w, h, ry:180, tx:0, ty:0};
     }
   }
