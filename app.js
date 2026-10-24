@@ -400,37 +400,14 @@ function showChalk(on){
   if(!el || !isDesktop()) return;
   gsap.to(el,{autoAlpha:on?1:0, duration:.6, overwrite:true});
 }
-// phones: one outline lies in the open band above the deck, and leaves once a card turns face up.
 function phoneTapeBottom(){
   const tape=document.getElementById('introTapeWrap');
   const b=tape ? tape.getBoundingClientRect().bottom : 0;
   return Math.max(24, Math.round(b));
 }
-function placePhoneChalk(){
-  if(isDesktop()) return;
-  const img=document.getElementById('chalkPlain');
-  const opts=document.getElementById('spreadOpts');
-  if(!img || !opts) return;
-  const tape=document.getElementById('introTapeWrap');
-  const tapeBottom=tape ? tape.getBoundingClientRect().bottom : 0;
-  const deck=document.querySelector('.deck-stack');
-  const deckBox=deck ? deck.getBoundingClientRect() : null;
-  if(!deckBox || !(deckBox.top>tapeBottom+48)) return;
-  const gap=14;
-  const room=deckBox.top-tapeBottom-gap*2;
-  const maxW=Math.max(120, innerWidth-28);
-  let visW=Math.min(maxW, room*(1192/553));
-  let visH=visW*(553/1192);
-  if(visH>room){ visH=room; visW=visH*(1192/553); }
-  img.style.width=Math.round(visW)+'px';
-  img.style.top=Math.round(tapeBottom+gap+(room-visH)/2)+'px';
-  img.style.transform='translate(-50%, 0)';
-}
-function phoneDeckChalk(on){
-  if(isDesktop()) return;
-  document.body.classList.toggle('deck-home', !!on);
-  if(on) placePhoneChalk();
-}
+// phones: the contour is off until there is a place the deck does not cover.
+function placePhoneChalk(){}
+function phoneDeckChalk(){}
 function chalkWeight(arc){
   const plain=document.getElementById('chalkPlain');
   if(!plain || !isDesktop()) return;

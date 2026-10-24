@@ -453,15 +453,7 @@ body.intro-done .intro-brand{transition:opacity .5s ease-in-out;}
    The draw, the carousel and the button frames stay as they are.
    On load the logo is alone, then the deck screen replaces it. The tape stays across the top. */
 @media not all and (hover:hover) and (pointer:fine){
-  /* the plain contour stands behind the deck, head up, and leaves once a card turns face up */
-  .chalk{display:block; position:fixed; inset:0; z-index:1; pointer-events:none;
-    opacity:0; visibility:hidden; transition:opacity .5s ease, visibility 0s linear .5s;}
-  body.deck-home .chalk{opacity:1; visibility:visible; transition:opacity .5s ease, visibility 0s;}
-  #chalkFrame{display:none;}
-  /* one figure, lying across the open space above the deck, so the cards do not cover it */
-  #chalkPlain{position:absolute; left:50%; top:46%; width:min(92vw, 520px); opacity:.34;
-    transform:translate(-50%, 0); transform-origin:50% 0;
-    user-select:none; -webkit-user-drag:none;}
+  /* the contour stays off on phones until there is a place where the deck does not hide it */
   body.intro .intro-logo{opacity:0;}
   body.intro .intro-tape-wrap{opacity:0;}
   body.intro-done .intro-logo{display:none;}
