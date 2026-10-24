@@ -214,6 +214,7 @@ ru:{title:'Таро Лидии Хаит', whisper:'хочешь знать?',
   next:'Далее', finish:'Завершить', nowYouKnow:'теперь ты знаешь',
   deckOne:'Эта карта — из колоды <b>Bloody Feast Tarot</b>: все 78 карт с авторской графикой в файле для печати на Etsy.',
   deckMany:'Эти карты — из колоды <b>Bloody Feast Tarot</b>: все 78 карт с авторской графикой в файле для печати на Etsy.',
+  spreadBack:'Посмотреть значение расклада',
   etsy:'Купить колоду', etsyPrint:'Колода для печати · купить на Etsy', rotate:'Поверни телефон вертикально', touchDeck:'коснись колоды', heading:'Таро «Кровавый пир» от Лидии Хаит', share:'Поделиться', gather:'Собрать колоду', onceMore:'Ещё раз',
   again:'↺ Новое гадание', saved:'Картинка сохранена — её можно выложить в сторис',
   storyDay:'КАРТА ДНЯ', storyThree:'ТРИ КАРТЫ', storyAsk:'А ЧТО ВЫПАДЕТ ТЕБЕ?',
@@ -237,6 +238,7 @@ en:{title:'Tarot by Lidiia Khait', whisper:'want to know?',
   next:'Next', finish:'Finish', nowYouKnow:'now you know',
   deckOne:'This card comes from the <b>Bloody Feast Tarot</b> deck: all 78 cards with original artwork in a printable file on Etsy.',
   deckMany:'These cards come from the <b>Bloody Feast Tarot</b> deck: all 78 cards with original artwork in a printable file on Etsy.',
+  spreadBack:'See the spread\'s meaning',
   etsy:'Buy the deck', etsyPrint:'Printable deck · buy on Etsy', rotate:'Turn your phone upright', touchDeck:'touch the deck', heading:'Bloody Feast Tarot deck by Lidiia Khait', share:'Share', gather:'Gather deck', onceMore:'Once more',
   again:'↺ New reading', saved:'Image saved — you can post it to your story',
   storyDay:'CARD OF THE DAY', storyThree:'THREE CARDS', storyAsk:'WHAT WILL YOU DRAW?',
@@ -398,8 +400,8 @@ function showChalk(on){
   if(!el || !isDesktop()) return;
   gsap.to(el,{autoAlpha:on?1:0, duration:.6, overwrite:true});
 }
-// phones: the outline is split down the middle. The right half looks in from the left edge of the
-// screen, the left half from the right, and both leave once a card turns face up.
+// phones: one outline stands behind the deck, head above the cards and feet below them.
+// it leaves once a card turns face up.
 function phoneTapeBottom(){
   const tape=document.getElementById('introTapeWrap');
   const b=tape ? tape.getBoundingClientRect().bottom : 0;
@@ -407,29 +409,25 @@ function phoneTapeBottom(){
 }
 function placePhoneChalk(){
   if(isDesktop()) return;
-  const left=document.getElementById('chalkLeft'), right=document.getElementById('chalkRight');
+  const img=document.getElementById('chalkPlain');
   const opts=document.getElementById('spreadOpts');
-  if(!left || !right || !opts) return;
+  if(!img || !opts) return;
   const tape=document.getElementById('introTapeWrap');
   const tapeBottom=tape ? tape.getBoundingClientRect().bottom : 0;
   const btnTop=opts.getBoundingClientRect().top;
   if(!(btnTop>tapeBottom+80)) return;
-  const band=btnTop-tapeBottom;
   const deck=document.querySelector('.deck-stack');
-  const deckW=deck ? deck.getBoundingClientRect().width : 200;
-  const gap=Math.max(18, Math.round(band*.06));
-  const cssH=Math.round(band-2*gap);
-  const half=cssH*(553/1192)/2;
-  const gutter=(innerWidth-deckW)/2;
-  const peek=Math.max(28, Math.min(half*.62, gutter-18));
-  const top=((tapeBottom+btnTop)/2)+'px';
-  const mid=innerWidth/2;
-  const w=cssH+'px';
-  left.style.width=right.style.width=w;
-  left.style.top=right.style.top=top;
-  // the right half of the figure enters from the left edge, the left half from the right edge
-  right.style.setProperty('--x', Math.round(peek-half-mid)+'px');
-  left.style.setProperty('--x', Math.round(mid-peek+half)+'px');
+  const deckBox=deck ? deck.getBoundingClientRect() : null;
+  if(!deckBox || !(deckBox.height>40)) return;
+  const gap=16;
+  const above=deckBox.top-tapeBottom-gap;
+  const below=btnTop-deckBox.bottom-gap;
+  const side=Math.max(28, Math.min(above, below));
+  let visH=deckBox.height+2*side;
+  const maxW=Math.max(80, innerWidth-20);
+  if(visH*(553/1192)>maxW) visH=maxW*(1192/553);
+  img.style.width=Math.round(visH)+'px';
+  img.style.top=(deckBox.top+deckBox.height/2)+'px';
 }
 function phoneDeckChalk(on){
   if(isDesktop()) return;
@@ -1297,6 +1295,7 @@ function showCarousel(){
   const sum=document.getElementById('fSummary');
   document.body.classList.add('car-open');
   document.body.classList.remove('car-leaf', 'car-ready');
+  syncSpreadCue();
   phoneDeckChalk(false);
   gsap.set([fCard, cardHead, sum],{clearProps:'opacity'});
   // the card readings share one height, so the buttons stay put while the cards turn.
@@ -1358,8 +1357,8 @@ function placeStack(withCaption){
 }
 carPrev.addEventListener('click', ()=>spread?.carousel && turnStack(-1));
 carNext.addEventListener('click', ()=>spread?.carousel && turnStack(1));
-// a tap on the card's name puts the spread's own paragraph back and lets the name go
-cardHead.addEventListener('click', ()=>{
+// a tap on the card's name, or the line under the buttons, puts the spread's own paragraph back
+function returnSpreadSummary(){
   if(busy || isDesktop() || !spread?.carousel || !document.body.classList.contains('car-leaf')) return;
   busy=true;
   const sum=document.getElementById('fSummary');
@@ -1367,6 +1366,7 @@ cardHead.addEventListener('click', ()=>{
   gsap.to([cardHead, fCard],{opacity:0, duration:.3, onComplete:()=>{
     document.body.classList.remove('car-leaf');
     cardHead.style.opacity='';
+    syncSpreadCue();
     sum.hidden=false;
     sum.textContent=spreadSummary(spread.cards);
     sum.classList.remove('card-text');
@@ -1382,7 +1382,13 @@ cardHead.addEventListener('click', ()=>{
       spread.cards.forEach(c=>c._state && renderCard(c, c._state));
     }});
   }});
-});
+}
+function syncSpreadCue(){
+  const btn=document.getElementById('spreadBack');
+  if(btn && !isDesktop() && document.body.classList.contains('car-leaf')) btn.textContent=tr('spreadBack');
+}
+cardHead.addEventListener('click', returnSpreadSummary);
+document.getElementById('spreadBack').addEventListener('click', returnSpreadSummary);
 // once, as the stack is laid out, its top card slides a little aside and back: the cards can be turned
 function peekStack(){
   const C=spread?.carousel; if(!C || busy) return;
@@ -1429,6 +1435,7 @@ function turnStack(dir){
       fCard.hidden=false; sum.hidden=true;
       gsap.set([fCard, cardHead],{opacity:0});
       gsap.to([fCard, cardHead],{opacity:1, duration:.4, onComplete:()=>{ cardHead.style.transition=''; }});
+      syncSpreadCue();
       busy=false;
       spread.cards.forEach(c=>c._state && renderCard(c, c._state));
     }})
@@ -1872,6 +1879,7 @@ function setFinale(els){
     document.getElementById('fDeck').hidden=false;
     document.getElementById('fDeck').innerHTML=tr('deckMany');
     document.getElementById('etsyBtn').textContent=tr('etsy');
+    syncSpreadCue();
   }else{
     document.getElementById('fDeck').hidden=!!els[0]._fromDeck;
     if(!document.getElementById('fDeck').hidden) document.getElementById('fDeck').innerHTML=tr('deckMany');
@@ -1947,6 +1955,7 @@ document.getElementById('gatherBtn').addEventListener('click', ()=>{
   const els=spread ? spread.cards : [el];
   els.forEach(c=>c.classList.remove('lit'));
   showCaps(false); document.body.classList.remove('car-open', 'car-leaf', 'car-ready');
+  syncSpreadCue();
   if(phoneLeave) queueMicrotask(()=>{ cardHead.style.transition=cardHead.style.opacity=''; });
   hideShowcase(()=>el._fromDeck ? tuckUnderDeck(els, endReading) : gatherDeck(els[0], els.slice(1)));
 });
@@ -2050,6 +2059,7 @@ function endReading(){
   if(mode==='day') dayDone=true;
   spread?.carousel?.arm?.kill();
   spread=null; fan.classList.remove('carousel'); document.body.classList.remove('car-open', 'car-leaf', 'car-ready', 'spread-row', 'tape-period');
+  syncSpreadCue();
   phoneDeckChalk(true); fan.querySelectorAll('.spread-cap, .pick-list').forEach(e=>e.remove());
   setAskSub(); showStart(true);
 }

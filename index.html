@@ -19,7 +19,7 @@
 <meta name="theme-color" content="#0c0303">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;1,300;1,500&family=IBM+Plex+Mono:wght@400;500&family=Montserrat:wght@600&family=Oswald:wght@500;700&family=Trispace:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-<link rel="stylesheet" href="style.css?v=116">
+<link rel="stylesheet" href="style.css?v=118">
 </head>
 <body class="noir intro">
 <div class="glow"></div>
@@ -29,8 +29,6 @@
 <div class="chalk" id="chalk" aria-hidden="true">
   <img id="chalkPlain" src="assets/SVG/contour%20without%20frame.svg?v=2" alt="">
   <img id="chalkFrame" src="assets/SVG/contour%20with%20frame.svg?v=2" alt="">
-  <img id="chalkLeft" class="chalk-half" src="assets/SVG/contour%20without%20frame.svg?v=2" alt="">
-  <img id="chalkRight" class="chalk-half" src="assets/SVG/contour%20without%20frame.svg?v=2" alt="">
 </div>
 
 <!-- splash: large logo → top-left, then crime-scene tape unrolls across the width -->
@@ -88,6 +86,7 @@
     </div>
     <p class="summary" id="fSummary" hidden></p>
     <p id="fDeck"></p>
+    <button type="button" class="spread-back" id="spreadBack" data-i18n="spreadBack">Посмотреть значение расклада</button>
     <div class="finale-row">
       <a class="cta" id="etsyBtn" target="_blank" rel="noopener" data-i18n="etsy">Колода на Etsy</a>
       <span class="row-break"></span>
@@ -101,6 +100,6 @@
 </div>
 <div class="rotate-note"><span class="rot-ic">↻</span><span data-i18n="rotate">Поверни телефон вертикально</span></div>
 
-<script src="app.js?v=149"></script>
+<script src="app.js?v=151"></script>
 </body>
 </html>

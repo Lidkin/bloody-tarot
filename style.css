@@ -28,7 +28,6 @@ canvas#dust{position:fixed; inset:0; z-index:1; pointer-events:none;}
   background:radial-gradient(ellipse at 50% 45%, transparent 30%, rgba(0,0,0,.75) 100%);}
 /* chalk body behind the deck. the drawings are already transparent, so the white line sits on the velvet */
 .chalk{display:none;}
-.chalk-half{display:none;}
 @media (hover:hover) and (pointer:fine){
   .chalk{display:block; position:fixed; inset:0; z-index:1; pointer-events:none;}
   .chalk img{position:absolute; left:50%; top:50%; width:min(92vw, 1120px); opacity:0;
@@ -458,14 +457,11 @@ body.intro-done .intro-brand{transition:opacity .5s ease-in-out;}
   .chalk{display:block; position:fixed; inset:0; z-index:1; pointer-events:none;
     opacity:0; visibility:hidden; transition:opacity .5s ease, visibility 0s linear .5s;}
   body.deck-home .chalk{opacity:1; visibility:visible; transition:opacity .5s ease, visibility 0s;}
-  #chalkFrame, #chalkPlain{display:none;}
-  /* the figure is split down the middle: its right half comes in from the left edge, its left half from the right */
-  .chalk-half{display:block; position:absolute; left:50%; top:46%; width:min(68vh, 520px); width:min(68dvh, 520px);
-    opacity:.28; transform-origin:50% 50%; user-select:none; -webkit-user-drag:none;}
-  #chalkLeft{clip-path:inset(0 0 50% 0);
-    transform:translate(calc(-50% + var(--x, 0px)), -50%) rotate(-90deg);}
-  #chalkRight{clip-path:inset(50% 0 0 0);
-    transform:translate(calc(-50% + var(--x, 0px)), -50%) rotate(-90deg);}
+  #chalkFrame{display:none;}
+  /* one figure, head up, centred on the deck: the cards cover the torso, the head and the feet stay visible */
+  #chalkPlain{position:absolute; left:50%; top:46%; width:min(68vh, 520px); width:min(68dvh, 520px); opacity:.2;
+    transform:translate(-50%, -50%) rotate(-90deg); transform-origin:50% 50%;
+    user-select:none; -webkit-user-drag:none;}
   body.intro .intro-logo{opacity:0;}
   body.intro .intro-tape-wrap{opacity:0;}
   body.intro-done .intro-logo{display:none;}
@@ -559,6 +555,14 @@ body.intro-done .intro-brand{transition:opacity .5s ease-in-out;}
     padding:0 20px; margin:14px 0 0;
     font-family:'Cormorant Garamond',Georgia,serif; font-weight:300; font-style:italic; letter-spacing:0;
     font-size:clamp(18px, 1.3889vw, 22px); color:var(--muted); opacity:.8;}
+  #finale #spreadBack{order:2; position:relative; display:none; width:fit-content; max-width:calc(100% - 32px);
+    margin:16px auto 0; padding:6px 2px 9px; background:none; border:none; color:var(--accent);
+    font-family:'Oswald',sans-serif; font-weight:500; font-size:16px; letter-spacing:0; line-height:1.25;
+    text-align:center; text-transform:uppercase;}
+  body.car-open.car-leaf #finale #fDeck{display:none;}
+  body.car-open.car-leaf #finale #spreadBack{display:block;}
+  #finale #spreadBack::after{content:''; position:absolute; left:0; right:0; bottom:2px; height:1px;
+    background:var(--red); transform:scaleY(.5); transform-origin:bottom center;}
   /* the spread's own paragraph, in the card text's face, between two hairlines */
   body.car-open #fSummary{position:relative; font-style:normal; padding:14px 20px;}
   body.car-open #fSummary::before,
