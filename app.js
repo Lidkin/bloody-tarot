@@ -1188,16 +1188,35 @@ function setTapePeriod(text){
   document.fonts.load('600 16px Montserrat').then(()=>{ if(lab.textContent===text) fit(); });
   document.body.classList.add('tape-period');
 }
+// The open-card sheet is the new page. The moment its class goes, the old finish row,
+// the old caption and the old panel place are what the fade would show. Hide first.
+function concealSheet(){
+  meaningPanel.style.transition=finale.style.transition=cardHead.style.transition='none';
+  meaningPanel.style.opacity=finale.style.opacity=cardHead.style.opacity='0';
+}
+// The panels stay at opacity 0, with no transition, until the next screen shows them.
+// Clearing it here would let the old finish row fade out after the sheet class has gone.
+function unveilSheet(){
+  void meaningPanel.offsetWidth;
+  queueMicrotask(()=>{ cardHead.style.transition=cardHead.style.opacity=''; });
+}
+function unlockFade(el){
+  el.style.transition='';
+  el.style.opacity='';
+}
 // "Далее": desktop - the open card lies back face up just out of its arc slot and the next one opens;
 // phones - it is put away off the screen, the deck comes back out of the dark and the next one is drawn
 function nextSpreadCard(){
   busy=true; const el=activeCard, s=el._state, render=()=>renderCard(el,s);
   // the sheet drops its day-card layout the moment it closes; hide it first so that snap is not seen
   const sheet=document.body.classList.contains('step-open');
+  const phone=!isDesktop() && document.body.classList.contains('day-open');
   if(sheet){ meaningPanel.style.transition='none'; meaningPanel.style.opacity='0'; }
+  if(phone) concealSheet();
   meaningPanel.classList.remove('show'); hideBigName();
   el.classList.remove('lit');
   if(sheet){ void meaningPanel.offsetWidth; meaningPanel.style.transition=meaningPanel.style.opacity=''; }
+  if(phone) unveilSheet();
   gsap.killTweensOf(s);
   if(!el._fromDeck){
     setDim(1, el);
@@ -1223,9 +1242,12 @@ function nextSpreadCard(){
 function showSpreadSummary(){
   busy=true; const el=activeCard, els=spread.cards;
   const sheet=isDesktop() && !el._fromDeck && document.body.classList.contains('day-open');
+  const phone=!isDesktop() && document.body.classList.contains('day-open');
   if(sheet){ meaningPanel.style.transition='none'; meaningPanel.style.opacity='0'; }
+  if(phone) concealSheet();
   meaningPanel.classList.remove('show'); hideBigName(); setTapePeriod(''); el.classList.remove('lit');
   if(sheet){ void meaningPanel.offsetWidth; meaningPanel.style.transition=meaningPanel.style.opacity=''; }
+  if(phone) unveilSheet();
   if(sheet) document.body.classList.add('spread-row');
   setFinale(els);
   if(el._fromDeck){ showCarousel(); return; }
@@ -1252,7 +1274,7 @@ function showSpreadSummary(){
     const capH=Math.max(...spread.caps.map(c=>c.offsetHeight));
     spread.caps.forEach(c=>c.style.height=capH+'px');
   }
-  gsap.delayedCall(1.2, ()=>{ spread.summary=true; showCaps(true); finale.classList.add('show'); busy=false; });
+  gsap.delayedCall(1.2, ()=>{ spread.summary=true; showCaps(true); unlockFade(finale); finale.classList.add('show'); busy=false; });
 }
 // phones: the three cards lie face up in a stack the size of the card just read, the past on top.
 // At first the words under it are the spread's. A couple of seconds later the arrows come, and a swipe
@@ -1285,7 +1307,7 @@ function showCarousel(){
   fan.classList.add('carousel'); placeCarArrows();
   gsap.delayedCall(1.4, ()=>{
     if(!spread?.carousel) return;
-    spread.summary=true; finale.classList.add('show'); busy=false;
+    spread.summary=true; unlockFade(finale); finale.classList.add('show'); busy=false;
     spread.cards.forEach(c=>c._state && renderCard(c, c._state));
     spread.carousel.arm=gsap.delayedCall(2*gsap.globalTimeline.timeScale(), ()=>{
       if(!spread?.carousel || !document.body.classList.contains('car-open')) return;
@@ -1501,7 +1523,7 @@ const isDesktop=()=>matchMedia('(hover:hover) and (pointer:fine)').matches;
 function onCardOpened(el){
   setEndRow(spread && spread.i<POSITIONS.length-1);
   if(spread && !el._fromDeck) setDim(2, el);
-  meaningPanel.classList.add('show'); busy=false;
+  unlockFade(meaningPanel); meaningPanel.classList.add('show'); busy=false;
   if(el._state) renderCard(el, el._state);
   inkReveal(document.getElementById('mName'), {delay:.3});
   const quoteEl=document.body.classList.contains('day-open') ? document.getElementById('mQuote') : document.getElementById('mTitle');
@@ -1764,7 +1786,7 @@ document.getElementById('finishBtn').addEventListener('click', e=>{
     setFinale([el]);
     meaningPanel.querySelector('.meaning-end').hidden=true;
     document.body.classList.add('day-done');
-    finale.classList.add('show');
+    unlockFade(finale); finale.classList.add('show');
     meaningPanel.style.top=box.top+'px';
     meaningPanel.style.bottom='auto';
     finale.style.top=(text.getBoundingClientRect().bottom+16)+'px';
@@ -1774,14 +1796,16 @@ document.getElementById('finishBtn').addEventListener('click', e=>{
     return;
   }
   busy=true; const el=activeCard, s=el._state;
+  concealSheet();
   meaningPanel.classList.remove('show');
   document.body.classList.remove('day-open');
+  unveilSheet();
   setFinale([el]);
   hideBigName();
   const pose=fitAbove(finale);
   gsap.killTweensOf(s);
   gsap.to(s,{...pose, duration:.7, ease:'power2.inOut', onUpdate:()=>renderCard(el,s),
-    onComplete:()=>{ finale.classList.add('show'); busy=false; showShowcase(el); }});
+    onComplete:()=>{ unlockFade(finale); finale.classList.add('show'); busy=false; showShowcase(el); }});
 });
 document.getElementById('shareBtn').addEventListener('click', shareStory);
 // the closing screen speaks of one card or of the whole spread
@@ -1853,19 +1877,24 @@ document.getElementById('gatherBtn').addEventListener('click', ()=>{
   busy=true; const el=activeCard;
   // the closing row and the description fade on a delay; dropping the day-card layout first
   // would show the old finish button for that whole delay. Hide both before the layout returns.
+  const phoneLeave=!isDesktop() && (document.body.classList.contains('day-open') || document.body.classList.contains('car-open') || document.body.classList.contains('card-open') || finale.classList.contains('show') || meaningPanel.classList.contains('show'));
+  if(phoneLeave) concealSheet();
   if(document.body.classList.contains('day-done')){
     meaningPanel.style.transition=finale.style.transition='none';
     meaningPanel.style.opacity=finale.style.opacity='0';
   }
   finale.classList.remove('show'); hideBigName();
   meaningPanel.classList.remove('show');
-  void meaningPanel.offsetWidth;
-  meaningPanel.style.transition=finale.style.transition='';
-  meaningPanel.style.opacity=finale.style.opacity='';
+  if(!phoneLeave){
+    void meaningPanel.offsetWidth;
+    meaningPanel.style.transition=finale.style.transition='';
+    meaningPanel.style.opacity=finale.style.opacity='';
+  }
   el.classList.remove('lit');
   const els=spread ? spread.cards : [el];
   els.forEach(c=>c.classList.remove('lit'));
   showCaps(false); document.body.classList.remove('car-open', 'car-leaf', 'car-ready');
+  if(phoneLeave) queueMicrotask(()=>{ cardHead.style.transition=cardHead.style.opacity=''; });
   hideShowcase(()=>el._fromDeck ? tuckUnderDeck(els, endReading) : gatherDeck(els[0], els.slice(1)));
 });
 // portrait phones: the card of the day turns face down and goes to the bottom of the deck it was drawn
