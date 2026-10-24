@@ -754,9 +754,12 @@ function renderCard(el, s){
   const lw=exact ? s.w : Math.max(8, Math.pow(1.25, Math.ceil(Math.log(s.w)/Math.log(1.25)))), k=exact ? 1 : s.w/lw;
   if(el._lw!==lw){ el._lw=lw; el.style.setProperty('--cw', lw+'px'); el.style.setProperty('--ch', lw*s.h/s.w+'px'); }
   const up=s.ry>1; if(el._up!==up){ el._up=up; el.classList.toggle('up', up); }
+  // once a phone card has stopped face up, drop the 3D turn. That layer is what was left soft after the size settled.
+  const flat=!isDesktop() && exact && !tilted;
+  el.classList.toggle('flat', flat);
   el.style.transform=`translate3d(${s.x}px,${s.y}px,0) rotate(${s.rot}deg)`+(tilted ? ` perspective(${s.h*3}px) rotateX(${tx}deg) rotateY(${ty}deg)` : '')+
     (k!==1 ? ` scale(${k.toFixed(5)})` : '');
-  el.firstElementChild.style.transform=`perspective(${s.h*4}px) rotateY(${s.ry}deg)`;
+  el.firstElementChild.style.transform=flat ? 'none' : `perspective(${s.h*4}px) rotateY(${s.ry}deg)`;
   // the thickness of a face-up card: its paper edge shows on the sides tilted towards the viewer,
   // and a little along the bottom even when it lies flat, as if seen from slightly above
   const front=el.querySelector('.face.front');
@@ -888,6 +891,11 @@ new MutationObserver(()=>{
     const end=meaningPanel.querySelector('.meaning-end'); if(end) end.hidden=false;
   }
 }).observe(meaningPanel, {attributes:true, attributeFilter:['class']});
+// the printed face is 520px across. Past the screen's own pixels the line art goes soft, so a phone card stops there.
+function phoneCardW(w){
+  const face=520*(CUT.w/CUT.fileW);
+  return Math.min(w, face/(window.devicePixelRatio||1));
+}
 // pose of a face-up card that, together with `panel` right under it, fits the viewport minus FIT_MARGIN
 function fitAbove(panel){
   const GAP=16, panelH=panel.offsetHeight, ASPECT=CARD_ASPECT;
@@ -903,7 +911,8 @@ function fitAbove(panel){
       const panelTop=panel.getBoundingClientRect().top;
       const space=panelTop-12-minTop;
       const room=space-nameH-nameGap;
-      const h=Math.min(Math.max(room, 96), availW/ASPECT), w=h*ASPECT;
+      let h=Math.min(Math.max(room, 96), availW/ASPECT), w=h*ASPECT;
+      w=phoneCardW(w); h=w/ASPECT;
       const top=minTop+Math.max(0, (space-(nameH+nameGap+h))/2);
       cardHead.style.top=top+'px';
       const cardTop=top+nameH+nameGap;
@@ -911,7 +920,9 @@ function fitAbove(panel){
     }
     if(panel===finale){
       const minTop=18;
-      const room=panel.getBoundingClientRect().top-GAP-minTop, h=Math.min(room, availW/ASPECT), w=h*ASPECT;
+      const room=panel.getBoundingClientRect().top-GAP-minTop;
+      let h=Math.min(room, availW/ASPECT), w=h*ASPECT;
+      w=phoneCardW(w); h=w/ASPECT;
       return {x:innerWidth/2, y:minTop+room/2, rot:0, w, h, ry:180, tx:0, ty:0};
     }
   }
@@ -1335,6 +1346,31 @@ function placeStack(withCaption){
 }
 carPrev.addEventListener('click', ()=>spread?.carousel && turnStack(-1));
 carNext.addEventListener('click', ()=>spread?.carousel && turnStack(1));
+// a tap on the card's name puts the spread's own paragraph back and lets the name go
+cardHead.addEventListener('click', ()=>{
+  if(busy || isDesktop() || !spread?.carousel || !document.body.classList.contains('car-leaf')) return;
+  busy=true;
+  const sum=document.getElementById('fSummary');
+  gsap.killTweensOf([cardHead, fCard, sum]);
+  gsap.to([cardHead, fCard],{opacity:0, duration:.3, onComplete:()=>{
+    document.body.classList.remove('car-leaf');
+    cardHead.style.opacity='';
+    sum.hidden=false;
+    sum.textContent=spreadSummary(spread.cards);
+    sum.classList.remove('card-text');
+    fCard.hidden=true;
+    gsap.set(sum,{opacity:0});
+    placeStack(false);
+    spread.carousel.order.forEach((k,d)=>{
+      const o=spread.cards[k], os=o._state;
+      gsap.to(os,{...stackPose(d), duration:.55, ease:'power2.inOut', onUpdate:()=>renderCard(o,os)});
+    });
+    gsap.to(sum,{opacity:1, duration:.4, delay:.12, onComplete:()=>{
+      busy=false;
+      spread.cards.forEach(c=>c._state && renderCard(c, c._state));
+    }});
+  }});
+});
 // once, as the stack is laid out, its top card slides a little aside and back: the cards can be turned
 function peekStack(){
   const C=spread?.carousel; if(!C || busy) return;
@@ -1798,7 +1834,7 @@ document.getElementById('finishBtn').addEventListener('click', e=>{
   const pose=fitAbove(finale);
   gsap.killTweensOf(s);
   gsap.to(s,{...pose, duration:.7, ease:'power2.inOut', onUpdate:()=>renderCard(el,s),
-    onComplete:()=>{ unlockFade(finale); finale.classList.add('show'); busy=false; showShowcase(el); }});
+    onComplete:()=>{ unlockFade(finale); finale.classList.add('show'); busy=false; renderCard(el, el._state); showShowcase(el); }});
 });
 document.getElementById('shareBtn').addEventListener('click', shareStory);
 // the closing screen speaks of one card or of the whole spread
@@ -1839,6 +1875,16 @@ function setFinale(els){
     sum.textContent=spreadSummary(els); sum.style.minHeight=Math.max(...h)+'px';
   }
   fCard.hidden=true;
+  fitFinaleRow();
+}
+// three labels share one line, as on the desktop. The long shop label drops under the other two.
+function fitFinaleRow(){
+  const row=document.querySelector('.finale-row');
+  if(isDesktop()){ row.classList.remove('shop-below'); return; }
+  row.classList.remove('shop-below');
+  const btns=['shareBtn','etsyBtn','gatherBtn'].map(id=>document.getElementById(id)).filter(el=>!el.hidden);
+  const need=btns.reduce((w,el)=>w+el.scrollWidth,0)+6*(btns.length-1)+8;
+  row.classList.toggle('shop-below', need>innerWidth);
 }
 
 // "Новое гадание": the card goes back where it came from - into its arc slot, or onto the deck on phones
