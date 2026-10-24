@@ -512,6 +512,7 @@ function drawFromDeck(dip){
 }
 // the reverse; the deck then settles and the ask button comes back for the next reading (or `onBack` runs)
 function returnToDeck(el, onBack){
+  document.body.classList.remove('card-held');
   const {topImg, dip, rest}=el._fromDeck, s=el._state, render=()=>renderCard(el,s);
   gsap.killTweensOf(s);
   setDim(0); gsap.to(deckStack,{opacity:1, duration:.8});
@@ -1688,6 +1689,7 @@ document.getElementById('finishBtn').addEventListener('click', e=>{
     return;
   }
   busy=true; const el=activeCard, s=el._state;
+  document.body.classList.add('card-held');
   meaningPanel.classList.remove('show');
   document.body.classList.remove('day-open');
   setFinale([el]);
@@ -1772,6 +1774,7 @@ document.getElementById('gatherBtn').addEventListener('click', ()=>{
     meaningPanel.style.opacity=finale.style.opacity='0';
   }
   finale.classList.remove('show'); hideBigName();
+  document.body.classList.remove('card-held');
   meaningPanel.classList.remove('show');
   void meaningPanel.offsetWidth;
   meaningPanel.style.transition=finale.style.transition='';
@@ -1879,7 +1882,7 @@ function flyHome(el){
 // the deck is back on the velvet: after the card of the day the time left until the next one is shown
 function endReading(){
   if(mode==='day') dayDone=true;
-  spread=null; fan.classList.remove('carousel'); document.body.classList.remove('car-open', 'spread-row', 'tape-period'); fan.querySelectorAll('.spread-cap, .pick-list').forEach(e=>e.remove());
+  spread=null; fan.classList.remove('carousel'); document.body.classList.remove('car-open', 'spread-row', 'tape-period', 'card-held'); fan.querySelectorAll('.spread-cap, .pick-list').forEach(e=>e.remove());
   setAskSub(); showStart(true);
 }
 // once the card of the day is drawn, the line under the options counts down to the next one, at local
@@ -2177,10 +2180,12 @@ async function phoneSplash(){
     const p=100*(innerWidth/2-L-redFrac*hostW)/hostW;
     gsap.set(tapeHost,{xPercent:p});
   };
+  const opening=document.getElementById('opening'), title=document.querySelector('h1.title');
   const done=()=>{
     document.body.classList.remove('intro');
     document.body.classList.add('intro-done');
     gsap.set(logo,{opacity:0});
+    gsap.set([opening, langSwitch, title].filter(Boolean),{clearProps:'opacity'});
     layer?.setAttribute('aria-hidden','true');
     requestAnimationFrame(()=>{ placeTape(); showStart(true); });
     addEventListener('resize', placeTape);
@@ -2188,13 +2193,18 @@ async function phoneSplash(){
   if(matchMedia('(prefers-reduced-motion: reduce)').matches){ done(); return; }
   gsap.set(logo,{opacity:0});
   gsap.timeline({onComplete:done})
-    .to(logo,{opacity:1, duration:.55, ease:'power2.out'})
-    .to(logo,{opacity:0, duration:.4, ease:'power2.in'}, '+=.75');
+    .to(logo,{opacity:1, duration:.7, ease:'power2.out'})
+    // the logo dissolves, and the deck screen comes up underneath it
+    .to(logo,{opacity:0, duration:1.6, ease:'power1.inOut', onStart(){
+      gsap.set([opening, langSwitch, title].filter(Boolean),{opacity:0});
+      document.body.classList.remove('intro');
+    }}, '+=.8')
+    .to(opening,{opacity:1, duration:1.6, ease:'power1.inOut', immediateRender:false}, '<');
 }
 
 /* ---------- intro: large logo → top-left, tape slides until a label hits center, then swaps ---------- */
 (async function runIntro(){
-  // phones: logo first, then the deck. The tape stays, with the words centered. No chalk, no corner logo.
+  // phones: logo first, then it dissolves into the deck. The tape stays, with the words centered.
   if(!isDesktop()){
     phoneSplash();
     return;
