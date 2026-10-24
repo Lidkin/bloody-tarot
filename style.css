@@ -396,7 +396,7 @@ body.car-open #fName{display:none;}
 .car-arrow{position:fixed; z-index:1200; transform:translate(-50%,-50%); background:none; border:none; padding:14px 12px;
   font-family:var(--head-font); font-weight:700; font-size:40px; line-height:1; color:var(--accent); opacity:0; pointer-events:none;
   text-shadow:0 0 10px rgba(0,0,0,.8); transition:opacity .5s ease-in-out, color .2s;}
-.fan.carousel ~ .finale.show ~ .car-arrow{opacity:.75; pointer-events:auto;}
+body.car-ready .fan.carousel ~ .finale.show ~ .car-arrow{opacity:.75; pointer-events:auto;}
 .car-arrow:active{color:var(--red); opacity:1 !important;}
 
 /* —— intro: logo lands top-left, crime-scene tape unrolls from it —— */
@@ -540,6 +540,12 @@ body.intro-done .intro-brand{transition:opacity .5s ease-in-out;}
   body.car-open .card-head h2{white-space:nowrap;}
   body.car-open .card-head .head-title{display:block; min-height:1.2em; margin-top:6px; white-space:nowrap;}
   body.car-open #fPos, body.car-open #fName, body.car-open #fTitle{display:none;}
+  /* the spread's own words stay until a card is turned; the caption waits in its place */
+  body.car-open:not(.car-leaf) .card-head{opacity:0;}
+  body.car-open #finale{left:0; right:0; bottom:calc(24px + env(safe-area-inset-bottom, 0px));
+    top:auto; transform:none; max-width:none; width:100%;}
+  body.car-open #finale p{max-width:none;}
+  body.car-open #fSummary, body.car-open #fText{width:100%; padding:0 20px; box-sizing:border-box; margin:0 0 16px;}
 }
 @media not all and (hover:hover) and (pointer:fine){
   html[lang=ru] .cap-pos, html[lang=ru] .meaning-panel .pos-label,

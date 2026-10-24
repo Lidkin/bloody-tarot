@@ -1251,31 +1251,44 @@ function showSpreadSummary(){
   }
   gsap.delayedCall(1.2, ()=>{ spread.summary=true; showCaps(true); finale.classList.add('show'); busy=false; });
 }
-// phones: the three cards lie face up in a small stack, the past on top; a swipe to the left (or a tap)
-// slides the top card out sideways until it is clear of the stack and tucks it in under it, a swipe to the
-// right pulls the bottom card out the other way and lays it on top - the description follows the top card
+// phones: the three cards lie face up in a stack the size of the card just read, the past on top.
+// At first the words under it are the spread's. A couple of seconds later the arrows come, and a swipe
+// to the left (or a tap) slides the top card out and tucks it under; a swipe to the right pulls the
+// bottom card out the other way. From the first turn, the card's own caption follows the top card.
 const fCard=document.getElementById('fCard');
 function showCarousel(){
-  const els=spread.cards;
-  fCard.hidden=false; document.body.classList.add('car-open');
+  const els=spread.cards, opened={w:activeCard._state.w, h:activeCard._state.h, x:activeCard._state.x, y:activeCard._state.y};
+  const sum=document.getElementById('fSummary');
+  document.body.classList.add('car-open');
+  document.body.classList.remove('car-leaf', 'car-ready');
   phoneDeckChalk(false);
-  cardHead.style.top='';
-  // the description block keeps the height of the longest one, so nothing moves as the cards change
-  fCard.style.minHeight='';
-  const hMax=Math.max(...els.map(c=>{ fillCarouselText(c); return fCard.offsetHeight; }));
-  fCard.style.minHeight=hMax+'px';
+  gsap.set([fCard, cardHead, sum],{clearProps:'opacity'});
+  // the card readings share one height, so the buttons stay put while the cards turn.
+  // the spread's own paragraph is left at its own height: it is on screen only before the first turn
+  fCard.hidden=false; fCard.style.minHeight=''; sum.style.minHeight='';
+  const readH=Math.max(0, ...els.map(c=>{ fillCarouselText(c); return fCard.offsetHeight; }));
+  fCard.style.minHeight=readH+'px';
+  fCard.hidden=true;
   fillCarouselText(els[0]);
-  spread.carousel={order:els.map((_,i)=>i), pose:fitAbove(finale)};
-  // they come back from where they were put away, the bottom of the stack first
+  spread.carousel={order:els.map((_,i)=>i), opened, pose:{x:innerWidth/2, y:0, rot:0, w:opened.w, h:opened.h, ry:180, tx:0, ty:0}, ready:false};
+  placeStack(false);
   els.forEach(c=>{ c.classList.remove('dim', 'away'); c.style.visibility=''; });
   spread.carousel.order.forEach((j,d)=>{
     const c=els[j], s=c._state; c.style.zIndex=1000-d;
     gsap.killTweensOf(s);
     gsap.to(s,{...stackPose(d), duration:1, delay:(els.length-1-d)*.15, ease:'power2.out', onUpdate:()=>renderCard(c,s)});
   });
-  fillCarouselText(els[0]); activeCard=els[0];
+  activeCard=els[0];
   fan.classList.add('carousel'); placeCarArrows();
-  gsap.delayedCall(1.4, ()=>{ spread.summary=true; finale.classList.add('show'); busy=false; gsap.delayedCall(.6, peekStack); });
+  gsap.delayedCall(1.4, ()=>{
+    if(!spread?.carousel) return;
+    spread.summary=true; finale.classList.add('show'); busy=false;
+    spread.carousel.arm=gsap.delayedCall(2*gsap.globalTimeline.timeScale(), ()=>{
+      if(!spread?.carousel || !document.body.classList.contains('car-open')) return;
+      spread.carousel.ready=true;
+      document.body.classList.add('car-ready');
+    });
+  });
 }
 // the arrows stand in the margins just beside the stack, level with its middle
 const carPrev=document.getElementById('carPrev'), carNext=document.getElementById('carNext');
@@ -1283,6 +1296,23 @@ function placeCarArrows(){
   const P=spread.carousel.pose, d=Math.min(P.w/2+46, innerWidth/2-22);
   carPrev.style.left=P.x-d+'px'; carNext.style.left=P.x+d+'px';
   carPrev.style.top=carNext.style.top=P.y+'px';
+}
+// the stack keeps the open card's size. Before the first turn it is centred above the spread's words;
+// after that the caption takes the top and the card sits under it
+function placeStack(withCaption){
+  const C=spread.carousel, P=C.pose, GAP=16;
+  const limit=finale.getBoundingClientRect().top-GAP;
+  let top=18, h=C.opened.h, w=C.opened.w;
+  if(withCaption){
+    const headH=Math.max(cardHead.offsetHeight, 24);
+    top=12+headH+14;
+  }
+  const room=limit-top;
+  if(h>room && room>120){ h=room; w=h*CARD_ASPECT; }
+  const cardTop=top+Math.max(0, room-h)/2;
+  P.w=w; P.h=h; P.x=innerWidth/2; P.y=cardTop+h/2;
+  if(withCaption) cardHead.style.top=(cardTop-14-cardHead.offsetHeight)+'px';
+  placeCarArrows();
 }
 carPrev.addEventListener('click', ()=>spread?.carousel && turnStack(-1));
 carNext.addEventListener('click', ()=>spread?.carousel && turnStack(1));
@@ -1314,22 +1344,35 @@ function fillCarouselText(el){
 }
 // dir 1: the top card goes under the stack; -1: the bottom card comes on top
 function turnStack(dir){
-  if(busy) return;
+  if(busy || !spread?.carousel?.ready) return;
   busy=true;
   const C=spread.carousel, els=spread.cards, n=C.order.length, P=C.pose;
   const j=dir>0 ? C.order[0] : C.order[n-1], c=els[j], s=c._state, render=()=>renderCard(c,s);
   C.order=dir>0 ? [...C.order.slice(1), j] : [j, ...C.order.slice(0, -1)];
   // far enough out that the tilted card clears the stack
   const out=(P.w*Math.cos(.14)+P.h*Math.sin(.14))/2+P.w/2+12, side=dir>0 ? -1 : 1;
-  const mName=document.getElementById('mName');
-  gsap.to([fCard, mName],{opacity:0, duration:.3});
+  const sum=document.getElementById('fSummary');
+  cardHead.style.transition='none';
+  gsap.to([cardHead, sum],{opacity:0, duration:.3});
+  if(!fCard.hidden) gsap.to(fCard,{opacity:0, duration:.3});
   gsap.killTweensOf(s);
   gsap.timeline({onComplete:()=>{
       activeCard=els[C.order[0]]; fillCarouselText(activeCard);
-      gsap.to([fCard, mName],{opacity:1, duration:.4}); busy=false;
+      document.body.classList.add('car-leaf');
+      fCard.hidden=false; sum.hidden=true;
+      gsap.set([fCard, cardHead],{opacity:0});
+      gsap.to([fCard, cardHead],{opacity:1, duration:.4, onComplete:()=>{ cardHead.style.transition=''; }});
+      busy=false;
     }})
     .to(s,{x:P.x+side*out, y:P.y-6, rot:side*8, duration:.5, ease:'power2.inOut', onUpdate:render})
     .call(()=>{
+      // the first turn swaps the spread's words for this card's caption, and the stack drops under it
+      if(!document.body.classList.contains('car-leaf')){
+        fillCarouselText(els[C.order[0]]);
+        document.body.classList.add('car-leaf');
+        fCard.hidden=false; sum.hidden=true;
+        placeStack(true);
+      }
       // clear of the stack now: it changes sides with no jump, and the others settle into their new depths
       C.order.forEach((k,d)=>{
         els[k].style.zIndex=1000-d;
@@ -1338,7 +1381,9 @@ function turnStack(dir){
         gsap.to(os,{...stackPose(d), duration:.5, ease:'power2.inOut', onUpdate:()=>renderCard(o,os)});
       });
     })
-    .to(s,{...stackPose(C.order.indexOf(j)), duration:.5, ease:'power2.inOut', onUpdate:render});
+    .to(s,{duration:.5, ease:'power2.inOut', onUpdate:render,
+      x:()=>stackPose(C.order.indexOf(j)).x, y:()=>stackPose(C.order.indexOf(j)).y,
+      rot:()=>stackPose(C.order.indexOf(j)).rot, w:()=>P.w, h:()=>P.h, ry:180, tx:0, ty:0});
 }
 let swipeX=null;
 fan.addEventListener('pointerdown', e=>{ if(spread?.carousel) swipeX=e.clientX; });
@@ -1815,7 +1860,7 @@ document.getElementById('gatherBtn').addEventListener('click', ()=>{
   el.classList.remove('lit');
   const els=spread ? spread.cards : [el];
   els.forEach(c=>c.classList.remove('lit'));
-  showCaps(false); document.body.classList.remove('car-open');
+  showCaps(false); document.body.classList.remove('car-open', 'car-leaf', 'car-ready');
   hideShowcase(()=>el._fromDeck ? tuckUnderDeck(els, endReading) : gatherDeck(els[0], els.slice(1)));
 });
 // portrait phones: the card of the day turns face down and goes to the bottom of the deck it was drawn
@@ -1916,7 +1961,8 @@ function flyHome(el){
 // the deck is back on the velvet: after the card of the day the time left until the next one is shown
 function endReading(){
   if(mode==='day') dayDone=true;
-  spread=null; fan.classList.remove('carousel'); document.body.classList.remove('car-open', 'spread-row', 'tape-period');
+  spread?.carousel?.arm?.kill();
+  spread=null; fan.classList.remove('carousel'); document.body.classList.remove('car-open', 'car-leaf', 'car-ready', 'spread-row', 'tape-period');
   phoneDeckChalk(true); fan.querySelectorAll('.spread-cap, .pick-list').forEach(e=>e.remove());
   setAskSub(); showStart(true);
 }
