@@ -547,18 +547,9 @@ body.intro-done .intro-brand{transition:opacity .5s ease-in-out;}
   #finale .finale-row .link-btn{white-space:nowrap;}
   #finale .finale-row .return-btn{order:0; justify-self:end; padding:9px 10px;}
   #finale .finale-row .cta{order:1; justify-self:center;}
-  #finale .finale-row .link-btn{order:2; justify-self:start; position:relative; padding:9px 2px;
-    animation:gatherFlicker 2.6s ease-in-out infinite;}
+  #finale .finale-row .link-btn{order:2; justify-self:start; position:relative; padding:9px 2px;}
   #finale .finale-row .link-btn::after{content:''; position:absolute; left:0; right:0; bottom:1px; height:1px;
-    background:var(--red); transform:scaleY(.5); transform-origin:bottom center;
-    animation:gatherLine 2.6s ease-in-out infinite;}
-  /* the letters stay put; the glow and the red line breathe, the way a light flickers */
-  @keyframes gatherFlicker{
-    0%, 100%{text-shadow:0 0 8px rgba(228,36,35,.25);}
-    38%{text-shadow:0 0 12px rgba(242,239,234,.85), 0 0 22px rgba(228,36,35,.75);}
-    58%{text-shadow:0 0 4px rgba(228,36,35,.12);}
-    76%{text-shadow:0 0 16px rgba(242,239,234,.7), 0 0 28px rgba(228,36,35,.85);}}
-  @keyframes gatherLine{0%, 100%{opacity:.3;} 38%{opacity:1;} 58%{opacity:.15;} 76%{opacity:.9;}}
+    background:var(--red); transform:scaleY(.5); transform-origin:bottom center;}
   /* the long shop label cannot share the line; it drops under the other two, still above the deck line */
   #finale .finale-row.shop-below{display:flex; flex-wrap:wrap; justify-content:center; column-gap:22px; row-gap:12px;}
   #finale .finale-row.shop-below .return-btn{order:1;}
