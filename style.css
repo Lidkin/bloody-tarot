@@ -289,6 +289,9 @@ body.noir .cta{background:none; color:var(--red); box-shadow:none;}
 .finale-row .cta{order:-2;}
 .finale-row .row-break{order:-1; flex-basis:100%; height:14px;}
 .finale #fDeck{margin-bottom:14px;}
+/* the return line is a phone-only inscription; on the desktop it stays out of the row */
+#spreadBack{display:none;}
+.finale-cue{display:contents;}
 @media (hover:hover) and (pointer:fine) and (min-width:760px){
   .finale{max-width:760px;}
   .finale .summary{max-width:640px;}
@@ -543,18 +546,19 @@ body.intro-done .intro-brand{transition:opacity .5s ease-in-out;}
   #finale .finale-row.shop-below .return-btn{order:1;}
   #finale .finale-row.shop-below .link-btn{order:2;}
   #finale .finale-row.shop-below .cta{order:3; flex-basis:100%;}
-  #finale #fDeck{order:2; display:block; max-width:none; white-space:normal; width:100%; box-sizing:border-box;
-    padding:0 20px; margin:14px 0 0;
+  /* the deck line keeps its height while a card is open, so the buttons above it do not move */
+  #finale .finale-cue{display:block; order:2; position:relative; width:100%; margin:14px 0 0;}
+  #finale #fDeck{display:block; max-width:none; white-space:normal; width:100%; box-sizing:border-box;
+    padding:0 20px; margin:0;
     font-family:'Cormorant Garamond',Georgia,serif; font-weight:300; font-style:italic; letter-spacing:0;
     font-size:clamp(18px, 1.3889vw, 22px); color:var(--muted); opacity:.8;}
-  #finale #spreadBack{order:2; position:relative; display:none; width:fit-content; max-width:calc(100% - 32px);
-    margin:16px auto 0; padding:6px 2px 9px; background:none; border:none; color:var(--accent);
-    font-family:'Oswald',sans-serif; font-weight:500; font-size:16px; letter-spacing:0; line-height:1.25;
-    text-align:center; text-transform:uppercase;}
-  body.car-open.car-leaf #finale #fDeck{display:none;}
+  #finale #spreadBack{position:absolute; left:0; right:0; top:0; display:none; width:100%; margin:0; padding:0 20px;
+    background:none; border:none; box-shadow:none; appearance:none; -webkit-appearance:none;
+    color:var(--accent); font-family:'Cormorant Garamond',Georgia,serif; font-weight:300; font-style:italic;
+    font-size:clamp(18px, 1.3889vw, 22px); letter-spacing:0; line-height:1.45; text-align:center; text-transform:none;
+    cursor:pointer;}
+  body.car-open.car-leaf #finale #fDeck{visibility:hidden;}
   body.car-open.car-leaf #finale #spreadBack{display:block;}
-  #finale #spreadBack::after{content:''; position:absolute; left:0; right:0; bottom:2px; height:1px;
-    background:var(--red); transform:scaleY(.5); transform-origin:bottom center;}
   /* the spread's own paragraph, in the card text's face, between two hairlines */
   body.car-open #fSummary{position:relative; font-style:normal; padding:14px 20px;}
   body.car-open #fSummary::before,
