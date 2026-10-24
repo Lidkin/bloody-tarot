@@ -472,9 +472,7 @@ body.intro-done .intro-brand{transition:opacity .5s ease-in-out;}
   body.tape-grow .intro-tape-wrap,
   body.intro-done .intro-tape-wrap{
     position:fixed; left:0; top:env(safe-area-inset-top, 0px);
-    width:100vw; height:32px; transform:none; overflow:hidden; z-index:42;}
-  body.card-open .intro-tape-wrap,
-  body.car-open .intro-tape-wrap{opacity:0; transition:opacity .5s ease;}
+    width:100vw; height:24px; transform:none; overflow:hidden; z-index:42;}
   #opening{padding-top:calc(40px + env(safe-area-inset-top, 0px));
     padding-bottom:calc(24px + 16px + 16px + 28px + env(safe-area-inset-bottom, 0px));
     box-sizing:border-box;}
@@ -486,11 +484,11 @@ body.intro-done .intro-brand{transition:opacity .5s ease-in-out;}
   .ask-sub .cd-row{position:absolute; left:50%; top:0; transform:translateX(-50%); margin:0;}
   .whisper{position:absolute; left:0; right:0; margin-top:0;
     bottom:calc(18px + env(safe-area-inset-bottom, 0px));}
-  .lang-switch{width:28px; height:28px; z-index:44;
-    top:calc(env(safe-area-inset-top, 0px) + 2px);
+  .lang-switch{width:22px; height:22px; z-index:44;
+    top:calc(env(safe-area-inset-top, 0px) + 1px);
     right:calc(8px + env(safe-area-inset-right, 0px));
-    font-size:11px; font-weight:700; letter-spacing:.04em; line-height:1;}
-  .lang-switch button{width:28px; height:28px; margin:0; padding:0; border-radius:50%;
+    font-size:10px; font-weight:700; letter-spacing:.04em; line-height:1;}
+  .lang-switch button{width:22px; height:22px; margin:0; padding:0; border-radius:50%;
     background:#0d0000; border:none; color:var(--red);
     font:inherit; letter-spacing:inherit; display:flex; align-items:center; justify-content:center; box-shadow:none;}
   h1.title{opacity:0 !important; pointer-events:none;}

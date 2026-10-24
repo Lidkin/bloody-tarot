@@ -237,7 +237,7 @@ en:{title:'Tarot by Lidiia Khait', whisper:'want to know?',
   next:'Next', finish:'Finish', nowYouKnow:'now you know',
   deckOne:'This card comes from the <b>Bloody Feast Tarot</b> deck: all 78 cards with original artwork in a printable file on Etsy.',
   deckMany:'These cards come from the <b>Bloody Feast Tarot</b> deck: all 78 cards with original artwork in a printable file on Etsy.',
-  etsy:'Buy the deck', etsyPrint:'Printable deck · buy on Etsy', rotate:'Turn your phone upright', touchDeck:'touch the deck', heading:'Bloody Feast Tarot deck by Lidiia Khait', share:'Share', gather:'Gather the deck', onceMore:'Once more',
+  etsy:'Buy the deck', etsyPrint:'Printable deck · buy on Etsy', rotate:'Turn your phone upright', touchDeck:'touch the deck', heading:'Bloody Feast Tarot deck by Lidiia Khait', share:'Share', gather:'Gather deck', onceMore:'Once more',
   again:'↺ New reading', saved:'Image saved — you can post it to your story',
   storyDay:'CARD OF THE DAY', storyThree:'THREE CARDS', storyAsk:'WHAT WILL YOU DRAW?',
   shareDay:name=>`My card of the day: ${name}.`, shareSpreadText:list=>`My spread: ${list}.`,
@@ -400,6 +400,11 @@ function showChalk(on){
 }
 // phones: the outline sits behind the deck, and leaves once a card turns face up.
 // it is centred in the band between the tape and the buttons, the same gap above and below
+function phoneTapeBottom(){
+  const tape=document.getElementById('introTapeWrap');
+  const b=tape ? tape.getBoundingClientRect().bottom : 0;
+  return Math.max(24, Math.round(b));
+}
 function placePhoneChalk(){
   if(isDesktop()) return;
   const img=document.getElementById('chalkPlain');
@@ -903,7 +908,7 @@ function fitAbove(panel){
       panel.style.bottom='calc(24px + env(safe-area-inset-bottom, 0px))';
       panel.style.left='0'; panel.style.right='0'; panel.style.width='100%';
       panel.style.maxWidth='none'; panel.style.transform='none';
-      const nameGap=14, minTop=12, nameH=Math.max(cardHead.offsetHeight, 24);
+      const nameGap=14, minTop=phoneTapeBottom()+8, nameH=Math.max(cardHead.offsetHeight, 24);
       const panelTop=panel.getBoundingClientRect().top;
       const space=panelTop-12-minTop;
       const room=space-nameH-nameGap;
@@ -914,7 +919,7 @@ function fitAbove(panel){
       return {x:innerWidth/2, y:cardTop+h/2, rot:0, w, h, ry:180, tx:0, ty:0};
     }
     if(panel===finale){
-      const minTop=18;
+      const minTop=phoneTapeBottom()+8;
       const room=panel.getBoundingClientRect().top-GAP-minTop, h=Math.min(room, availW/ASPECT), w=h*ASPECT;
       return {x:innerWidth/2, y:minTop+room/2, rot:0, w, h, ry:180, tx:0, ty:0};
     }
@@ -1320,15 +1325,20 @@ function placeCarArrows(){
   carPrev.style.left=P.x-d+'px'; carNext.style.left=P.x+d+'px';
   carPrev.style.top=carNext.style.top=P.y+'px';
 }
-// the stack keeps the open card's size. Before the first turn it is centred above the spread's words;
-// after that the caption takes the top and the card sits under it
+// the stack starts at the open card's size and sits under the tape, which stays.
+// before the first turn it is centred above the spread's words, and gives up a little height
+// if those words need the room; after that the caption takes the top and the card sits under it
 function placeStack(withCaption){
   const C=spread.carousel, P=C.pose, GAP=16;
   const limit=finale.getBoundingClientRect().top-GAP;
-  let top=18, h=C.opened.h, w=C.opened.w;
+  const edge=phoneTapeBottom()+8;
+  let top=edge, h=C.opened.h, w=C.opened.w;
   if(withCaption){
     const headH=Math.max(cardHead.offsetHeight, 24);
-    top=12+headH+14;
+    top=edge+headH+14;
+  }else{
+    // the tape stays, and the spread's own paragraph sits under the stack, so the stack steps down a little
+    h*=.92; w=h*CARD_ASPECT;
   }
   const room=limit-top;
   if(h>room && room>120){ h=room; w=h*CARD_ASPECT; }
@@ -2326,7 +2336,7 @@ async function phoneSplash(){
   })();
   const placeTape=()=>{
     if(!svgEl || !redFrac || !tape || !tapeHost) return;
-    tape.style.height='32px';
+    tape.style.height='24px';
     void tapeHost.offsetWidth;
     const hostW=tapeHost.offsetWidth||1;
     const L=tape.getBoundingClientRect().left;
