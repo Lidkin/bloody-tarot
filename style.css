@@ -450,6 +450,7 @@ body.card-open .intro-brand, body.car-open .intro-brand{opacity:0; transition:op
 body.intro-done .intro-brand{transition:opacity .5s ease-in-out;}
 @media (prefers-reduced-motion:reduce){
   body.intro #opening, body.intro .lang-switch{opacity:1; pointer-events:auto;}
+  #finale #fDeck, #finale #spreadBack{transition:none;}
 }
 
 /* phones: the same faces and the same places for the words as on the desktop.
@@ -551,14 +552,17 @@ body.intro-done .intro-brand{transition:opacity .5s ease-in-out;}
   #finale #fDeck{display:block; max-width:none; white-space:normal; width:100%; box-sizing:border-box;
     padding:0 20px; margin:0;
     font-family:'Cormorant Garamond',Georgia,serif; font-weight:300; font-style:italic; letter-spacing:0;
-    font-size:clamp(18px, 1.3889vw, 22px); color:var(--muted); opacity:.8;}
-  #finale #spreadBack{position:absolute; left:0; right:0; top:0; display:none; width:100%; margin:0; padding:0 20px;
+    font-size:clamp(18px, 1.3889vw, 22px); color:var(--muted); opacity:.8;
+    transition:opacity .7s ease;}
+  #finale #spreadBack{position:absolute; left:0; right:0; top:0; display:block; width:100%; margin:0; padding:0 20px;
     background:none; border:none; box-shadow:none; appearance:none; -webkit-appearance:none;
-    color:var(--accent); font-family:'Cormorant Garamond',Georgia,serif; font-weight:300; font-style:italic;
-    font-size:clamp(18px, 1.3889vw, 22px); letter-spacing:0; line-height:1.45; text-align:center; text-transform:none;
-    cursor:pointer;}
-  body.car-open.car-leaf #finale #fDeck{visibility:hidden;}
-  body.car-open.car-leaf #finale #spreadBack{display:block;}
+    color:var(--accent); font-family:'Oswald',sans-serif; font-weight:500; font-style:normal;
+    font-size:16px; letter-spacing:0; line-height:1; text-align:center; text-transform:uppercase;
+    cursor:pointer; opacity:0; visibility:hidden; pointer-events:none;
+    transition:opacity .7s ease, visibility 0s linear .7s;}
+  body.car-open.car-leaf #finale #fDeck{opacity:0;}
+  body.car-open.car-leaf #finale #spreadBack{opacity:1; visibility:visible; pointer-events:auto;
+    transition:opacity .7s ease, visibility 0s linear 0s;}
   /* the spread's own paragraph, in the card text's face, between two hairlines */
   body.car-open #fSummary{position:relative; font-style:normal; padding:14px 20px;}
   body.car-open #fSummary::before,
