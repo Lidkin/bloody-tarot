@@ -215,7 +215,7 @@ ru:{title:'Таро Лидии Хаит', whisper:'хочешь знать?',
   deckOne:'Эта карта — из колоды <b>Bloody Feast Tarot</b>: все 78 карт с авторской графикой в файле для печати на Etsy.',
   deckMany:'Эти карты — из колоды <b>Bloody Feast Tarot</b>: все 78 карт с авторской графикой в файле для печати на Etsy.',
   spreadBack:'Посмотреть значение расклада',
-  etsy:'Купить колоду', etsyPrint:'Колода для печати · купить на Etsy', rotate:'Поверни телефон вертикально', touchDeck:'коснись колоды', heading:'Таро «Кровавый пир» от Лидии Хаит', share:'Поделиться', gather:'Собрать колоду', onceMore:'Ещё раз',
+  etsy:'Купить колоду', etsyPrint:'Колода для печати · купить на Etsy', rotate:'Поверни телефон вертикально', touchDeck:'коснись колоды', heading:'Таро «Кровавый пир» от Лидии Хаит', share:'Поделиться', gather:'Собрать', onceMore:'Ещё раз',
   again:'↺ Новое гадание', saved:'Картинка сохранена — её можно выложить в сторис',
   storyDay:'КАРТА ДНЯ', storyThree:'ТРИ КАРТЫ', storyAsk:'А ЧТО ВЫПАДЕТ ТЕБЕ?',
   shareDay:name=>`Моя карта дня — ${name}.`, shareSpreadText:list=>`Мой расклад: ${list}.`,
@@ -1909,7 +1909,7 @@ function returnToArc(el){
       onComplete:()=>{ restoreInArc(el); activeCard=null; busy=false; }});
 }
 
-// "Собрать колоду": the reading is over for today - the fan is gathered up the way it was dealt, backwards,
+// "Собрать": the reading is over for today - the fan is gathered up the way it was dealt, backwards,
 // and the deck is back on the velvet with the time left until the next card of the day
 document.getElementById('gatherBtn').addEventListener('click', ()=>{
   if(!activeCard || busy) return;
