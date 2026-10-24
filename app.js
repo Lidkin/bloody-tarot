@@ -286,7 +286,9 @@ const P = Array.from({length:70},()=>({x:Math.random()*innerWidth,y:Math.random(
 // dust: each speck sits somewhere between grey and burgundy and now and then flares the red of the card backs
 const ASH=[150,138,142], BURGUNDY=[150,38,54], FLARE=[228,36,35], FLASH_FRAMES=70;
 const lerp=(a,b,t)=>a.map((v,i)=>Math.round(v+(b[i]-v)*t));
+let dustRun=true;
 function tick(){
+  if(!dustRun) return;
   ctx.clearRect(0,0,canvas.width,canvas.height);
   P.forEach(p=>{
     p.y+=p.vy; p.x+=p.vx+Math.sin(p.y*.01)*.1;
@@ -296,12 +298,19 @@ function tick(){
     if(p.flash) p.flash--;
     ctx.fillStyle=`rgb(${lerp(lerp(ASH,BURGUNDY,p.mix),FLARE,f)})`;
     ctx.globalAlpha=p.a*.8+(1-p.a*.8)*f;
-    ctx.shadowColor='#e42423'; ctx.shadowBlur=6*f;
+    if(f){ ctx.shadowColor='#e42423'; ctx.shadowBlur=6*f; }
     const r=p.r*(1+.5*f);
     ctx.beginPath(); ctx.arc(p.x,p.y,r,0,7); ctx.fill();
+    if(f) ctx.shadowBlur=0;
   });
   requestAnimationFrame(tick);
 }
+document.addEventListener('visibilitychange', ()=>{
+  const go=!document.hidden;
+  if(go===dustRun) return;
+  dustRun=go;
+  if(go) tick();
+});
 tick();
 
 /* ---------- flow control (GSAP-driven) ---------- */
@@ -388,6 +397,11 @@ function showChalk(on){
   const el=document.getElementById('chalk');
   if(!el || !isDesktop()) return;
   gsap.to(el,{autoAlpha:on?1:0, duration:.6, overwrite:true});
+}
+// phones: the outline sits behind the deck, and leaves once a card turns face up
+function phoneDeckChalk(on){
+  if(isDesktop()) return;
+  document.body.classList.toggle('deck-home', !!on);
 }
 function chalkWeight(arc){
   const plain=document.getElementById('chalkPlain');
@@ -507,12 +521,11 @@ function drawFromDeck(dip){
   gsap.timeline()
     .to(s,{y:s.y-s.h*.45, duration:.9, ease:'sine.in', onUpdate:render})
     // the deck would end up under the description, so it is cleared away
-    .call(()=>setDim(2, el))
+    .call(()=>{ setDim(2, el); phoneDeckChalk(false); })
     .to(s,{...pose, duration:1.3, ease:'power2.out', onUpdate:render, onComplete:()=>onCardOpened(el)});
 }
 // the reverse; the deck then settles and the ask button comes back for the next reading (or `onBack` runs)
 function returnToDeck(el, onBack){
-  document.body.classList.remove('card-held');
   const {topImg, dip, rest}=el._fromDeck, s=el._state, render=()=>renderCard(el,s);
   gsap.killTweensOf(s);
   setDim(0); gsap.to(deckStack,{opacity:1, duration:.8});
@@ -521,6 +534,7 @@ function returnToDeck(el, onBack){
     .to(s,{y:rest.y, duration:.5, ease:'sine.out', onUpdate:render})
     .call(()=>{
       sfx.tick(.6); topImg.style.visibility=''; el.remove(); fanScreen.hidden=true; activeCard=null;
+      phoneDeckChalk(true);
       settleDeck(dip, ()=>{
         if(onBack) onBack(); else endReading();
         busy=false;
@@ -1112,6 +1126,7 @@ function openSpreadCard(i){
   const el=spread.cards[i]; spread.i=i;
   busy=true; activeCard=el;
   if(!el._fromDeck) showChalk(false);
+  if(el._fromDeck) phoneDeckChalk(false);
   setDim(2, el); showCaps(false); el.classList.remove('lit');
   if(el.classList.contains('away')) fadeInCard(el);
   const s=el._state, pose=openedPose(el, el._card), render=()=>renderCard(el,s), tl=gsap.timeline();
@@ -1171,7 +1186,7 @@ function nextSpreadCard(){
   if(el._fromDeck){
     gsap.to(s,{x:-s.w*.7, rot:-14, tx:0, ty:0, duration:.8, ease:'power2.in', onUpdate:render, onComplete:()=>{
       el.style.visibility='hidden';
-      setDim(0); gsap.to(deckStack,{opacity:1, duration:.6});
+      setDim(0); phoneDeckChalk(true); gsap.to(deckStack,{opacity:1, duration:.6});
       gsap.delayedCall(.7, ()=>drawSpreadCard(spread.i+1));
     }});
     return;
@@ -1224,6 +1239,7 @@ const fCard=document.getElementById('fCard');
 function showCarousel(){
   const els=spread.cards;
   fCard.hidden=false; document.body.classList.add('car-open');
+  phoneDeckChalk(false);
   cardHead.style.top='';
   // the description block keeps the height of the longest one, so nothing moves as the cards change
   fCard.style.minHeight='';
@@ -1689,7 +1705,6 @@ document.getElementById('finishBtn').addEventListener('click', e=>{
     return;
   }
   busy=true; const el=activeCard, s=el._state;
-  document.body.classList.add('card-held');
   meaningPanel.classList.remove('show');
   document.body.classList.remove('day-open');
   setFinale([el]);
@@ -1774,7 +1789,6 @@ document.getElementById('gatherBtn').addEventListener('click', ()=>{
     meaningPanel.style.opacity=finale.style.opacity='0';
   }
   finale.classList.remove('show'); hideBigName();
-  document.body.classList.remove('card-held');
   meaningPanel.classList.remove('show');
   void meaningPanel.offsetWidth;
   meaningPanel.style.transition=finale.style.transition='';
@@ -1806,6 +1820,7 @@ function tuckUnderDeck(els, onBack){
       [...deckStack.children].forEach((c,i)=>c.style.zIndex=i ? 2 : 0);
       gsap.set(img,{x:0, y:out, rotation:rot}); img.style.visibility='';
       els.forEach(el=>el.remove()); fanScreen.hidden=true; activeCard=null;
+      phoneDeckChalk(true);
       [...deckStack.children].slice(1).forEach((c,i)=>gsap.to(c,{...DECK_REST[i+1], duration:.6, ease:'power2.inOut'}));
     })
     .to(img,{...DECK_REST[0], duration:.6, ease:'power2.inOut'})
@@ -1882,7 +1897,8 @@ function flyHome(el){
 // the deck is back on the velvet: after the card of the day the time left until the next one is shown
 function endReading(){
   if(mode==='day') dayDone=true;
-  spread=null; fan.classList.remove('carousel'); document.body.classList.remove('car-open', 'spread-row', 'tape-period', 'card-held'); fan.querySelectorAll('.spread-cap, .pick-list').forEach(e=>e.remove());
+  spread=null; fan.classList.remove('carousel'); document.body.classList.remove('car-open', 'spread-row', 'tape-period');
+  phoneDeckChalk(true); fan.querySelectorAll('.spread-cap, .pick-list').forEach(e=>e.remove());
   setAskSub(); showStart(true);
 }
 // once the card of the day is drawn, the line under the options counts down to the next one, at local
@@ -2127,22 +2143,27 @@ if(!isDesktop()) screen.orientation?.lock?.('portrait').catch(()=>{});
 document.addEventListener('contextmenu', e=>{ if(e.target.closest('img, .card, canvas')) e.preventDefault(); });
 document.addEventListener('dragstart', e=>{ if(e.target.tagName==='IMG') e.preventDefault(); });
 
-/* ---------- phone: the logo is the first thing, then the deck screen replaces it.
-   The tape stays across the top, its red words on the center of the screen. ---------- */
+/* ---------- phone: the logo is the first thing, then it dissolves into the deck.
+   While it dissolves, the tape's plate appears at the top centre and the stripes grow out to both edges.
+   The words stay put. The outline comes in with the deck and leaves when a card turns face up. ---------- */
 async function phoneSplash(){
   const logo=document.getElementById('introLogo'), tape=document.getElementById('introTapeWrap'),
     tapeHost=document.getElementById('introTape'), layer=document.getElementById('intro');
-  let svgEl=null, redFrac=0;
-  try{
-    const raw=await fetch(encodeURI('assets/SVG/Border LIne.svg')).then(r=>r.text());
-    const doc=new DOMParser().parseFromString(raw, 'image/svg+xml');
-    svgEl=doc.querySelector('svg');
-    if(svgEl && tapeHost){
-      svgEl.setAttribute('preserveAspectRatio','xMinYMid meet');
-      tapeHost.replaceChildren(svgEl);
-    }
-  }catch(e){}
-  if(svgEl){
+  const opening=document.getElementById('opening'), title=document.querySelector('h1.title');
+  // the logo's box is transformed, and a fixed child of a transformed box is not fixed to the screen
+  if(tape && tape.parentElement!==document.body) document.body.appendChild(tape);
+  let svgEl=null, redFrac=0, plateFrac=0;
+  const prep=(async()=>{
+    try{
+      const raw=await fetch(encodeURI('assets/SVG/Border LIne.svg')).then(r=>r.text());
+      const doc=new DOMParser().parseFromString(raw, 'image/svg+xml');
+      svgEl=doc.querySelector('svg');
+      if(svgEl && tapeHost){
+        svgEl.setAttribute('preserveAspectRatio','xMinYMid meet');
+        tapeHost.replaceChildren(svgEl);
+      }
+    }catch(e){ return; }
+    if(!svgEl) return;
     const letters=[...svgEl.querySelectorAll('path.st1')];
     const vb=svgEl.viewBox.baseVal.width;
     let minX=Infinity, maxX=-Infinity, minY=Infinity, maxY=-Infinity;
@@ -2158,8 +2179,8 @@ async function phoneSplash(){
       return textCx>=x && textCx<=x+w;
     });
     if(plate && letters.length){
-      const px=+plate.getAttribute('x'), py=+plate.getAttribute('y');
-      const pw=+plate.getAttribute('width'), ph=+plate.getAttribute('height');
+      const px=+plate.getAttribute('x'), pw=+plate.getAttribute('width');
+      const py=+plate.getAttribute('y'), ph=+plate.getAttribute('height');
       const dx=(px+pw/2)-textCx, dy=(py+ph/2)-textCy;
       const group=document.createElementNS('http://www.w3.org/2000/svg','g');
       const shift=document.createElementNS('http://www.w3.org/2000/svg','g');
@@ -2168,36 +2189,64 @@ async function phoneSplash(){
       shift.append(...letters);
       group.append(plate, shift);
       redFrac=(px+pw/2)/vb;
+      plateFrac=pw/vb;
     }
-  }
+  })();
   const placeTape=()=>{
     if(!svgEl || !redFrac || !tape || !tapeHost) return;
-    const H=32;
-    tape.style.height=H+'px';
+    tape.style.height='32px';
     void tapeHost.offsetWidth;
     const hostW=tapeHost.offsetWidth||1;
     const L=tape.getBoundingClientRect().left;
     const p=100*(innerWidth/2-L-redFrac*hostW)/hostW;
     gsap.set(tapeHost,{xPercent:p});
   };
-  const opening=document.getElementById('opening'), title=document.querySelector('h1.title');
+  // the plate is already centred; the clip only opens sideways, so the words never travel
+  const growPhoneTape=()=>{
+    if(!svgEl || !redFrac || document.body.classList.contains('intro-done')) return;
+    document.body.classList.add('tape-grow');
+    placeTape();
+    const hostW=tapeHost.offsetWidth||1;
+    const platePx=plateFrac ? plateFrac*hostW : Math.min(innerWidth*.7, 220);
+    const inset=Math.max(0, (innerWidth-platePx)/2);
+    const clip={v:inset};
+    gsap.killTweensOf(tape);
+    gsap.killTweensOf(clip);
+    gsap.set(tape,{autoAlpha:0});
+    tape.style.clipPath=`inset(0px ${inset}px 0px ${inset}px)`;
+    // GSAP's own clip-path tween opens one side first; drive both edges from one number
+    gsap.timeline()
+      .to(tape,{autoAlpha:1, duration:.4, ease:'power1.out'})
+      .to(clip,{v:0, duration:1.2, ease:'power2.inOut', onUpdate(){
+        tape.style.clipPath=`inset(0px ${clip.v}px 0px ${clip.v}px)`;
+      }}, .15);
+  };
   const done=()=>{
     document.body.classList.remove('intro');
-    document.body.classList.add('intro-done');
+    document.body.classList.add('tape-grow', 'intro-done');
+    gsap.killTweensOf(tape);
+    if(tape) gsap.set(tape,{clearProps:'clipPath,opacity,visibility'});
     gsap.set(logo,{opacity:0});
-    gsap.set([opening, langSwitch, title].filter(Boolean),{clearProps:'opacity'});
+    gsap.set([opening, langSwitch, title].filter(Boolean),{clearProps:'opacity,pointerEvents'});
     layer?.setAttribute('aria-hidden','true');
-    requestAnimationFrame(()=>{ placeTape(); showStart(true); });
-    addEventListener('resize', placeTape);
+    if(!document.body.classList.contains('card-open') && !document.body.classList.contains('car-open')) phoneDeckChalk(true);
+    prep.then(()=>requestAnimationFrame(()=>{ placeTape(); showStart(true); }));
+    if(!phoneSplash.listening){
+      phoneSplash.listening=true;
+      addEventListener('resize', ()=>{ if(document.body.classList.contains('intro-done')) placeTape(); });
+    }
   };
-  if(matchMedia('(prefers-reduced-motion: reduce)').matches){ done(); return; }
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches){ prep.then(done); return; }
+  // the logo starts at once; the tape is prepared while it is on screen, so a slow file never holds the first paint
   gsap.set(logo,{opacity:0});
   gsap.timeline({onComplete:done})
     .to(logo,{opacity:1, duration:.7, ease:'power2.out'})
-    // the logo dissolves, and the deck screen comes up underneath it
     .to(logo,{opacity:0, duration:1.6, ease:'power1.inOut', onStart(){
-      gsap.set([opening, langSwitch, title].filter(Boolean),{opacity:0});
+      if(tape) gsap.set(tape,{autoAlpha:0});
+      gsap.set([opening, langSwitch, title].filter(Boolean),{opacity:0, pointerEvents:'none'});
       document.body.classList.remove('intro');
+      document.body.classList.add('tape-grow');
+      prep.then(()=>{ if(!document.body.classList.contains('intro-done')) growPhoneTape(); });
     }}, '+=.8')
     .to(opening,{opacity:1, duration:1.6, ease:'power1.inOut', immediateRender:false}, '<');
 }
