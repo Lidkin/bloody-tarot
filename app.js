@@ -400,8 +400,7 @@ function showChalk(on){
   if(!el || !isDesktop()) return;
   gsap.to(el,{autoAlpha:on?1:0, duration:.6, overwrite:true});
 }
-// phones: one outline stands behind the deck, head above the cards and feet below them.
-// it leaves once a card turns face up.
+// phones: one outline lies in the open band above the deck, and leaves once a card turns face up.
 function phoneTapeBottom(){
   const tape=document.getElementById('introTapeWrap');
   const b=tape ? tape.getBoundingClientRect().bottom : 0;
@@ -414,20 +413,18 @@ function placePhoneChalk(){
   if(!img || !opts) return;
   const tape=document.getElementById('introTapeWrap');
   const tapeBottom=tape ? tape.getBoundingClientRect().bottom : 0;
-  const btnTop=opts.getBoundingClientRect().top;
-  if(!(btnTop>tapeBottom+80)) return;
   const deck=document.querySelector('.deck-stack');
   const deckBox=deck ? deck.getBoundingClientRect() : null;
-  if(!deckBox || !(deckBox.height>40)) return;
-  const gap=16;
-  const above=deckBox.top-tapeBottom-gap;
-  const below=btnTop-deckBox.bottom-gap;
-  const side=Math.max(28, Math.min(above, below));
-  let visH=deckBox.height+2*side;
-  const maxW=Math.max(80, innerWidth-20);
-  if(visH*(553/1192)>maxW) visH=maxW*(1192/553);
-  img.style.width=Math.round(visH)+'px';
-  img.style.top=(deckBox.top+deckBox.height/2)+'px';
+  if(!deckBox || !(deckBox.top>tapeBottom+48)) return;
+  const gap=14;
+  const room=deckBox.top-tapeBottom-gap*2;
+  const maxW=Math.max(120, innerWidth-28);
+  let visW=Math.min(maxW, room*(1192/553));
+  let visH=visW*(553/1192);
+  if(visH>room){ visH=room; visW=visH*(1192/553); }
+  img.style.width=Math.round(visW)+'px';
+  img.style.top=Math.round(tapeBottom+gap+(room-visH)/2)+'px';
+  img.style.transform='translate(-50%, 0)';
 }
 function phoneDeckChalk(on){
   if(isDesktop()) return;
@@ -1385,7 +1382,11 @@ function returnSpreadSummary(){
 }
 function syncSpreadCue(){
   const btn=document.getElementById('spreadBack');
-  if(btn && !isDesktop() && document.body.classList.contains('car-leaf')) btn.textContent=tr('spreadBack');
+  const deck=document.getElementById('fDeck');
+  if(!btn || !deck) return;
+  const card=document.body.classList.contains('car-leaf');
+  if(!isDesktop() && card) btn.textContent=tr('spreadBack');
+  if(!isDesktop() && document.body.classList.contains('car-open') && !card) deck.hidden=false;
 }
 cardHead.addEventListener('click', returnSpreadSummary);
 document.getElementById('spreadBack').addEventListener('click', returnSpreadSummary);

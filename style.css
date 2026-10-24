@@ -458,9 +458,9 @@ body.intro-done .intro-brand{transition:opacity .5s ease-in-out;}
     opacity:0; visibility:hidden; transition:opacity .5s ease, visibility 0s linear .5s;}
   body.deck-home .chalk{opacity:1; visibility:visible; transition:opacity .5s ease, visibility 0s;}
   #chalkFrame{display:none;}
-  /* one figure, head up, centred on the deck: the cards cover the torso, the head and the feet stay visible */
-  #chalkPlain{position:absolute; left:50%; top:46%; width:min(68vh, 520px); width:min(68dvh, 520px); opacity:.2;
-    transform:translate(-50%, -50%) rotate(-90deg); transform-origin:50% 50%;
+  /* one figure, lying across the open space above the deck, so the cards do not cover it */
+  #chalkPlain{position:absolute; left:50%; top:46%; width:min(92vw, 520px); opacity:.34;
+    transform:translate(-50%, 0); transform-origin:50% 0;
     user-select:none; -webkit-user-drag:none;}
   body.intro .intro-logo{opacity:0;}
   body.intro .intro-tape-wrap{opacity:0;}
