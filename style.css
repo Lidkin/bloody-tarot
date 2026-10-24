@@ -554,7 +554,8 @@ body.intro-done .intro-brand{transition:opacity .5s ease-in-out;}
     font-family:'Cormorant Garamond',Georgia,serif; font-weight:300; font-style:italic; letter-spacing:0;
     font-size:clamp(18px, 1.3889vw, 22px); color:var(--muted); opacity:.8;
     transition:opacity .7s ease;}
-  #finale #spreadBack{position:absolute; left:0; right:0; top:0; display:block; width:100%; margin:0; padding:0 20px;
+  #finale #spreadBack{position:absolute; left:50%; top:32px; transform:translateX(-50%); display:block;
+    width:max-content; max-width:calc(100% - 40px); margin:0; padding:6px 2px;
     background:none; border:none; box-shadow:none; appearance:none; -webkit-appearance:none;
     color:var(--accent); font-family:'Oswald',sans-serif; font-weight:500; font-style:normal;
     font-size:16px; letter-spacing:0; line-height:1; text-align:center; text-transform:uppercase;
