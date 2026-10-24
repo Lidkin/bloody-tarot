@@ -494,6 +494,8 @@ body.intro-done .intro-brand{transition:opacity .5s ease-in-out;}
   h1.title{opacity:0 !important; pointer-events:none;}
   .whisper, .end-phrase{font-family:'Cormorant Garamond',Georgia,serif; font-weight:300; font-style:italic;
     letter-spacing:.05em; font-size:16px;}
+  /* the same muted colour the desktop whisper has before a hover turns it red */
+  .end-phrase{color:color-mix(in srgb, var(--muted) 80%, transparent);}
   .opt, .finish-btn, .return-btn, .cta, .link-btn{font-family:'Oswald',sans-serif; font-weight:500;
     letter-spacing:0; line-height:1; font-size:16px;}
   .opt{margin-right:0;}
