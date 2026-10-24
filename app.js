@@ -747,7 +747,10 @@ function renderCard(el, s){
   // once it lies open that scale is what softens it — the picture is painted, then shrunk. The settled
   // card is laid out at its real size, so nothing is scaled. One layout, then only the tilt moves.
   const tx=s.tx||0, ty=s.ty||0, tilted=tx||ty;
-  const exact=el===activeCard && s.ry>90 && !busy;
+  // a card that has stopped — the one being read, and every card in the phone's stack — is laid out
+  // at its real size. The cards under the top one are not the active card, but their edges show.
+  const inStack=!!(spread&&spread.carousel&&spread.cards.includes(el));
+  const exact=s.ry>90 && !busy && (el===activeCard || inStack);
   const lw=exact ? s.w : Math.max(8, Math.pow(1.25, Math.ceil(Math.log(s.w)/Math.log(1.25)))), k=exact ? 1 : s.w/lw;
   if(el._lw!==lw){ el._lw=lw; el.style.setProperty('--cw', lw+'px'); el.style.setProperty('--ch', lw*s.h/s.w+'px'); }
   const up=s.ry>1; if(el._up!==up){ el._up=up; el.classList.toggle('up', up); }
@@ -1283,6 +1286,7 @@ function showCarousel(){
   gsap.delayedCall(1.4, ()=>{
     if(!spread?.carousel) return;
     spread.summary=true; finale.classList.add('show'); busy=false;
+    spread.cards.forEach(c=>c._state && renderCard(c, c._state));
     spread.carousel.arm=gsap.delayedCall(2*gsap.globalTimeline.timeScale(), ()=>{
       if(!spread?.carousel || !document.body.classList.contains('car-open')) return;
       spread.carousel.ready=true;
@@ -1321,7 +1325,7 @@ function peekStack(){
   const C=spread?.carousel; if(!C || busy) return;
   const c=spread.cards[C.order[0]], s=c._state, P=C.pose, render=()=>renderCard(c,s);
   busy=true;
-  gsap.timeline({onComplete:()=>{ busy=false; }})
+  gsap.timeline({onComplete:()=>{ busy=false; spread.cards.forEach(c=>c._state && renderCard(c, c._state)); }})
     .to(s,{x:P.x-P.w*.3, y:P.y-4, rot:-6, duration:.5, ease:'power2.out', onUpdate:render})
     .to(s,{...stackPose(0), duration:.6, ease:'power2.inOut', onUpdate:render});
 }
@@ -1363,6 +1367,7 @@ function turnStack(dir){
       gsap.set([fCard, cardHead],{opacity:0});
       gsap.to([fCard, cardHead],{opacity:1, duration:.4, onComplete:()=>{ cardHead.style.transition=''; }});
       busy=false;
+      spread.cards.forEach(c=>c._state && renderCard(c, c._state));
     }})
     .to(s,{x:P.x+side*out, y:P.y-6, rot:side*8, duration:.5, ease:'power2.inOut', onUpdate:render})
     .call(()=>{
