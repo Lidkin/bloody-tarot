@@ -398,8 +398,8 @@ function showChalk(on){
   if(!el || !isDesktop()) return;
   gsap.to(el,{autoAlpha:on?1:0, duration:.6, overwrite:true});
 }
-// phones: the outline sits behind the deck, and leaves once a card turns face up.
-// it is centred in the band between the tape and the buttons, the same gap above and below
+// phones: the outline stands beside the deck, split down the middle, and leaves once a card turns face up.
+// the two halves are centred in the band between the tape and the buttons
 function phoneTapeBottom(){
   const tape=document.getElementById('introTapeWrap');
   const b=tape ? tape.getBoundingClientRect().bottom : 0;
@@ -407,20 +407,29 @@ function phoneTapeBottom(){
 }
 function placePhoneChalk(){
   if(isDesktop()) return;
-  const img=document.getElementById('chalkPlain');
+  const left=document.getElementById('chalkLeft'), right=document.getElementById('chalkRight');
   const opts=document.getElementById('spreadOpts');
-  if(!img || !opts) return;
+  if(!left || !right || !opts) return;
   const tape=document.getElementById('introTapeWrap');
   const tapeBottom=tape ? tape.getBoundingClientRect().bottom : 0;
   const btnTop=opts.getBoundingClientRect().top;
   if(!(btnTop>tapeBottom+80)) return;
   const band=btnTop-tapeBottom;
-  const gap=Math.max(24, Math.round(band*.08));
-  let visH=band-2*gap;
-  const maxW=Math.max(120, innerWidth-32);
-  if(visH*(553/1192)>maxW) visH=maxW*(1192/553);
-  img.style.width=Math.round(visH)+'px';
-  img.style.top=((tapeBottom+btnTop)/2)+'px';
+  const deck=document.querySelector('.deck-stack');
+  const deckW=deck ? deck.getBoundingClientRect().width : 200;
+  const margin=10, beside=14;
+  const gutter=(innerWidth-deckW)/2;
+  let visW=Math.max(48, (gutter-margin-beside)*2);
+  const maxH=band-2*Math.max(20, Math.round(band*.06));
+  if(visW*(1192/553)>maxH) visW=maxH*(553/1192);
+  const cssW=Math.round(visW*(1192/553))+'px';
+  const top=((tapeBottom+btnTop)/2)+'px';
+  const split=Math.round(deckW/2+beside)+'px';
+  [left, right].forEach(img=>{
+    img.style.width=cssW;
+    img.style.top=top;
+    img.style.setProperty('--split', split);
+  });
 }
 function phoneDeckChalk(on){
   if(isDesktop()) return;
