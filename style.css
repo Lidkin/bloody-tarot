@@ -521,35 +521,26 @@ body.intro-done .intro-brand{transition:opacity .5s ease-in-out;}
   .cta, body.noir .cta{background:var(--red); color:#fff; padding:12px 30px; border-radius:26px;
     box-shadow:0 0 18px rgba(228,36,35,.4);}
   .link-btn{color:var(--muted);}
-  /* an open card: the period, the name and the quote above it, the reading across the width, the button, then the whisper */
-  body.day-open .card-head{white-space:normal; display:flex; flex-direction:column; align-items:center;}
-  body.day-open .card-head .head-pos:not(:empty){display:block; font-family:'Trispace',sans-serif; font-weight:400;
-    letter-spacing:.12em; margin:0 -.12em 6px 0; text-transform:uppercase; color:var(--red); line-height:1.2; font-size:13px;}
-  body.day-open .card-head h2{white-space:nowrap;}
-  body.day-open .card-head .head-title{display:block; min-height:1.2em; margin-top:6px; white-space:nowrap;}
-  body.day-open #mTitle, body.day-open #mPos{display:none;}
-  body.day-open #meaningPanel{left:0; right:0; bottom:calc(24px + env(safe-area-inset-bottom, 0px));
+  /* one sheet only: the period, the name and the quote above the card, the reading across the width,
+     the button, then the whisper. The old centred panel, the in-panel caption and the row with the rule
+     are not a second layout waiting underneath. */
+  #mPos, #mTitle, #fPos, #fName, #fTitle, #endRule, .finish-btn .arrow{display:none;}
+  #meaningPanel, #finale{left:0; right:0; bottom:calc(24px + env(safe-area-inset-bottom, 0px));
     top:auto; transform:none; max-width:none; width:100%;}
-  body.day-open #mText{width:100%; max-width:none; padding:0 20px; box-sizing:border-box;}
-  body.day-open #meaningPanel .meaning-end{flex-direction:column-reverse; gap:12px; margin-top:0;}
-  body.day-open #endRule, body.day-open .finish-btn .arrow{display:none;}
-  /* the carousel keeps its swipe. The captions sit above the stack, as they do over the three cards */
-  body.car-open .card-head{white-space:normal; display:flex; flex-direction:column; align-items:center;}
-  body.car-open .card-head .head-pos:not(:empty){display:block; font-family:'Trispace',sans-serif; font-weight:400;
+  #mText, #fSummary, #fText{width:100%; max-width:none; padding:0 20px; box-sizing:border-box; margin:0 0 16px;}
+  #finale p{max-width:none;}
+  #meaningPanel .meaning-end{flex-direction:column-reverse; gap:12px; margin-top:0;}
+  .card-head{white-space:normal; display:flex; flex-direction:column; align-items:center;}
+  .card-head .head-pos:not(:empty){display:block; font-family:'Trispace',sans-serif; font-weight:400;
     letter-spacing:.12em; margin:0 -.12em 6px 0; text-transform:uppercase; color:var(--red); line-height:1.2; font-size:13px;}
-  body.car-open .card-head h2{white-space:nowrap;}
-  body.car-open .card-head .head-title{display:block; min-height:1.2em; margin-top:6px; white-space:nowrap;}
-  body.car-open #fPos, body.car-open #fName, body.car-open #fTitle{display:none;}
+  .card-head h2{white-space:nowrap;}
+  .card-head .head-title{display:block; min-height:1.2em; margin-top:6px; white-space:nowrap;}
   /* the spread's own words stay until a card is turned; the caption waits in its place */
   body.car-open:not(.car-leaf) .card-head{opacity:0;}
-  body.car-open #finale{left:0; right:0; bottom:calc(24px + env(safe-area-inset-bottom, 0px));
-    top:auto; transform:none; max-width:none; width:100%;}
-  body.car-open #finale p{max-width:none;}
-  body.car-open #fSummary, body.car-open #fText{width:100%; padding:0 20px; box-sizing:border-box; margin:0 0 16px;}
 }
 @media not all and (hover:hover) and (pointer:fine){
   html[lang=ru] .cap-pos, html[lang=ru] .meaning-panel .pos-label,
-  html[lang=ru] body.day-open .card-head .head-pos, html[lang=ru] body.car-open .card-head .head-pos{
+  html[lang=ru] .card-head .head-pos{
     font-family:'IBM Plex Mono',monospace; font-weight:400; letter-spacing:.12em;}
   html[lang=ru] .cap-name, html[lang=ru] .meaning-panel h2, html[lang=ru] .card-head h2{
     font-family:'IBM Plex Mono',monospace; font-weight:500; letter-spacing:.05em;}

@@ -892,10 +892,9 @@ new MutationObserver(()=>{
 function fitAbove(panel){
   const GAP=16, panelH=panel.offsetHeight, ASPECT=CARD_ASPECT;
   const availW=innerWidth-2*FIT_MARGIN;
-  // phones draw the same way they always have. The settled inscriptions sit as they do on the desktop:
-  // period, name and quote above the card, the reading and the button under it.
+  // phone: the same sheet as the open card. There is no older panel to fall back to.
   if(!isDesktop()){
-    if(panel===meaningPanel && document.body.classList.contains('day-open')){
+    if(panel===meaningPanel){
       panel.style.top='auto';
       panel.style.bottom='calc(24px + env(safe-area-inset-bottom, 0px))';
       panel.style.left='0'; panel.style.right='0'; panel.style.width='100%';
@@ -910,17 +909,11 @@ function fitAbove(panel){
       const cardTop=top+nameH+nameGap;
       return {x:innerWidth/2, y:cardTop+h/2, rot:0, w, h, ry:180, tx:0, ty:0};
     }
-    const head=panel===meaningPanel || document.body.classList.contains('car-open') ? cardHead : document.querySelector('h1.title');
-    const minTop=Math.max(FIT_MARGIN, head.getBoundingClientRect().bottom+24);
     if(panel===finale){
+      const minTop=18;
       const room=panel.getBoundingClientRect().top-GAP-minTop, h=Math.min(room, availW/ASPECT), w=h*ASPECT;
       return {x:innerWidth/2, y:minTop+room/2, rot:0, w, h, ry:180, tx:0, ty:0};
     }
-    const availH=innerHeight-minTop-FIT_MARGIN-GAP-panelH;
-    const h=Math.min(availH, availW/ASPECT), w=h*ASPECT;
-    const top=Math.max(minTop, (innerHeight-(h+GAP+panelH))/2);
-    panel.style.top=(top+h+GAP)+'px'; panel.style.bottom='auto';
-    return {x:innerWidth/2, y:top+h/2, rot:0, w, h, ry:180, tx:0, ty:0};
   }
   // card of the day, and past and present: name and a reserved quote above the card, the text full
   // width underneath, and the button 80px off the bottom of the screen
