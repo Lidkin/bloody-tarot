@@ -398,10 +398,29 @@ function showChalk(on){
   if(!el || !isDesktop()) return;
   gsap.to(el,{autoAlpha:on?1:0, duration:.6, overwrite:true});
 }
-// phones: the outline sits behind the deck, and leaves once a card turns face up
+// phones: the outline sits behind the deck, and leaves once a card turns face up.
+// it is centred in the band between the tape and the buttons, the same gap above and below
+function placePhoneChalk(){
+  if(isDesktop()) return;
+  const img=document.getElementById('chalkPlain');
+  const opts=document.getElementById('spreadOpts');
+  if(!img || !opts) return;
+  const tape=document.getElementById('introTapeWrap');
+  const tapeBottom=tape ? tape.getBoundingClientRect().bottom : 0;
+  const btnTop=opts.getBoundingClientRect().top;
+  if(!(btnTop>tapeBottom+80)) return;
+  const band=btnTop-tapeBottom;
+  const gap=Math.max(24, Math.round(band*.08));
+  let visH=band-2*gap;
+  const maxW=Math.max(120, innerWidth-32);
+  if(visH*(553/1192)>maxW) visH=maxW*(1192/553);
+  img.style.width=Math.round(visH)+'px';
+  img.style.top=((tapeBottom+btnTop)/2)+'px';
+}
 function phoneDeckChalk(on){
   if(isDesktop()) return;
   document.body.classList.toggle('deck-home', !!on);
+  if(on) placePhoneChalk();
 }
 function chalkWeight(arc){
   const plain=document.getElementById('chalkPlain');
@@ -1914,7 +1933,6 @@ function setAskSub(){
 }
 // the digits stay inside the width of "Карта дня"; tabular figures keep that width as they tick
 function fitCountdown(){
-  if(!isDesktop()) return;
   const btn=document.querySelector('.opt[data-mode=day]');
   const cd=document.querySelector('#askSub .countdown');
   if(!cd) return;
@@ -2088,7 +2106,7 @@ function applyLang(){
   document.querySelectorAll('[data-i18n]').forEach(e=>e.textContent=tr(e.dataset.i18n));
   const other=lang==='ru' ? 'en' : 'ru';
   langBtn.textContent=other.toUpperCase(); langBtn.dataset.lang=other;
-  setAskSub(); fitTitle(); fitOptLines();
+  setAskSub(); fitTitle(); fitOptLines(); fitCountdown(); placePhoneChalk();
 }
 // the title stays on one line, centred on the screen; its letters shrink until it clears the language
 // button on both sides alike
@@ -2230,10 +2248,12 @@ async function phoneSplash(){
     gsap.set([opening, langSwitch, title].filter(Boolean),{clearProps:'opacity,pointerEvents'});
     layer?.setAttribute('aria-hidden','true');
     if(!document.body.classList.contains('card-open') && !document.body.classList.contains('car-open')) phoneDeckChalk(true);
-    prep.then(()=>requestAnimationFrame(()=>{ placeTape(); showStart(true); }));
+    prep.then(()=>requestAnimationFrame(()=>{ placeTape(); placePhoneChalk(); showStart(true); }));
     if(!phoneSplash.listening){
       phoneSplash.listening=true;
-      addEventListener('resize', ()=>{ if(document.body.classList.contains('intro-done')) placeTape(); });
+      const refit=()=>{ if(document.body.classList.contains('intro-done')){ placeTape(); placePhoneChalk(); } };
+      addEventListener('resize', refit);
+      visualViewport?.addEventListener('resize', refit);
     }
   };
   if(matchMedia('(prefers-reduced-motion: reduce)').matches){ prep.then(done); return; }

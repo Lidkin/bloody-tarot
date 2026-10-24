@@ -458,7 +458,8 @@ body.intro-done .intro-brand{transition:opacity .5s ease-in-out;}
     opacity:0; visibility:hidden; transition:opacity .5s ease, visibility 0s linear .5s;}
   body.deck-home .chalk{opacity:1; visibility:visible; transition:opacity .5s ease, visibility 0s;}
   #chalkFrame{display:none;}
-  #chalkPlain{position:absolute; left:50%; top:50%; width:min(92vh, 760px); width:min(92dvh, 760px); opacity:.15;
+  /* width is the figure's height once it is stood up; placePhoneChalk sets the real size */
+  #chalkPlain{position:absolute; left:50%; top:46%; width:min(68vh, 520px); width:min(68dvh, 520px); opacity:.15;
     transform:translate(-50%, -50%) rotate(-90deg); transform-origin:50% 50%;
     user-select:none; -webkit-user-drag:none;}
   body.intro .intro-logo{opacity:0;}
@@ -492,6 +493,7 @@ body.intro-done .intro-brand{transition:opacity .5s ease-in-out;}
   .lang-switch button{width:28px; height:28px; margin:0; padding:0; border-radius:50%;
     background:#0d0000; border:none; color:var(--red);
     font:inherit; letter-spacing:inherit; display:flex; align-items:center; justify-content:center; box-shadow:none;}
+  h1.title{opacity:0 !important; pointer-events:none;}
   .whisper, .end-phrase{font-family:'Cormorant Garamond',Georgia,serif; font-weight:300; font-style:italic;
     letter-spacing:.05em; font-size:16px;}
   .opt, .finish-btn, .return-btn, .cta, .link-btn{font-family:'Oswald',sans-serif; font-weight:500;
@@ -507,8 +509,10 @@ body.intro-done .intro-brand{transition:opacity .5s ease-in-out;}
   .cap-title:empty{display:none;}
   #mText, #fText, .finale .summary{font-family:'Trispace',sans-serif; font-weight:300; letter-spacing:0;
     font-size:15px; line-height:1.4;}
-  .ask-sub .countdown{font-family:'Trispace',sans-serif; font-weight:400; letter-spacing:.06em; font-size:14px;}
+  .ask-sub .countdown{font-family:'Trispace',sans-serif; font-weight:700; letter-spacing:.171em; font-size:14px;}
   #fDeck{font-family:'Cormorant Garamond',Georgia,serif; font-weight:300; font-style:italic; letter-spacing:0; font-size:16px;}
+  #fDeck b{color:inherit; font-weight:inherit;}
+  .finale .summary{font-style:normal;}
   .finish-btn{color:var(--accent);}
   .finish-btn .fill{color:transparent; -webkit-text-fill-color:transparent; -webkit-background-clip:text; background-clip:text;
     background-image:linear-gradient(90deg, var(--accent) 37.5%, var(--red) 37.5% 62.5%, var(--accent) 62.5%);
@@ -543,8 +547,8 @@ body.intro-done .intro-brand{transition:opacity .5s ease-in-out;}
     font-family:'IBM Plex Mono',monospace; font-weight:400; letter-spacing:.12em;}
   html[lang=ru] .cap-name, html[lang=ru] .meaning-panel h2, html[lang=ru] .card-head h2{
     font-family:'IBM Plex Mono',monospace; font-weight:500; letter-spacing:.05em;}
-  html[lang=ru] #mText, html[lang=ru] #fText, html[lang=ru] .finale .summary,
-  html[lang=ru] .ask-sub .countdown{font-family:'IBM Plex Mono',monospace; font-weight:400; letter-spacing:.05em;}
+  html[lang=ru] #mText, html[lang=ru] #fText, html[lang=ru] .finale .summary{
+    font-family:'IBM Plex Mono',monospace; font-weight:400; letter-spacing:.05em;}
   html[lang=ru] #fDeck{font-family:'Cormorant Garamond',Georgia,serif; font-weight:300; font-style:italic; letter-spacing:0;}
 }
 
