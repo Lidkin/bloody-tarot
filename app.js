@@ -398,8 +398,8 @@ function showChalk(on){
   if(!el || !isDesktop()) return;
   gsap.to(el,{autoAlpha:on?1:0, duration:.6, overwrite:true});
 }
-// phones: the outline stands beside the deck, split down the middle, and leaves once a card turns face up.
-// the two halves are centred in the band between the tape and the buttons
+// phones: the outline is split down the middle. The right half looks in from the left edge of the
+// screen, the left half from the right, and both leave once a card turns face up.
 function phoneTapeBottom(){
   const tape=document.getElementById('introTapeWrap');
   const b=tape ? tape.getBoundingClientRect().bottom : 0;
@@ -417,19 +417,19 @@ function placePhoneChalk(){
   const band=btnTop-tapeBottom;
   const deck=document.querySelector('.deck-stack');
   const deckW=deck ? deck.getBoundingClientRect().width : 200;
-  const margin=10, beside=14;
+  const gap=Math.max(18, Math.round(band*.06));
+  const cssH=Math.round(band-2*gap);
+  const half=cssH*(553/1192)/2;
   const gutter=(innerWidth-deckW)/2;
-  let visW=Math.max(48, (gutter-margin-beside)*2);
-  const maxH=band-2*Math.max(20, Math.round(band*.06));
-  if(visW*(1192/553)>maxH) visW=maxH*(553/1192);
-  const cssW=Math.round(visW*(1192/553))+'px';
+  const peek=Math.max(28, Math.min(half*.62, gutter-18));
   const top=((tapeBottom+btnTop)/2)+'px';
-  const split=Math.round(deckW/2+beside)+'px';
-  [left, right].forEach(img=>{
-    img.style.width=cssW;
-    img.style.top=top;
-    img.style.setProperty('--split', split);
-  });
+  const mid=innerWidth/2;
+  const w=cssH+'px';
+  left.style.width=right.style.width=w;
+  left.style.top=right.style.top=top;
+  // the right half of the figure enters from the left edge, the left half from the right edge
+  right.style.setProperty('--x', Math.round(peek-half-mid)+'px');
+  left.style.setProperty('--x', Math.round(mid-peek+half)+'px');
 }
 function phoneDeckChalk(on){
   if(isDesktop()) return;

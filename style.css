@@ -459,13 +459,13 @@ body.intro-done .intro-brand{transition:opacity .5s ease-in-out;}
     opacity:0; visibility:hidden; transition:opacity .5s ease, visibility 0s linear .5s;}
   body.deck-home .chalk{opacity:1; visibility:visible; transition:opacity .5s ease, visibility 0s;}
   #chalkFrame, #chalkPlain{display:none;}
-  /* the standing figure is split down its middle and the halves step apart, so the deck no longer hides the line */
+  /* the figure is split down the middle: its right half comes in from the left edge, its left half from the right */
   .chalk-half{display:block; position:absolute; left:50%; top:46%; width:min(68vh, 520px); width:min(68dvh, 520px);
     opacity:.28; transform-origin:50% 50%; user-select:none; -webkit-user-drag:none;}
   #chalkLeft{clip-path:inset(0 0 50% 0);
-    transform:translate(calc(-50% - var(--split, 0px)), -50%) rotate(-90deg);}
+    transform:translate(calc(-50% + var(--x, 0px)), -50%) rotate(-90deg);}
   #chalkRight{clip-path:inset(50% 0 0 0);
-    transform:translate(calc(-50% + var(--split, 0px)), -50%) rotate(-90deg);}
+    transform:translate(calc(-50% + var(--x, 0px)), -50%) rotate(-90deg);}
   body.intro .intro-logo{opacity:0;}
   body.intro .intro-tape-wrap{opacity:0;}
   body.intro-done .intro-logo{display:none;}
