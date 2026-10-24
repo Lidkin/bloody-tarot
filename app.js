@@ -1849,8 +1849,10 @@ function setFinale(els){
   document.getElementById('etsyBtn').href=etsyLink(els[0]._card);
   document.getElementById('fDeck').innerHTML=tr(one ? 'deckOne' : 'deckMany');
   if(!isDesktop()){
-    document.getElementById('fDeck').hidden=!!els[0]._fromDeck && !one;
-    document.getElementById('etsyBtn').textContent=tr(document.getElementById('fDeck').hidden ? 'etsyPrint' : 'etsy');
+    // the same line as the desktop finale: under the buttons, on both closing screens
+    document.getElementById('fDeck').hidden=false;
+    document.getElementById('fDeck').innerHTML=tr('deckMany');
+    document.getElementById('etsyBtn').textContent=tr('etsy');
   }else{
     document.getElementById('fDeck').hidden=!!els[0]._fromDeck;
     if(!document.getElementById('fDeck').hidden) document.getElementById('fDeck').innerHTML=tr('deckMany');

@@ -551,8 +551,10 @@ body.intro-done .intro-brand{transition:opacity .5s ease-in-out;}
   #finale .finale-row.shop-below .return-btn{order:1;}
   #finale .finale-row.shop-below .link-btn{order:2;}
   #finale .finale-row.shop-below .cta{order:3; flex-basis:100%;}
-  #finale #fDeck{order:2; max-width:none; white-space:normal; width:100%; box-sizing:border-box;
-    padding:0 20px; margin:14px 0 0;}
+  #finale #fDeck{order:2; display:block; max-width:none; white-space:normal; width:100%; box-sizing:border-box;
+    padding:0 20px; margin:14px 0 0;
+    font-family:'Cormorant Garamond',Georgia,serif; font-weight:300; font-style:italic; letter-spacing:0;
+    font-size:clamp(18px, 1.3889vw, 22px); color:var(--muted); opacity:.8;}
   /* the spread's own paragraph, in the card text's face, between two hairlines */
   body.car-open #fSummary{position:relative; font-style:normal; padding:14px 20px;}
   body.car-open #fSummary::before,
