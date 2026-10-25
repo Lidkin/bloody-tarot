@@ -206,7 +206,7 @@ for(let i=0;i<78;i++){
 
 /* ---------- language ---------- */
 const UI={
-ru:{title:'Таро Лидии Хаит', whisper:'хочешь знать?',
+ru:{title:'Таро Лидии Хаит', whisper:'хочешь знать?', rush:'кликни ещё — быстрее',
   optDay:'Карта дня', optThree:'Три карты', positions:['Прошлое','Настоящее','Будущее'],
   upright:'Прямое положение', reversed:'Перевёрнутое положение',
   pickAsk:['выбери три карты','выбери настоящее','выбери будущее'], pickDone:'выбор сделан',
@@ -230,7 +230,7 @@ ru:{title:'Таро Лидии Хаит', whisper:'хочешь знать?',
     n=>`${n} легла перевёрнутой — здесь энергия застревает.`,
     'Две карты перевёрнуты — сначала стоит разобраться с тем, что мешает.',
     'Все карты перевёрнуты — время посмотреть внутрь себя, прежде чем действовать.']},
-en:{title:'Tarot by Lidiia Khait', whisper:'want to know?',
+en:{title:'Tarot by Lidiia Khait', whisper:'want to know?', rush:'click again — faster',
   optDay:'Card of the day', optThree:'Three cards', positions:['Past','Present','Future'],
   upright:'Upright', reversed:'Reversed',
   pickAsk:['choose three cards','choose the present','choose the future'], pickDone:'the choice is made',
@@ -697,9 +697,11 @@ function buildFan(onReady){
     if(mode==='three') startSpread(true);
     const tl=dealTl=gsap.timeline({onComplete:()=>{
       dealTl=null;
+      showRushHint(false);
       gsap.to(mover,{opacity:0,duration:.2,onComplete:()=>mover.remove()});
       if(spread) updatePickList();
     }});
+    showRushHint(true);
     tl.to(pop,{a:angleEnd,duration:sweepDur(outerIdx.length),ease:'sine.inOut',
       onStart:dropOuter, onUpdate:()=>{ setMover(); dropOuter(); }, onComplete:dropOuter});
     // the rest of the deck steps down to the lower arc's right end and deals it back, mirroring the upper one
@@ -821,6 +823,11 @@ fan.addEventListener('pointermove', e=>{
   else showPickAsk();
 });
 fan.addEventListener('pointerleave', ()=>{ if(fanIdle()){ setHover(null); if(spread?.list) showPickAsk(); } });
+// the whisper's place, and only while a click can hurry the dealing or the gathering
+function showRushHint(on){
+  const el=document.getElementById('rushHint');
+  if(el) el.classList.toggle('on', !!(on && isDesktop()));
+}
 // a mouse click anywhere while the opening plays, while the fan is dealing, or while it is gathered
 // back into the deck, plays that motion at double speed instead of choosing a card
 addEventListener('pointerdown', e=>{
@@ -1984,6 +1991,7 @@ function resetDeckStack(){
 // the upper arc's right end, sweeps it back to its left end, and flies home onto the velvet.
 // The other cards of a spread (extras) land there just before it, and it covers them.
 function gatherDeck(el, extras=[]){
+  showRushHint(true);
   const s=el._state, render=()=>renderCard(el,s);
   gsap.killTweensOf(s);
   setDim(0);
@@ -2037,6 +2045,7 @@ function flyHome(el){
     deckStack.style.setProperty('--ex', edge.x.toFixed(2)+'px'); deckStack.style.setProperty('--ey', edge.y.toFixed(2)+'px');
   }}, 0);
   tl.to(deckStack,{x:0, y:0, rotation:0, scaleX:1, scaleY:1, duration:DUR, ease:EASE, onComplete:()=>{
+    showRushHint(false);
     gatherTl=null; activeCard=null; hoverCard=null; shufflePhase='idle'; busy=false; endReading();
   }}, 0);
 }
