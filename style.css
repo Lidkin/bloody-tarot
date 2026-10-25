@@ -93,7 +93,7 @@ body:not(.fonts-ready) h1.title{visibility:hidden;}
   color:var(--muted); font-size:18px; font-style:italic; letter-spacing:1px; opacity:.8; pointer-events:none; transition:opacity .8s ease-in-out;}
 .whisper.gone, .whisper.swap{opacity:0;}
 /* the same line, in the whisper's place, only while a second click can hurry the cards */
-.rush-hint{position:fixed; left:0; right:0; bottom:80px; z-index:6; margin:0; text-align:center;
+.rush-hint{position:fixed; left:0; right:0; bottom:80px; z-index:46; margin:0; text-align:center;
   pointer-events:none; opacity:0; color:var(--muted); font-style:italic; line-height:1;
   transition:opacity .8s ease-in-out;}
 .rush-hint.on{opacity:.8;}
@@ -395,12 +395,16 @@ body.car-open #fName{display:none;}
 @media (max-width:480px){ body.noir h1.title{font-size:12px; letter-spacing:2.85px;} }
 /* a phone held sideways: the page is made for upright phones and a browser page cannot lock the rotation,
    so it asks to turn the phone back */
-.rotate-note{display:none;}
+.rotate-note, .tablet-note{display:none;}
 @media (orientation:landscape) and (max-height:500px) and (pointer:coarse){
   .rotate-note{position:fixed; inset:0; z-index:10000; display:flex; flex-direction:column; align-items:center; justify-content:center;
     gap:14px; background:#050303; color:var(--ink); font-size:19px; font-style:italic; letter-spacing:.5px; text-align:center;}
   .rotate-note .rot-ic{font-size:34px; font-style:normal; color:var(--red); line-height:1;}
 }
+/* a tablet held upright: the page is made for a wide screen, and a browser page cannot lock the rotation */
+body.tablet-portrait .tablet-note{position:fixed; inset:0; z-index:10000; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:14px; padding:24px; background:#050303; color:var(--ink); font-size:19px; font-style:italic; letter-spacing:.5px; text-align:center;}
+body.tablet-portrait .tablet-note .rot-ic{font-size:34px; font-style:normal; color:var(--red); line-height:1;}
 /* phones, three cards: arrows in the free margins beside the stack; placeCarArrows (app.js) sets their height */
 .car-arrow{position:fixed; z-index:1200; transform:translate(-50%,-50%); background:none; border:none; padding:14px 12px;
   font-family:var(--head-font); font-weight:700; font-size:40px; line-height:1; color:var(--accent); opacity:0; pointer-events:none;

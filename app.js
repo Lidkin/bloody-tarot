@@ -215,7 +215,7 @@ ru:{title:'Таро Лидии Хаит', whisper:'хочешь знать?', ru
   deckOne:'Эта карта — из колоды <b>Bloody Feast Tarot</b>: все 78 карт с авторской графикой в файле для печати на Etsy.',
   deckMany:'Эти карты — из колоды <b>Bloody Feast Tarot</b>: все 78 карт с авторской графикой в файле для печати на Etsy.',
   spreadBack:'Посмотреть значение расклада',
-  etsy:'Купить колоду', etsyPrint:'Колода для печати · купить на Etsy', rotate:'Поверни телефон вертикально', touchDeck:'коснись колоды', heading:'Таро «Кровавый пир» от Лидии Хаит', share:'Поделиться', gather:'Собрать', onceMore:'Ещё раз',
+  etsy:'Купить колоду', etsyPrint:'Колода для печати · купить на Etsy', rotate:'Поверни телефон вертикально', rotateTablet:'Поверни планшет горизонтально', touchDeck:'коснись колоды', heading:'Таро «Кровавый пир» от Лидии Хаит', share:'Поделиться', gather:'Собрать', onceMore:'Ещё раз',
   again:'↺ Новое гадание', saved:'Картинка сохранена — её можно выложить в сторис',
   storyDay:'КАРТА ДНЯ', storyThree:'ТРИ КАРТЫ', storyAsk:'А ЧТО ВЫПАДЕТ ТЕБЕ?',
   shareDay:name=>`Моя карта дня — ${name}.`, shareSpreadText:list=>`Мой расклад: ${list}.`,
@@ -239,7 +239,7 @@ en:{title:'Tarot by Lidiia Khait', whisper:'want to know?', rush:'click again �
   deckOne:'This card comes from the <b>Bloody Feast Tarot</b> deck: all 78 cards with original artwork in a printable file on Etsy.',
   deckMany:'These cards come from the <b>Bloody Feast Tarot</b> deck: all 78 cards with original artwork in a printable file on Etsy.',
   spreadBack:'See the spread\'s meaning',
-  etsy:'Buy the deck', etsyPrint:'Printable deck · buy on Etsy', rotate:'Turn your phone upright', touchDeck:'touch the deck', heading:'Bloody Feast Tarot deck by Lidiia Khait', share:'Share', gather:'Gather deck', onceMore:'Once more',
+  etsy:'Buy the deck', etsyPrint:'Printable deck · buy on Etsy', rotate:'Turn your phone upright', rotateTablet:'Turn your tablet sideways', touchDeck:'touch the deck', heading:'Bloody Feast Tarot deck by Lidiia Khait', share:'Share', gather:'Gather deck', onceMore:'Once more',
   again:'↺ New reading', saved:'Image saved — you can post it to your story',
   storyDay:'CARD OF THE DAY', storyThree:'THREE CARDS', storyAsk:'WHAT WILL YOU DRAW?',
   shareDay:name=>`My card of the day: ${name}.`, shareSpreadText:list=>`My spread: ${list}.`,
@@ -823,7 +823,7 @@ fan.addEventListener('pointermove', e=>{
   else showPickAsk();
 });
 fan.addEventListener('pointerleave', ()=>{ if(fanIdle()){ setHover(null); if(spread?.list) showPickAsk(); } });
-// the whisper's place, and only while a click can hurry the dealing or the gathering
+// the whisper's place, while a click can hurry the tape, the dealing or the gathering
 function showRushHint(on){
   const el=document.getElementById('rushHint');
   if(el) el.classList.toggle('on', !!(on && isDesktop()));
@@ -2293,8 +2293,18 @@ langBtn.addEventListener('click', ()=>{
 const browserLangs=navigator.languages?.length ? navigator.languages : [navigator.language||'en'];
 langSwitch.classList.toggle('off', browserLangs.every(l=>/^en\b/i.test(l)) && lang==='en');
 applyLang();
-// phones: a page opened from the home screen may keep upright; in the browser only the note in style.css can ask
-if(!isDesktop()) screen.orientation?.lock?.('portrait').catch(()=>{});
+// a tablet is a touch screen whose short side is at least the iPad mini. Phones stay under that.
+const isTabletDevice=()=>navigator.maxTouchPoints>1 && Math.min(screen.width, screen.height)>=600;
+// phones may keep upright when opened from the home screen; tablets are asked to stay landscape.
+// A browser page cannot lock the rotation, so the note covers the screen when it is the wrong way.
+function syncOrient(){
+  document.body.classList.toggle('tablet-portrait', isTabletDevice() && matchMedia('(orientation: portrait)').matches);
+}
+syncOrient();
+addEventListener('resize', syncOrient);
+screen.orientation?.addEventListener?.('change', syncOrient);
+if(isTabletDevice()) screen.orientation?.lock?.('landscape').catch(()=>{});
+else if(!isDesktop()) screen.orientation?.lock?.('portrait').catch(()=>{});
 
 document.addEventListener('contextmenu', e=>{ if(e.target.closest('img, .card, canvas')) e.preventDefault(); });
 document.addEventListener('dragstart', e=>{ if(e.target.tagName==='IMG') e.preventDefault(); });
@@ -2603,6 +2613,7 @@ async function phoneSplash(){
   const dockDur=1.0, unrollDur=2.5;
   const riseLeft=(innerWidth-end.width)/2;
   introTl=gsap.timeline({defaults:{ease:'power2.inOut'}, onComplete:()=>{
+    showRushHint(false);
     introTl=null;
     document.body.classList.add('intro-done');
     document.body.classList.remove('intro');
@@ -2619,7 +2630,7 @@ async function phoneSplash(){
     .to(logo,{clipPath:'inset(0% 0% 12% 0%)', duration:dockDur, ease:'power2.out'}, 'dock')
     // tape pays out to the right while the logo rolls left into the corner
     .set(tape,{width:end.tapeW}, `dock+=${dockDur}`)
-    .to(brand,{left:end.left, duration:unrollDur, ease:'none', onStart(){ logoTween=this; }}, `dock+=${dockDur}`)
+    .to(brand,{left:end.left, duration:unrollDur, ease:'none', onStart(){ logoTween=this; showRushHint(true); }}, `dock+=${dockDur}`)
     .fromTo(tapeHost,{xPercent:-100},{xPercent:()=>endP, duration:unrollDur, ease:'none',
       onStart(){ slideTween=this; }}, `dock+=${dockDur}`)
     .to(langSwitch, {opacity:1, duration:.9, ease:'power1.out',
