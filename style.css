@@ -187,9 +187,10 @@ img{-webkit-user-drag:none; user-select:none; -webkit-user-select:none; -webkit-
   background-image:linear-gradient(115deg, rgba(0,0,0,.07) 0%, transparent 38%, rgba(255,255,255,.55) 49%, rgba(255,255,255,.12) 55%, transparent 64%, rgba(0,0,0,.07) 100%);}
 /* desktop, closing screen: more cards of the deck, each a link to the shop */
 .fcard.showcase{pointer-events:auto;}
-/* the pointer is a bloody fingerprint, the same over whatever can be pressed - only its fallback differs */
-:root{--cur:-webkit-image-set(url(assets/fingerprint-cursor.png) 1x, url(assets/fingerprint-cursor-2x.png) 2x) 16 21, auto;
-  --cur-on:-webkit-image-set(url(assets/fingerprint-cursor.png) 1x, url(assets/fingerprint-cursor-2x.png) 2x) 16 21, pointer;}
+/* a gloved hand. chalk while it rests, the bare finger on anything that can be pressed.
+   the hotspot is the chalk tip, and that same point on the bare index finger */
+:root{--cur:-webkit-image-set(url(assets/cursor-chalk.png) 1x, url(assets/cursor-chalk-2x.png) 2x) 6 0, auto;
+  --cur-on:-webkit-image-set(url(assets/cursor-hand.png) 1x, url(assets/cursor-hand-2x.png) 2x) 5 0, pointer;}
 html{cursor:var(--cur);}
 button:not(:disabled), a[href], .deck-stack, .fcard.showcase{cursor:var(--cur-on);}
 /* the white of an illustration is shown as warm paper, like the faces without artwork;
@@ -559,7 +560,7 @@ body.intro-done .intro-brand{transition:opacity .5s ease-in-out;}
     background:none; border:none; box-shadow:none; appearance:none; -webkit-appearance:none;
     color:var(--accent); font-family:'Oswald',sans-serif; font-weight:500; font-style:normal;
     font-size:16px; letter-spacing:0; line-height:1; text-align:center; text-transform:uppercase;
-    cursor:pointer; opacity:0; visibility:hidden; pointer-events:none;
+    cursor:var(--cur-on); opacity:0; visibility:hidden; pointer-events:none;
     transition:opacity .7s ease, visibility 0s linear .7s;}
   body.car-open.car-leaf #finale #fDeck{opacity:0;}
   body.car-open.car-leaf #finale #spreadBack{opacity:1; visibility:visible; pointer-events:auto;
