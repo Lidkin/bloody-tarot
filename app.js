@@ -1787,15 +1787,36 @@ const untilt=()=>{ if(activeCard) tiltTo(0,0,.9); else if(deckAtRest()) tiltDeck
 document.documentElement.addEventListener('pointerleave', ()=>{ untilt(); activeCard&&activeCard.classList.remove('lit'); });
 window.addEventListener('pointerup', e=>{ if(e.pointerType==='touch') untilt(); });
 // the phone's pose when the card opens is neutral; the neutral slowly follows the phone, so the card
-// always drifts back to lying flat
-let tiltBase=null;
+// always drifts back to lying flat. a few degrees of shake do nothing, and a full lean takes a
+// much wider tilt than before. the picture eases once a frame, instead of a new tween per reading.
+let tiltBase=null, tiltFrame=0;
+const TILT_SPAN=40, TILT_DEAD=3;
 window.addEventListener('deviceorientation', e=>{
   const onDeck=!activeCard && deckAtRest();
   if(e.beta==null || (!onDeck && (!activeCard || busy))){ tiltBase=null; return; }
-  if(!tiltBase) tiltBase={b:e.beta, g:e.gamma};
-  tiltBase.b+=(e.beta-tiltBase.b)*.01; tiltBase.g+=(e.gamma-tiltBase.g)*.01;
-  const nx=clamp1((e.gamma-tiltBase.g)/18), ny=clamp1((e.beta-tiltBase.b)/18);
-  onDeck ? tiltDeck(nx, ny, .4) : (!holdFlat && tiltTo(nx, ny, .4));
+  if(!tiltBase) tiltBase={b:e.beta, g:e.gamma, nx:0, ny:0};
+  tiltBase.gx=e.gamma; tiltBase.by=e.beta; tiltBase.deck=onDeck;
+  if(tiltFrame) return;
+  tiltFrame=requestAnimationFrame(()=>{
+    tiltFrame=0;
+    const t=tiltBase; if(!t) return;
+    t.b+=(t.by-t.b)*.02; t.g+=(t.gx-t.g)*.02;
+    let dx=t.gx-t.g, dy=t.by-t.b;
+    if(Math.hypot(dx, dy)<TILT_DEAD){ dx=0; dy=0; }
+    t.nx+=(clamp1(dx/TILT_SPAN)-t.nx)*.18;
+    t.ny+=(clamp1(dy/TILT_SPAN)-t.ny)*.18;
+    if(t.deck){
+      if(!deckAtRest()) return;
+      gsap.killTweensOf(deckTilt);
+      deckTilt.ty=t.nx*DECK_TILT_Y; deckTilt.tx=-t.ny*DECK_TILT_X;
+      renderDeckTilt();
+    } else if(!holdFlat && activeCard?._state && !spread?.summary && !busy){
+      const s=activeCard._state;
+      gsap.killTweensOf(s, 'tx,ty');
+      s.ty=t.nx*TILT_Y; s.tx=-t.ny*TILT_X;
+      renderCard(activeCard, s);
+    }
+  });
 });
 // iOS lets a page read the phone's tilt only after asking, from a tap
 function askTiltPermission(){
