@@ -758,12 +758,14 @@ body.intro-done .intro-brand{transition:opacity .5s ease-in-out;}
   @media (max-height:758px){
     body.spread-row .spread-cap{font-size:clamp(11px, 1vw, 13px); gap:1px;}
     body.spread-row .cap-title{margin-top:.3em;}
+    body.spread-row #fSummary{padding:12px 20px;}
     body.spread-row #finale #fDeck{margin-top:10px;}
-    body.spread-row #finale .finale-row{margin-top:10px;}
+    body.spread-row #finale .finale-row{margin-top:12px;}
   }
   body.spread-row #finale{left:0; right:0; top:auto; bottom:var(--whisper-bottom); width:100%; max-width:none; transform:none;}
-  body.spread-row #fSummary{position:relative; max-width:none; width:100%; box-sizing:border-box; padding:14px 24px; margin:0;
-    font-style:normal; border:none;}
+  /* reading block: equal air inside the red rules; side inset matches the deck note below */
+  body.spread-row #fSummary{position:relative; max-width:none; width:100%; box-sizing:border-box;
+    padding:16px 28px; margin:0; font-style:normal; border:none; line-height:1.45;}
   /* a scaled hairline: a 1px rule is the thinnest border the browser will keep, so this draws half of that */
   body.spread-row #fSummary::before,
   body.spread-row #fSummary::after{content:''; position:absolute; left:0; right:0; height:1px; background:var(--red);
@@ -772,9 +774,9 @@ body.intro-done .intro-brand{transition:opacity .5s ease-in-out;}
   body.spread-row #fSummary::after{bottom:0; transform-origin:bottom center;}
   body.spread-row #fSummary.card-text::before,
   body.spread-row #fSummary.card-text::after{background:transparent;}
-  body.spread-row #finale #fDeck{display:block; order:2; max-width:none; white-space:normal; padding:0 24px; margin:16px 0 0;
+  body.spread-row #finale #fDeck{display:block; order:2; max-width:none; white-space:normal; padding:0 28px; margin:14px 0 0;
     font-size:clamp(12px, .95vw, 15px);}
-  body.spread-row #finale .finale-row{order:1; display:grid; grid-template-columns:1fr auto 1fr; align-items:center; column-gap:22px; width:100%; margin-top:16px;}
+  body.spread-row #finale .finale-row{order:1; display:grid; grid-template-columns:1fr auto 1fr; align-items:center; column-gap:22px; width:100%; margin-top:14px;}
   body.spread-row #finale .return-btn,
   body.spread-row #finale .cta,
   body.spread-row #finale .link-btn{font-size:clamp(16px, 1.25vw, 20px);}

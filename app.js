@@ -1531,12 +1531,15 @@ fan.addEventListener('pointerup', e=>{
 // parent band between the tape and the reading; the middle column’s axis is the screen centre.
 // Column height follows the band; the card takes all leftover height (size first, gap last).
 function spreadRowPoses(els){
-  const n=els.length, side=20, COL_GAP=18, CAP_CARD_GAP=6, EDGE=6;
+  const n=els.length, side=20, COL_GAP=18;
+  // padding inside each column: under the captions, and above the reading
+  const CARD_PAD_TOP=innerHeight<760 ? 10 : 14;
+  const CARD_PAD_BOT=innerHeight<760 ? 12 : 16;
   const tapeBottom=(document.getElementById('introTapeWrap')?.getBoundingClientRect().bottom)||0;
   const topPad=innerHeight<760 ? 4 : 10;
   const bandTop=tapeBottom+topPad;
   const sum=document.getElementById('fSummary');
-  const bandBot=sum.getBoundingClientRect().top-EDGE;
+  const bandBot=sum.getBoundingClientRect().top-CARD_PAD_BOT;
   const bandH=Math.max(100, bandBot-bandTop);
   const availW=Math.max(160, innerWidth-2*side);
   const midX=innerWidth/2;
@@ -1563,8 +1566,8 @@ function spreadRowPoses(els){
   fitCaps((availW-(n-1)*COL_GAP)/n);
 
   let capH=Math.max(1, ...spread.caps.map(c=>c.offsetHeight||0));
-  // card claims the rest of the column height; tighten the gutters before shrinking the card
-  let cardH=Math.max(48, bandH-capH-CAP_CARD_GAP);
+  // card claims the rest of the column height (minus paddings); tighten gutters before shrinking
+  let cardH=Math.max(48, bandH-capH-CARD_PAD_TOP);
   let cardW=cardH*CARD_ASPECT;
   let capW=Math.max(...spread.caps.map(c=>c.offsetWidth||0));
   let colW=Math.max(cardW, capW);
@@ -1577,7 +1580,7 @@ function spreadRowPoses(els){
       colW=(availW-(n-1)*colGap)/n;
       fitCaps(colW);
       capH=Math.max(1, ...spread.caps.map(c=>c.offsetHeight||0));
-      cardH=Math.min(Math.max(48, bandH-capH-CAP_CARD_GAP), colW/CARD_ASPECT);
+      cardH=Math.min(Math.max(48, bandH-capH-CARD_PAD_TOP), colW/CARD_ASPECT);
       cardW=cardH*CARD_ASPECT;
       colW=Math.max(cardW, Math.min(colW, Math.max(...spread.caps.map(c=>c.offsetWidth||0))));
       if(rowW()>availW){
@@ -1596,7 +1599,7 @@ function spreadRowPoses(els){
     spread.caps[i].style.height=capH+'px';
   });
 
-  const cardTop=bandTop+capH+CAP_CARD_GAP;
+  const cardTop=bandTop+capH+CARD_PAD_TOP;
   const midY=cardTop+cardH/2;
   return {poses:els.map((_,i)=>({
     x:centers[i], y:midY, rot:0, w:cardW, h:cardH, ry:180, tx:0, ty:0
