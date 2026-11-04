@@ -117,7 +117,8 @@ body:not(.fonts-ready) .ask-sub{visibility:hidden;}
   transform:scaleX(0); transition:transform .35s ease;}
 .opt.done{opacity:.45; text-shadow:none; cursor:var(--cur);}
 @media (hover:hover) and (pointer:fine){
-  .opt:not(.done):hover::after{transform:scaleX(1);}
+  .opt:not(.done):hover::after,
+  .opt:not(.done).hand-on::after{transform:scaleX(1);}
 }
 /* phones: a thin frame shows round one reading, then round the other - pick one; once the card of the day is
    drawn, only "Три карты" keeps calling. It lies outside the words' box, so nothing moves */
@@ -266,11 +267,14 @@ body:not(.noir) .big-name{font-family:'Cinzel',serif; color:#5e4c25;}
 /* hover effects only where there is a pointer: a phone keeps "hovering" the spot last tapped, and the next
    button showing up under the finger would already look pressed. There a tap fills it (.tap, app.js) */
 @media (hover:hover) and (pointer:fine){
-  .finish-btn:hover .fill{animation:none; background-position:50% 0;}
-  .finish-btn:hover .arrow{transform:translateX(5px); transition-delay:.35s, 0s;}
-  .return-btn:hover{color:var(--ink);}
-  .cta:hover{color:#ff4d4c;}
-  .link-btn:hover{color:var(--ink);}
+  .finish-btn:hover .arrow,
+  .finish-btn.hand-on .arrow{transform:translateX(5px); transition-delay:.35s, 0s;}
+  .return-btn:hover,
+  .return-btn.hand-on{color:var(--ink);}
+  .cta:hover,
+  .cta.hand-on{color:#ff4d4c;}
+  .link-btn:hover,
+  .link-btn.hand-on{color:var(--ink);}
 }
 .finish-btn.tap .fill{animation:none; background-position:50% 0;}
 .finish-btn.tap .arrow{transform:translateX(5px);}
@@ -624,17 +628,23 @@ body.intro-done .intro-brand{transition:opacity .5s ease-in-out;}
   .finish-btn .fill{color:transparent; -webkit-text-fill-color:transparent; -webkit-background-clip:text; background-clip:text;
     background-image:linear-gradient(90deg, var(--accent) 37.5%, var(--red) 37.5% 62.5%, var(--accent) 62.5%);
     background-size:400% 100%; background-position:100% 0;}
-  .finish-btn:hover, .finish-btn:hover .fill{color:transparent; -webkit-text-fill-color:transparent;}
+  /* chalk glove: quiet. bare glove on the button: the word starts calling */
+  .finish-btn.hand-on .fill{animation:call 3.6s ease-in-out infinite;}
+  .finish-btn:hover, .finish-btn:hover .fill,
+  .finish-btn.hand-on, .finish-btn.hand-on .fill{color:transparent; -webkit-text-fill-color:transparent;}
   .return-btn{color:var(--accent); background:none; border:1px solid rgba(var(--accent-rgb),.4);
     padding:9px 20px; border-radius:24px;}
-  .return-btn:hover{color:var(--accent); background:rgba(228,36,35,.15); border-color:var(--red);}
+  .return-btn:hover,
+  .return-btn.hand-on{color:var(--accent); background:rgba(228,36,35,.15); border-color:var(--red);}
   /* the same vertical padding and border as Share, so the red pill is the same height */
   .cta, body.noir .cta{color:#fff; -webkit-text-fill-color:#fff; background:var(--red);
     border:1px solid transparent; padding:9px 30px; border-radius:26px; box-shadow:0 0 18px rgba(228,36,35,.4);}
-  .cta:hover, body.noir .cta:hover{color:#fff; -webkit-text-fill-color:#fff; transform:translateY(-1px);
+  .cta:hover, body.noir .cta:hover,
+  .cta.hand-on, body.noir .cta.hand-on{color:#fff; -webkit-text-fill-color:#fff; transform:translateY(-1px);
     box-shadow:0 0 28px rgba(228,36,35,.65);}
   .link-btn{color:var(--muted); background:none; border:none; border-radius:0; padding:9px 6px; box-shadow:none;}
-  .link-btn:hover{color:var(--ink);}
+  .link-btn:hover,
+  .link-btn.hand-on{color:var(--ink);}
   .cap-pos, .meaning-panel .pos-label, .pick-word:not(.pick-ask){font-family:'Trispace',sans-serif; font-weight:400; letter-spacing:0;
     font-size:clamp(13px, .9722vw, 16px);}
   .pick-word:not(.pick-ask){letter-spacing:.12em; margin-right:-.12em; font-size:clamp(13px, 1.15vw, 20px); color:var(--accent);}
@@ -680,16 +690,19 @@ body.intro-done .intro-brand{transition:opacity .5s ease-in-out;}
   body.day-open .finish-btn .fill{color:transparent; -webkit-text-fill-color:transparent;
     background-image:linear-gradient(to bottom, #fff 0 50%, var(--red) 50% 100%);
     background-size:100% 200%; background-position:0 100%; background-repeat:no-repeat;
-    -webkit-background-clip:text; background-clip:text;
+    -webkit-background-clip:text; background-clip:text; animation:none;
     transition:background-position 1.6s ease;}
-  body.day-open .finish-btn:hover .fill{background-position:0 0; transition-duration:.6s;}
+  body.day-open .finish-btn:hover .fill,
+  body.day-open .finish-btn.hand-on .fill{background-position:0 0; transition-duration:.6s;}
   body.day-open .end-phrase{font-size:clamp(12px, .95vw, 16px); opacity:0;
     color:transparent; -webkit-text-fill-color:transparent;
     background-image:linear-gradient(to bottom, color-mix(in srgb, var(--muted) 80%, transparent) 0 50%, var(--red) 50% 100%);
     background-size:100% 200%; background-position:0 0; background-repeat:no-repeat;
     -webkit-background-clip:text; background-clip:text;
     transition:background-position 1.4s ease;}
-  body.day-open .meaning-end:has(.finish-btn:hover) .end-phrase{background-position:0 100%; transition-delay:.35s;}
+  /* whisper starts taking red before the big word has finished turning white */
+  body.day-open .meaning-end:has(.finish-btn:hover) .end-phrase,
+  body.day-open .meaning-end:has(.finish-btn.hand-on) .end-phrase{background-position:0 100%; transition-delay:.05s;}
   /* after Finish the same screen stays; the closing row takes the button's place, 80px off the bottom */
   body.day-open.day-done #meaningPanel .meaning-end{display:none;}
   body.day-open.day-done #mText{margin-bottom:0;}
@@ -707,8 +720,10 @@ body.intro-done .intro-brand{transition:opacity .5s ease-in-out;}
     color:var(--accent); text-shadow:0 0 12px rgba(var(--accent-rgb),.45);}
   body.day-open.day-done #finale .finale-row .link-btn::after{content:''; position:absolute; left:6px; right:6px; bottom:0;
     height:1px; background:var(--red); transform:scaleX(0); transition:transform .35s ease;}
-  body.day-open.day-done #finale .finale-row .link-btn:hover{color:var(--accent);}
-  body.day-open.day-done #finale .finale-row .link-btn:hover::after{transform:scaleX(1);}
+  body.day-open.day-done #finale .finale-row .link-btn:hover,
+  body.day-open.day-done #finale .finale-row .link-btn.hand-on{color:var(--accent);}
+  body.day-open.day-done #finale .finale-row .link-btn:hover::after,
+  body.day-open.day-done #finale .finale-row .link-btn.hand-on::after{transform:scaleX(1);}
   body.day-open.day-done #finale .row-break{display:none;}
   /* three cards in a row: captions sit up under the tape, the reading is full width, the buttons match the day card */
   body.spread-row .cap-pos{color:var(--red); letter-spacing:.12em; margin-right:-.12em; line-height:1.2;
@@ -741,8 +756,10 @@ body.intro-done .intro-brand{transition:opacity .5s ease-in-out;}
     color:var(--accent); text-shadow:0 0 12px rgba(var(--accent-rgb),.45);}
   body.spread-row #finale .finale-row .link-btn::after{content:''; position:absolute; left:6px; right:6px; bottom:0;
     height:1px; background:var(--red); transform:scaleX(0); transition:transform .35s ease;}
-  body.spread-row #finale .finale-row .link-btn:hover{color:var(--accent);}
-  body.spread-row #finale .finale-row .link-btn:hover::after{transform:scaleX(1);}
+  body.spread-row #finale .finale-row .link-btn:hover,
+  body.spread-row #finale .finale-row .link-btn.hand-on{color:var(--accent);}
+  body.spread-row #finale .finale-row .link-btn:hover::after,
+  body.spread-row #finale .finale-row .link-btn.hand-on::after{transform:scaleX(1);}
   body.spread-row #finale .row-break{display:none;}
 }
 

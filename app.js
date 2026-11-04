@@ -821,10 +821,24 @@ function hotUnderCursor(x, y){
   }
   return null;
 }
+let handOnEl=null;
+function setHandOn(el){
+  if(handOnEl===el) return;
+  handOnEl?.classList.remove('hand-on');
+  handOnEl=el||null;
+  if(handOnEl) handOnEl.classList.add('hand-on');
+}
 function syncHandCursor(x, y){
-  if(!isDesktop()){ document.documentElement.classList.remove('cur-hand'); return null; }
+  if(!isDesktop()){
+    document.documentElement.classList.remove('cur-hand');
+    setHandOn(null);
+    return null;
+  }
   const hit=hotUnderCursor(x, y) || cardAtCursor(x, y);
   document.documentElement.classList.toggle('cur-hand', !!hit);
+  // bare glove ↔ button hover: CSS :hover only sees the hotspot pixel, the whole hand uses .hand-on
+  const btn=hit?.closest?.('.finish-btn, .opt:not(.done), .link-btn, .return-btn, .cta');
+  setHandOn(btn||null);
   return hit;
 }
 let faceTimer=0;
@@ -1834,7 +1848,10 @@ window.addEventListener('pointermove', e=>{
   tiltTo(clamp1((e.clientX-s.x)/(s.w*.9)), clamp1((e.clientY-s.y)/(s.h*.7)));
 });
 const untilt=()=>{ if(activeCard) tiltTo(0,0,.9); else if(deckAtRest()) tiltDeck(0,0,.9); };
-document.documentElement.addEventListener('pointerleave', ()=>{ untilt(); activeCard&&activeCard.classList.remove('lit'); });
+document.documentElement.addEventListener('pointerleave', ()=>{
+  untilt(); activeCard&&activeCard.classList.remove('lit');
+  document.documentElement.classList.remove('cur-hand'); setHandOn(null);
+});
 window.addEventListener('pointerup', e=>{ if(e.pointerType==='touch') untilt(); });
 // the phone's pose when the card opens is neutral; the neutral slowly follows the phone, so the card
 // always drifts back to lying flat. a few degrees of shake do nothing, and a full lean takes a
