@@ -2390,7 +2390,7 @@ async function phoneSplash(){
   })();
   const placeTape=()=>{
     if(!svgEl || !redFrac || !tape || !tapeHost) return;
-    tape.style.height='29px';
+    tape.style.height='35px';
     void tapeHost.offsetWidth;
     const hostW=tapeHost.offsetWidth||1;
     const L=tape.getBoundingClientRect().left;
@@ -2487,7 +2487,7 @@ async function phoneSplash(){
 
   // tape height follows the CSS clamp, but grows on a wide screen so the one red label
   // can sit on the viewport center while the strip still covers the rail
-  const cssTapeH=()=>Math.max(12, Math.min(19, innerWidth*0.0252));
+  const cssTapeH=()=>Math.max(14, Math.min(23, innerWidth*0.03));
   let endP=0, slideTween=null, logoTween=null, tapeReady=false;
   const syncTape=(snap)=>{
     if(!svgEl || !redFrac) return 0;
