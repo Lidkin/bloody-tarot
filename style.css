@@ -35,7 +35,7 @@ canvas#dust{position:fixed; inset:0; z-index:1; pointer-events:none;}
   background:radial-gradient(ellipse at 50% 45%, transparent 30%, rgba(0,0,0,.75) 100%);}
 /* chalk body behind the deck. the drawings are already transparent, so the white line sits on the velvet */
 .chalk{display:none;}
-@media (hover:hover) and (pointer:fine){
+@media (hover:hover) and (pointer:fine), (hover:none) and (min-device-width:768px){
   .chalk{display:block; position:fixed; inset:0; z-index:1; pointer-events:none;}
   .chalk img{position:absolute; left:50%; top:50%; width:min(92vw, 1120px); opacity:0;
     user-select:none; -webkit-user-drag:none; transform-origin:50% 50%;}
@@ -130,7 +130,7 @@ body:not(.fonts-ready) .ask-sub{visibility:hidden;}
 .opt::after{content:''; position:absolute; left:0; right:3px; bottom:0; height:1px; background:var(--red);
   transform:scaleX(0); transition:transform .35s ease;}
 .opt.done{opacity:.45; text-shadow:none; cursor:var(--cur);}
-@media (hover:hover) and (pointer:fine){
+@media (hover:hover) and (pointer:fine), (hover:none) and (min-device-width:768px){
   .opt:not(.done):hover::after,
   .opt:not(.done).hand-on::after{transform:scaleX(1);}
 }
@@ -143,16 +143,16 @@ html.tablet .opt:not(.done).hand-on::after{transform:scaleX(1);}
 /* phones: a thin frame shows round one reading, then round the other - pick one; once the card of the day is
    drawn, only "Три карты" keeps calling. It lies outside the words' box, so nothing moves */
 @media not all and (hover:hover) and (pointer:fine){
-  html:not(.tablet) .opt::before{content:''; position:absolute; top:0; bottom:0; left:-18px; right:-15px; border:.67px solid rgba(var(--accent-rgb),.55);
+  html.phone .opt::before{content:''; position:absolute; top:0; bottom:0; left:-18px; right:-15px; border:.67px solid rgba(var(--accent-rgb),.55);
     border-radius:24px; opacity:0; animation:frame 8s ease-in-out infinite; pointer-events:none;}
-  html:not(.tablet) .opt-col + .opt::before{animation-delay:4s;}
+  html.phone .opt-col + .opt::before{animation-delay:4s;}
   /* hidden, never stopped: a stopped frame would start its cycle over and blink together with the other */
-  html:not(.tablet) .opt.done::before,
-html:not(.tablet) .opt:not(.done):active::before,
-html:not(.tablet) .opt.tap::before{visibility:hidden;}
+  html.phone .opt.done::before,
+html.phone .opt:not(.done):active::before,
+html.phone .opt.tap::before{visibility:hidden;}
   /* a tap: only the words turn red */
-  html:not(.tablet) .opt:not(.done):active,
-html:not(.tablet) .opt.tap{color:var(--red); text-shadow:0 0 10px rgba(228,36,35,.7), 0 0 24px rgba(228,36,35,.45);}
+  html.phone .opt:not(.done):active,
+html.phone .opt.tap{color:var(--red); text-shadow:0 0 10px rgba(228,36,35,.7), 0 0 24px rgba(228,36,35,.45);}
 }
 @keyframes frame{0%{opacity:0;} 20%, 30%{opacity:1;} 50%, 100%{opacity:0;}}
 body:not(.fonts-ready) .spread-options{visibility:hidden;}
@@ -270,7 +270,7 @@ body:not(.noir) .big-name{font-family:'Cinzel',serif; color:#5e4c25;}
 .meaning-panel .pos-label{display:block; font-family:var(--head-font); font-weight:400; color:var(--ink); font-size:16px; letter-spacing:.96px;
   text-transform:uppercase; margin-bottom:6px;}
 .meaning-panel .pos-label:empty{display:none;}
-@media (hover:hover) and (pointer:fine){ #mPos{display:none;} }
+@media (hover:hover) and (pointer:fine), (hover:none) and (min-device-width:768px){ #mPos{display:none;} }
 /* tablet: same layout as desktop */
  html.tablet #mPos{display:none;} 
 
@@ -292,7 +292,7 @@ body:not(.noir) .big-name{font-family:'Cinzel',serif; color:#5e4c25;}
 .finish-btn .arrow{margin-left:4px; animation-delay:.35s; transition:background-position .35s ease, transform .35s ease;} /* red reaches it after the word */
 /* hover effects only where there is a pointer: a phone keeps "hovering" the spot last tapped, and the next
    button showing up under the finger would already look pressed. There a tap fills it (.tap, app.js) */
-@media (hover:hover) and (pointer:fine){
+@media (hover:hover) and (pointer:fine), (hover:none) and (min-device-width:768px){
   .finish-btn:hover .arrow,
   .finish-btn.hand-on .arrow{transform:translateX(5px); transition-delay:.35s, 0s;}
   .return-btn:hover,
@@ -346,7 +346,7 @@ body.noir .cta{background:none; color:var(--red); box-shadow:none;}
 /* the return line is a phone-only inscription; on the desktop it stays out of the row */
 #spreadBack{display:none;}
 .finale-cue{display:contents;}
-@media (hover:hover) and (pointer:fine) and (min-width:760px){
+@media (hover:hover) and (pointer:fine) and (min-width:760px), (hover:none) and (min-device-width:768px) and (min-width:760px){
   .finale{max-width:760px;}
   .finale .summary{max-width:640px;}
   .finale #fDeck{max-width:none; white-space:nowrap;}
@@ -372,7 +372,7 @@ body.noir .cta{background:none; color:var(--red); box-shadow:none;}
 
 /* the closing block stands on the bottom of the screen; the cards find room above it (fitAbove / fitRow) */
 .finale{top:auto; bottom:calc(28px + env(safe-area-inset-bottom,0px));}
-@media (hover:hover) and (pointer:fine){ .finale{bottom:calc(40px + env(safe-area-inset-bottom,0px));} }
+@media (hover:hover) and (pointer:fine), (hover:none) and (min-device-width:768px){ .finale{bottom:calc(40px + env(safe-area-inset-bottom,0px));} }
 /* tablet: same layout as desktop */
  html.tablet .finale{bottom:calc(40px + env(safe-area-inset-bottom,0px));} 
 
@@ -383,7 +383,7 @@ h1.title{position:fixed; top:calc(14px + env(safe-area-inset-top,0px)); left:50%
   margin:0; width:max-content; white-space:nowrap; font-family:var(--head-font); color:var(--accent);
   font-size:13px; line-height:20px; letter-spacing:2.85px; opacity:.6; z-index:5; text-transform:uppercase;}
 /* desktop: a bigger deck and the title lower */
-@media (hover:hover) and (pointer:fine){
+@media (hover:hover) and (pointer:fine), (hover:none) and (min-device-width:768px){
   /* deck sits in the band between the tape and the button block; --deck-w is capped in CSS and
      tightened further by fitOpeningLayout (app.js) so a short window never covers the tape */
   .velvet{--deck-w:210px; position:absolute; left:50%; width:min(92vw,520px); height:auto; margin:0;
@@ -463,7 +463,7 @@ html.tablet .ask-sub .cd-row .countdown{margin:0; font-size:var(--count-size); l
 .sound-btn .wave{transition:opacity .3s ease;}
 .sound-btn.muted .wave{opacity:0;}
 .sound-btn:not(.muted) .cross{opacity:0;}
-@media (hover:hover) and (pointer:fine){
+@media (hover:hover) and (pointer:fine), (hover:none) and (min-device-width:768px){
   .lang-switch button:hover,
   .lang-switch button.hand-on{
     background:#2a0808;
@@ -483,7 +483,7 @@ html.tablet .lang-switch button.hand-on{
   .sound-btn:hover,
   .sound-btn.hand-on{color:var(--ink);}
 }
-@media (hover:hover) and (pointer:fine){
+@media (hover:hover) and (pointer:fine), (hover:none) and (min-device-width:768px){
   .sound-btn{top:calc(40px + env(safe-area-inset-top,0px)); left:28px;}
   .lang-switch{right:28px; top:calc(40px + env(safe-area-inset-top,0px) + 72px * 678 / 840 * .38 - 17px);}
 }
@@ -508,7 +508,7 @@ body.car-open #fName{display:none;}
 .card-head h2{margin:0; font-family:var(--head-font); font-weight:500; color:var(--accent); font-size:20px; line-height:24px; letter-spacing:.16em;}
 .card-head .head-title{display:none;}
 .card-head .head-pos{display:none;}
-@media (hover:hover) and (pointer:fine){ .card-head{top:calc(64px + env(safe-area-inset-top,0px));} }
+@media (hover:hover) and (pointer:fine), (hover:none) and (min-device-width:768px){ .card-head{top:calc(64px + env(safe-area-inset-top,0px));} }
 /* tablet: same layout as desktop */
  html.tablet .card-head{top:calc(64px + env(safe-area-inset-top,0px));} 
 
@@ -543,7 +543,7 @@ body.intro h1.title,
 body.intro .lang-switch,
 body.intro .sound-btn,
 body.intro #opening{opacity:0 !important; pointer-events:none;}
-@media (hover:hover) and (pointer:fine){
+@media (hover:hover) and (pointer:fine), (hover:none) and (min-device-width:768px){
   /* the deck has to show during the intro, while the buttons stay hidden until the logo is in the corner */
   body.intro #opening{opacity:1 !important; pointer-events:none;}
   body.intro .spread-options,
@@ -575,7 +575,7 @@ body.intro-done .intro-brand{left:calc(14px + env(safe-area-inset-left,0px)); to
 body.intro-done .intro-logo{clip-path:inset(0 0 12% 0);}
 body.intro-done .intro-tape-wrap{
   width:calc(100vw - (14px + env(safe-area-inset-left,0px)) - min(12vw, 68px) - env(safe-area-inset-right,0px));}
-@media (hover:hover) and (pointer:fine){
+@media (hover:hover) and (pointer:fine), (hover:none) and (min-device-width:768px){
   body.intro-done .intro-brand{left:28px; top:calc(40px + env(safe-area-inset-top,0px)); width:72px;}
   body.intro-done .intro-tape-wrap{width:calc(100vw - 28px - 72px - env(safe-area-inset-right,0px));}
 }
@@ -608,171 +608,171 @@ body.intro-done .intro-brand{transition:opacity .5s ease-in-out;}
    On load the logo is alone, then the deck screen replaces it. The tape stays across the top. */
 @media not all and (hover:hover) and (pointer:fine){
   /* the contour stays off on phones until there is a place where the deck does not hide it */
-  html:not(.tablet) body.intro .intro-logo{opacity:0;}
-  html:not(.tablet) body.intro .intro-tape-wrap{opacity:0;}
-  html:not(.tablet) body.intro-done .intro-logo{display:none;}
-  html:not(.tablet) body.intro-done .intro-brand{
+  html.phone body.intro .intro-logo{opacity:0;}
+  html.phone body.intro .intro-tape-wrap{opacity:0;}
+  html.phone body.intro-done .intro-logo{display:none;}
+  html.phone body.intro-done .intro-brand{
     left:0; top:env(safe-area-inset-top, 0px);
     width:100%; height:0; transform:none;}
   /* fixed, and not inside the centred logo, so the plate can sit on the screen's top edge */
-  html:not(.tablet) body.tape-grow .intro-tape-wrap,
-html:not(.tablet) body.intro-done .intro-tape-wrap{
+  html.phone body.tape-grow .intro-tape-wrap,
+html.phone body.intro-done .intro-tape-wrap{
     position:fixed; left:0; top:env(safe-area-inset-top, 0px);
     width:100vw; height:35px; transform:none; overflow:hidden; z-index:42;}
-  html:not(.tablet) #opening{padding-top:calc(40px + env(safe-area-inset-top, 0px));
+  html.phone #opening{padding-top:calc(40px + env(safe-area-inset-top, 0px));
     padding-bottom:calc(24px + 16px + 16px + 28px + env(safe-area-inset-bottom, 0px));
     box-sizing:border-box;}
-  html:not(.tablet) .spread-options{position:absolute; left:0; right:0; margin-top:0; gap:28px; align-items:flex-start;
+  html.phone .spread-options{position:absolute; left:0; right:0; margin-top:0; gap:28px; align-items:flex-start;
     bottom:calc(24px + 16px + 18px + env(safe-area-inset-bottom, 0px));}
-  html:not(.tablet) .opt-col{display:flex; flex-direction:column; align-items:center;}
-  html:not(.tablet) .ask-sub{position:relative; left:auto; top:auto; transform:none; width:100%; height:16px; margin-top:8px;
+  html.phone .opt-col{display:flex; flex-direction:column; align-items:center;}
+  html.phone .ask-sub{position:relative; left:auto; top:auto; transform:none; width:100%; height:16px; margin-top:8px;
     line-height:16px;}
-  html:not(.tablet) .ask-sub .cd-row{position:absolute; left:50%; top:0; transform:translateX(-50%); margin:0;}
-  html:not(.tablet) .whisper{position:absolute; left:0; right:0; margin-top:0;
+  html.phone .ask-sub .cd-row{position:absolute; left:50%; top:0; transform:translateX(-50%); margin:0;}
+  html.phone .whisper{position:absolute; left:0; right:0; margin-top:0;
     bottom:calc(18px + env(safe-area-inset-bottom, 0px));}
-  html:not(.tablet) .rush-hint{display:none;}
-  html:not(.tablet) .lang-switch{width:22px; height:22px; z-index:44;
+  html.phone .rush-hint{display:none;}
+  html.phone .lang-switch{width:22px; height:22px; z-index:44;
     top:calc(env(safe-area-inset-top, 0px) + 1px);
     right:calc(8px + env(safe-area-inset-right, 0px));
     font-size:10px; font-weight:700; letter-spacing:.04em; line-height:1;}
-  html:not(.tablet) .lang-switch button{width:22px; height:22px; margin:0; padding:0; border-radius:50%;
+  html.phone .lang-switch button{width:22px; height:22px; margin:0; padding:0; border-radius:50%;
     background:#0d0000; border:none; color:var(--red);
     font:inherit; letter-spacing:inherit; display:flex; align-items:center; justify-content:center; box-shadow:none;}
-  html:not(.tablet) h1.title{opacity:0 !important; pointer-events:none;}
-  html:not(.tablet) .whisper,
-html:not(.tablet) .end-phrase{font-family:'Trispace',sans-serif; font-weight:400; font-style:normal;
+  html.phone h1.title{opacity:0 !important; pointer-events:none;}
+  html.phone .whisper,
+html.phone .end-phrase{font-family:'Trispace',sans-serif; font-weight:400; font-style:normal;
     letter-spacing:.04em; font-size:14px;}
   /* the same muted colour the desktop whisper has before a hover turns it red */
-  html:not(.tablet) .end-phrase{color:color-mix(in srgb, var(--muted) 80%, transparent);}
-  html:not(.tablet) .opt,
-html:not(.tablet) .finish-btn,
-html:not(.tablet) .return-btn,
-html:not(.tablet) .cta,
-html:not(.tablet) .link-btn{font-family:'Oswald',sans-serif; font-weight:500;
+  html.phone .end-phrase{color:color-mix(in srgb, var(--muted) 80%, transparent);}
+  html.phone .opt,
+html.phone .finish-btn,
+html.phone .return-btn,
+html.phone .cta,
+html.phone .link-btn{font-family:'Oswald',sans-serif; font-weight:500;
     letter-spacing:0; line-height:1; font-size:16px;}
-  html:not(.tablet) .opt{margin-right:0;}
-  html:not(.tablet) .cap-pos,
-html:not(.tablet) .meaning-panel .pos-label{font-family:'Trispace',sans-serif; font-weight:400;
+  html.phone .opt{margin-right:0;}
+  html.phone .cap-pos,
+html.phone .meaning-panel .pos-label{font-family:'Trispace',sans-serif; font-weight:400;
     letter-spacing:.12em; font-size:13px; color:var(--red);}
-  html:not(.tablet) .cap-name,
-html:not(.tablet) .meaning-panel h2,
-html:not(.tablet) .card-head h2{font-family:'Trispace',sans-serif; font-weight:500;
+  html.phone .cap-name,
+html.phone .meaning-panel h2,
+html.phone .card-head h2{font-family:'Trispace',sans-serif; font-weight:500;
     letter-spacing:0; font-size:18px;}
-  html:not(.tablet) .meaning-panel .card-title,
-html:not(.tablet) .card-head .head-title,
-html:not(.tablet) .cap-title{font-family:'Trispace',sans-serif;
+  html.phone .meaning-panel .card-title,
+html.phone .card-head .head-title,
+html.phone .cap-title{font-family:'Trispace',sans-serif;
     font-weight:300; font-style:normal; letter-spacing:0; font-size:14px; line-height:1.2; color:var(--ink); opacity:1;}
-  html:not(.tablet) .cap-title{display:block; margin-top:6px;}
-  html:not(.tablet) .cap-title:empty{display:none;}
-  html:not(.tablet) #mText,
-html:not(.tablet) #fText,
-html:not(.tablet) .finale .summary{font-family:'Trispace',sans-serif; font-weight:300; letter-spacing:0;
+  html.phone .cap-title{display:block; margin-top:6px;}
+  html.phone .cap-title:empty{display:none;}
+  html.phone #mText,
+html.phone #fText,
+html.phone .finale .summary{font-family:'Trispace',sans-serif; font-weight:300; letter-spacing:0;
     font-size:15px; line-height:1.4;}
-  html:not(.tablet) .ask-sub .countdown{font-family:'Trispace',sans-serif; font-weight:700; letter-spacing:.171em; font-size:14px;}
-  html:not(.tablet) #fDeck{font-family:'Trispace',sans-serif; font-weight:300; font-style:normal; letter-spacing:0; font-size:13px;}
-  html:not(.tablet) #fDeck b{color:inherit; font-weight:inherit;}
-  html:not(.tablet) .finale .summary{font-style:normal;}
-  html:not(.tablet) .velvet{--deck-w:200px;}
-  html:not(.tablet) .finish-btn{color:var(--accent);}
-  html:not(.tablet) .finish-btn .fill{color:transparent; -webkit-text-fill-color:transparent; -webkit-background-clip:text; background-clip:text;
+  html.phone .ask-sub .countdown{font-family:'Trispace',sans-serif; font-weight:700; letter-spacing:.171em; font-size:14px;}
+  html.phone #fDeck{font-family:'Trispace',sans-serif; font-weight:300; font-style:normal; letter-spacing:0; font-size:13px;}
+  html.phone #fDeck b{color:inherit; font-weight:inherit;}
+  html.phone .finale .summary{font-style:normal;}
+  html.phone .velvet{--deck-w:200px;}
+  html.phone .finish-btn{color:var(--accent);}
+  html.phone .finish-btn .fill{color:transparent; -webkit-text-fill-color:transparent; -webkit-background-clip:text; background-clip:text;
     background-image:linear-gradient(90deg, var(--accent) 37.5%, var(--red) 37.5% 62.5%, var(--accent) 62.5%);
     background-size:400% 100%; background-position:100% 0; animation:call 3.6s ease-in-out infinite;}
   /* a filled pill: the page glow breathes behind a transparent one, and the button itself seemed to flicker */
-  html:not(.tablet) .return-btn{border:1px solid rgba(var(--accent-rgb),.72); padding:9px 12px; border-radius:24px; background:#140606;}
-  html:not(.tablet) .cta,
-html:not(.tablet) body.noir .cta{background:var(--red); color:#fff; padding:10px 14px; border-radius:26px;
+  html.phone .return-btn{border:1px solid rgba(var(--accent-rgb),.72); padding:9px 12px; border-radius:24px; background:#140606;}
+  html.phone .cta,
+html.phone body.noir .cta{background:var(--red); color:#fff; padding:10px 14px; border-radius:26px;
     box-shadow:0 0 18px rgba(228,36,35,.4);}
-  html:not(.tablet) .link-btn{color:var(--accent); text-shadow:0 0 12px rgba(var(--accent-rgb),.45);}
+  html.phone .link-btn{color:var(--accent); text-shadow:0 0 12px rgba(var(--accent-rgb),.45);}
   /* one sheet only: the period, the name and the quote above the card, the reading across the width,
      the button, then the whisper. The old centred panel, the in-panel caption and the row with the rule
      are not a second layout waiting underneath. */
-  html:not(.tablet) #mPos,
-html:not(.tablet) #mTitle,
-html:not(.tablet) #fPos,
-html:not(.tablet) #fName,
-html:not(.tablet) #fTitle,
-html:not(.tablet) #endRule,
-html:not(.tablet) .finish-btn .arrow{display:none;}
-  html:not(.tablet) #meaningPanel,
-html:not(.tablet) #finale{left:0; right:0; bottom:calc(24px + env(safe-area-inset-bottom, 0px));
+  html.phone #mPos,
+html.phone #mTitle,
+html.phone #fPos,
+html.phone #fName,
+html.phone #fTitle,
+html.phone #endRule,
+html.phone .finish-btn .arrow{display:none;}
+  html.phone #meaningPanel,
+html.phone #finale{left:0; right:0; bottom:calc(24px + env(safe-area-inset-bottom, 0px));
     top:auto; transform:none; max-width:none; width:100%;}
-  html:not(.tablet) #mText,
-html:not(.tablet) #fSummary,
-html:not(.tablet) #fText{width:100%; max-width:none; padding:0 20px; box-sizing:border-box; margin:0 0 16px;}
-  html:not(.tablet) #finale p{max-width:none;}
-  html:not(.tablet) #meaningPanel .meaning-end{flex-direction:column-reverse; gap:12px; margin-top:0;}
+  html.phone #mText,
+html.phone #fSummary,
+html.phone #fText{width:100%; max-width:none; padding:0 20px; box-sizing:border-box; margin:0 0 16px;}
+  html.phone #finale p{max-width:none;}
+  html.phone #meaningPanel .meaning-end{flex-direction:column-reverse; gap:12px; margin-top:0;}
   /* the same closing order as the desktop: the buttons, then the line about the deck and the shop */
-  html:not(.tablet) #finale{display:flex; flex-direction:column; align-items:center;}
-  html:not(.tablet) #finale #fCard,
-html:not(.tablet) #finale #fSummary{order:0;}
-  html:not(.tablet) #finale .finale-row{order:1; display:grid; grid-template-columns:1fr auto 1fr; align-items:center;
+  html.phone #finale{display:flex; flex-direction:column; align-items:center;}
+  html.phone #finale #fCard,
+html.phone #finale #fSummary{order:0;}
+  html.phone #finale .finale-row{order:1; display:grid; grid-template-columns:1fr auto 1fr; align-items:center;
     column-gap:6px; width:100%; margin:0; padding:0 4px; box-sizing:border-box;}
-  html:not(.tablet) #finale .finale-row .row-break{display:none;}
-  html:not(.tablet) #finale .finale-row .return-btn,
-html:not(.tablet) #finale .finale-row .cta,
-html:not(.tablet) #finale .finale-row .link-btn{white-space:nowrap;}
-  html:not(.tablet) #finale .finale-row .return-btn{order:0; justify-self:end; padding:9px 10px;}
-  html:not(.tablet) #finale .finale-row .cta{order:1; justify-self:center;}
-  html:not(.tablet) #finale .finale-row .link-btn{order:2; justify-self:start; position:relative; padding:9px 2px;}
-  html:not(.tablet) #finale .finale-row .link-btn::after{content:''; position:absolute; left:0; right:0; bottom:1px; height:1px;
+  html.phone #finale .finale-row .row-break{display:none;}
+  html.phone #finale .finale-row .return-btn,
+html.phone #finale .finale-row .cta,
+html.phone #finale .finale-row .link-btn{white-space:nowrap;}
+  html.phone #finale .finale-row .return-btn{order:0; justify-self:end; padding:9px 10px;}
+  html.phone #finale .finale-row .cta{order:1; justify-self:center;}
+  html.phone #finale .finale-row .link-btn{order:2; justify-self:start; position:relative; padding:9px 2px;}
+  html.phone #finale .finale-row .link-btn::after{content:''; position:absolute; left:0; right:0; bottom:1px; height:1px;
     background:var(--red); transform:scaleY(.5); transform-origin:bottom center;}
   /* the long shop label cannot share the line; it drops under the other two, still above the deck line */
-  html:not(.tablet) #finale .finale-row.shop-below{display:flex; flex-wrap:wrap; justify-content:center; column-gap:22px; row-gap:12px;}
-  html:not(.tablet) #finale .finale-row.shop-below .return-btn{order:1;}
-  html:not(.tablet) #finale .finale-row.shop-below .link-btn{order:2;}
-  html:not(.tablet) #finale .finale-row.shop-below .cta{order:3; flex-basis:100%;}
+  html.phone #finale .finale-row.shop-below{display:flex; flex-wrap:wrap; justify-content:center; column-gap:22px; row-gap:12px;}
+  html.phone #finale .finale-row.shop-below .return-btn{order:1;}
+  html.phone #finale .finale-row.shop-below .link-btn{order:2;}
+  html.phone #finale .finale-row.shop-below .cta{order:3; flex-basis:100%;}
   /* the deck line keeps its height while a card is open, so the buttons above it do not move */
-  html:not(.tablet) #finale .finale-cue{display:block; order:2; position:relative; width:100%; margin:14px 0 0;}
-  html:not(.tablet) #finale #fDeck{display:block; max-width:none; white-space:normal; width:100%; box-sizing:border-box;
+  html.phone #finale .finale-cue{display:block; order:2; position:relative; width:100%; margin:14px 0 0;}
+  html.phone #finale #fDeck{display:block; max-width:none; white-space:normal; width:100%; box-sizing:border-box;
     padding:0 20px; margin:0;
     font-family:'Trispace',sans-serif; font-weight:300; font-style:normal; letter-spacing:0;
     font-size:13px; color:var(--muted); opacity:.8;
     transition:opacity .7s ease;}
-  html:not(.tablet) #finale #spreadBack{position:absolute; left:50%; top:32px; transform:translateX(-50%); display:block;
+  html.phone #finale #spreadBack{position:absolute; left:50%; top:32px; transform:translateX(-50%); display:block;
     width:max-content; max-width:calc(100% - 40px); margin:0; padding:6px 2px;
     background:none; border:none; box-shadow:none; appearance:none; -webkit-appearance:none;
     color:var(--accent); font-family:'Oswald',sans-serif; font-weight:500; font-style:normal;
     font-size:16px; letter-spacing:0; line-height:1; text-align:center; text-transform:uppercase;
     cursor:var(--cur-on); opacity:0; visibility:hidden; pointer-events:none;
     transition:opacity .7s ease, visibility 0s linear .7s;}
-  html:not(.tablet) body.car-open.car-leaf #finale #fDeck{opacity:0;}
-  html:not(.tablet) body.car-open.car-leaf #finale #spreadBack{opacity:1; visibility:visible; pointer-events:auto;
+  html.phone body.car-open.car-leaf #finale #fDeck{opacity:0;}
+  html.phone body.car-open.car-leaf #finale #spreadBack{opacity:1; visibility:visible; pointer-events:auto;
     transition:opacity .7s ease, visibility 0s linear 0s;}
   /* the spread's own paragraph, in the card text's face, between two hairlines */
-  html:not(.tablet) body.car-open #fSummary{position:relative; font-style:normal; padding:14px 20px;}
-  html:not(.tablet) body.car-open #fSummary::before,
-html:not(.tablet) body.car-open #fSummary::after{content:''; position:absolute; left:0; right:0; height:1px; background:var(--red);
+  html.phone body.car-open #fSummary{position:relative; font-style:normal; padding:14px 20px;}
+  html.phone body.car-open #fSummary::before,
+html.phone body.car-open #fSummary::after{content:''; position:absolute; left:0; right:0; height:1px; background:var(--red);
     transform:scaleY(.5); pointer-events:none;}
-  html:not(.tablet) body.car-open #fSummary::before{top:0; transform-origin:top center;}
-  html:not(.tablet) body.car-open #fSummary::after{bottom:0; transform-origin:bottom center;}
-  html:not(.tablet) body.car-open.car-leaf .card-head{pointer-events:auto;}
-  html:not(.tablet) .card-head{white-space:normal; display:flex; flex-direction:column; align-items:center;}
-  html:not(.tablet) .card-head .head-pos:not(:empty){display:block; font-family:'Trispace',sans-serif; font-weight:400;
+  html.phone body.car-open #fSummary::before{top:0; transform-origin:top center;}
+  html.phone body.car-open #fSummary::after{bottom:0; transform-origin:bottom center;}
+  html.phone body.car-open.car-leaf .card-head{pointer-events:auto;}
+  html.phone .card-head{white-space:normal; display:flex; flex-direction:column; align-items:center;}
+  html.phone .card-head .head-pos:not(:empty){display:block; font-family:'Trispace',sans-serif; font-weight:400;
     letter-spacing:.12em; margin:0 -.12em 6px 0; text-transform:uppercase; color:var(--red); line-height:1.2; font-size:13px;}
-  html:not(.tablet) .card-head h2{white-space:nowrap;}
-  html:not(.tablet) .card-head .head-title{display:block; min-height:1.2em; margin-top:6px; white-space:nowrap;}
+  html.phone .card-head h2{white-space:nowrap;}
+  html.phone .card-head .head-title{display:block; min-height:1.2em; margin-top:6px; white-space:nowrap;}
   /* the spread's own words stay until a card is turned; the caption waits in its place */
-  html:not(.tablet) body.car-open:not(.car-leaf) .card-head{opacity:0;}
+  html.phone body.car-open:not(.car-leaf) .card-head{opacity:0;}
 }
 @media not all and (hover:hover) and (pointer:fine){
-  html:not(.tablet)[lang=ru] .cap-pos,
-html:not(.tablet)[lang=ru] .meaning-panel .pos-label,
-html:not(.tablet)[lang=ru] .card-head .head-pos{
+  html.phone[lang=ru] .cap-pos,
+html.phone[lang=ru] .meaning-panel .pos-label,
+html.phone[lang=ru] .card-head .head-pos{
     font-family:'IBM Plex Mono',monospace; font-weight:400; letter-spacing:.12em;}
-  html:not(.tablet)[lang=ru] .cap-name,
-html:not(.tablet)[lang=ru] .meaning-panel h2,
-html:not(.tablet)[lang=ru] .card-head h2{
+  html.phone[lang=ru] .cap-name,
+html.phone[lang=ru] .meaning-panel h2,
+html.phone[lang=ru] .card-head h2{
     font-family:'IBM Plex Mono',monospace; font-weight:500; letter-spacing:.05em;}
-  html:not(.tablet)[lang=ru] #mText,
-html:not(.tablet)[lang=ru] #fText,
-html:not(.tablet)[lang=ru] .finale .summary{
+  html.phone[lang=ru] #mText,
+html.phone[lang=ru] #fText,
+html.phone[lang=ru] .finale .summary{
     font-family:'IBM Plex Mono',monospace; font-weight:400; letter-spacing:.05em;}
-  html:not(.tablet)[lang=ru] #fDeck{font-family:'IBM Plex Mono',monospace; font-weight:300; font-style:normal; letter-spacing:0;}
+  html.phone[lang=ru] #fDeck{font-family:'IBM Plex Mono',monospace; font-weight:300; font-style:normal; letter-spacing:0;}
 }
 
 /* desktop type. Sizes sit on the 1440px frame and stay inside the band discussed for other monitors.
    Button shapes, fills, the red sweep and the colours are the GitHub ones. Oswald stays on the buttons. */
-@media (hover:hover) and (pointer:fine){
+@media (hover:hover) and (pointer:fine), (hover:none) and (min-device-width:768px){
   /* both asides share one size, a step under the buttons and the card text */
   .whisper, .end-phrase, .rush-hint{font-family:'Trispace',sans-serif; font-weight:400; font-style:normal; letter-spacing:.04em;
     font-size:clamp(11px, .85vw, 14px);}
@@ -884,7 +884,7 @@ html.tablet .finale .summary{font-family:'Trispace',sans-serif; font-weight:300;
   html.tablet #fDeck b{color:inherit; font-weight:inherit;}
 
 
-@media (hover:hover) and (pointer:fine){
+@media (hover:hover) and (pointer:fine), (hover:none) and (min-device-width:768px){
   html[lang=ru] .cap-pos, html[lang=ru] .meaning-panel .pos-label, html[lang=ru] .pick-word:not(.pick-ask),
   html[lang=ru] body.day-open .card-head .head-pos{font-family:'IBM Plex Mono',monospace; font-weight:400; letter-spacing:.05em;}
   html[lang=ru] .pick-word:not(.pick-ask),
@@ -912,7 +912,7 @@ html.tablet[lang=ru] .finale .summary{font-family:'IBM Plex Mono',monospace; fon
 
 /* desktop card of the day: name, a reserved quote, the card, then the reading across the screen,
    the whisper, and a finish button 80px off the bottom */
-@media (hover:hover) and (pointer:fine){
+@media (hover:hover) and (pointer:fine), (hover:none) and (min-device-width:768px){
   body.day-open .card-head{white-space:normal; display:flex; flex-direction:column; align-items:center;}
   body.day-open .card-head .head-pos:not(:empty){display:block; font-family:'Trispace',sans-serif; font-weight:400;
     letter-spacing:.12em; margin:0 -.12em 8px 0; text-transform:uppercase; color:var(--red); line-height:1.2;
@@ -1150,16 +1150,6 @@ html[lang=ru] .pick-word:not(.pick-ask){
 }
 
 
-/* —— tablet touch controls: phone frames / tap red; no mouse underline —— */
-html.tablet .opt::before{content:''; position:absolute; top:0; bottom:0; left:-18px; right:-15px; border:.67px solid rgba(var(--accent-rgb),.55);
-  border-radius:24px; opacity:0; animation:frame 8s ease-in-out infinite; pointer-events:none;}
-html.tablet .opt-col + .opt::before{animation-delay:4s;}
-html.tablet .opt.done::before,
-html.tablet .opt:not(.done):active::before,
-html.tablet .opt.tap::before{visibility:hidden;}
-html.tablet .opt:not(.done):active,
-html.tablet .opt.tap{color:var(--red); text-shadow:0 0 10px rgba(228,36,35,.7), 0 0 24px rgba(228,36,35,.45);}
-html.tablet .opt:not(.done):hover::after,
-html.tablet .opt:not(.done).hand-on::after{transform:none;}
+/* tablet = desktop UI; only extras are rotate-note + double-tap rush hint (no phone frames) */
 html.tablet, html.tablet *{cursor:auto;}
 html.tablet .rush-hint{display:block;}

@@ -21,14 +21,20 @@
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;700&family=Montserrat:wght@600&family=Oswald:wght@500;700&family=Trispace:wght@100;300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script>
-/* tablet vs phone before CSS: large touch → tablet (desktop layout); small touch → phone */
+/* tablet vs phone before CSS: iPad / large touch → tablet (desktop UI); small touch → phone */
 (function(){
-  var tab=navigator.maxTouchPoints>1 && Math.min(screen.width, screen.height)>=600;
-  var desk=window.matchMedia('(hover:hover) and (pointer:fine)').matches && !tab;
+  var ua=navigator.userAgent||'';
+  var iPad=/iPad/i.test(ua) || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1) ||
+    (/Macintosh/i.test(ua) && navigator.maxTouchPoints>1);
+  var minSide=Math.min(screen.width||0, screen.height||0);
+  var touch=navigator.maxTouchPoints>0 || window.matchMedia('(pointer:coarse)').matches || window.matchMedia('(hover:none)').matches;
+  var fine=window.matchMedia('(hover:hover) and (pointer:fine)').matches;
+  var tab=iPad || (touch && minSide>=600 && !fine);
+  var desk=fine && !tab;
   document.documentElement.classList.add(tab ? 'tablet' : desk ? 'desk' : 'phone');
 })();
 </script>
-<link rel="stylesheet" href="style.css?v=145">
+<link rel="stylesheet" href="style.css?v=146">
 </head>
 <body class="noir intro">
 <div class="glow"></div>
@@ -113,6 +119,6 @@
 <div class="rotate-note"><span class="rot-ic">↻</span><span data-i18n="rotate">Поверни телефон вертикально</span></div>
 <div class="tablet-note"><span class="rot-ic">↻</span><span data-i18n="rotateTablet">Поверни планшет горизонтально</span></div>
 
-<script src="app.js?v=182"></script>
+<script src="app.js?v=183"></script>
 </body>
 </html>

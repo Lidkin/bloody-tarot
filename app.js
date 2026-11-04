@@ -505,20 +505,33 @@ function tiltDeck(nx, ny, dur=.6){
 gsap.set(deckStack,{x:0, y:0, xPercent:-50, yPercent:-50}); // centred in % so it stays centred at any size
 renderDeckTilt();
 
-/* device: desk = mouse desktop; tablet = large touch (desktop layout + phone tap chrome);
-   phone = small touch. Layout desk = desk|tablet. Mouse UI = desk only. */
+/* device: desk = mouse primary; tablet = iPad / large touch (full desktop UI + rotate note +
+   double-tap rush); phone = small touch. Layout desk = desk|tablet. Mouse UI = desk only. */
+function isIPadDevice(){
+  return /iPad/i.test(navigator.userAgent) ||
+    (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1) ||
+    (/Macintosh/i.test(navigator.userAgent) && navigator.maxTouchPoints>1);
+}
 function isTabletDevice(){
-  return navigator.maxTouchPoints>1 && Math.min(screen.width, screen.height)>=600;
+  if(isIPadDevice()) return true;
+  const minSide=Math.min(screen.width||0, screen.height||0);
+  if(minSide<600) return false;
+  const touch=navigator.maxTouchPoints>0 || matchMedia('(pointer:coarse)').matches || matchMedia('(hover:none)').matches;
+  if(!touch) return false;
+  // touch laptops with a mouse stay desktop; pure tablets do not get hover+fine
+  if(matchMedia('(hover:hover) and (pointer:fine)').matches) return false;
+  return true;
 }
 function isDesktop(){ return matchMedia('(hover:hover) and (pointer:fine)').matches; }
 function isLayoutDesk(){ return isDesktop() || isTabletDevice(); }
 function isMouseUI(){ return isDesktop() && !isTabletDevice(); }
 function isPhone(){ return !isLayoutDesk(); }
 function syncDeviceClass(){
-  const tab=isTabletDevice(), phone=isPhone();
-  document.documentElement.classList.toggle('tablet', tab);
-  document.documentElement.classList.toggle('phone', phone);
-  document.documentElement.classList.toggle('desk', isMouseUI());
+  const tab=isTabletDevice(), phone=isPhone(), desk=isMouseUI();
+  const root=document.documentElement;
+  root.classList.toggle('tablet', tab);
+  root.classList.toggle('phone', phone);
+  root.classList.toggle('desk', desk);
   document.body.classList.toggle('tablet', tab);
   document.body.classList.toggle('phone', phone);
 }
@@ -889,14 +902,15 @@ fan.addEventListener('pointermove', e=>{
 });
 fan.addEventListener('pointerleave', ()=>{ if(fanIdle()){ setHover(null); if(spread?.list) showPickAsk(); } });
 // the whisper's place, while a click can hurry the tape, the dealing or the gathering
-function rushHintText(){ return tr(isMouseUI() ? 'rush' : 'rushTap'); }
+function rushHintText(){ return tr(isTabletDevice() ? 'rushTap' : 'rush'); }
 function showRushHint(on){
   const el=document.getElementById('rushHint');
   if(!el) return;
+  // desktop click-rush, or tablet double-tap reminder, while tape / deal / gather run
   if(on && isLayoutDesk()){ el.textContent=rushHintText(); el.classList.add('on'); }
   else el.classList.remove('on');
 }
-// mouse click, or a double-tap on a tablet, hurries the intro / deal / gather
+// mouse click on desktop, or a double-tap on a tablet, hurries the intro / deal / gather
 function rushMotion(){
   if(dealTl) dealTl.timeScale(2);
   if(gatherTl) gatherTl.timeScale(2);
@@ -906,11 +920,12 @@ function rushMotion(){
 let lastTouchRush=0;
 addEventListener('pointerdown', e=>{
   if(!e.pointerType || e.pointerType==='mouse'){
-    rushMotion();
+    // desktop mouse, or a tablet trackpad: one click hurries the motion
+    if(isLayoutDesk()) rushMotion();
     return;
   }
-  // tablet (and phone): double-tap anywhere to speed the current motion
-  if(!isTabletDevice() && !isPhone()) return;
+  // finger on a tablet: double-tap (the rush hint says so)
+  if(!isTabletDevice()) return;
   const now=performance.now();
   if(now-lastTouchRush<340) rushMotion();
   lastTouchRush=now;
@@ -2004,9 +2019,9 @@ const etsyLink=card=>`${ETSY_URL}?utm_source=tarot-app&utm_medium=${mode==='thre
 // "Завершить гадание": the description gives way to the closing screen, the card makes room for it
 document.getElementById('finishBtn').addEventListener('click', e=>{
   if(!activeCard || busy) return;
-  // phones: the tapped button first fills with red, so the tap is seen, then does its work
+  // phones only: the tapped button first fills with red, so the tap is seen, then does its work
   const btn=e.currentTarget;
-  if(!isMouseUI() && !btn._tapped){
+  if(isPhone() && !btn._tapped){
     btn.classList.add('tap'); btn._tapped=true; busy=true;
     setTimeout(()=>{ busy=false; btn.click(); btn._tapped=false; }, 420);
     return;
@@ -2463,7 +2478,7 @@ function fitTitle(){
 document.fonts.ready.then(fitTitle);
 // the red line under a reading grows to the ink of the word, the same distance past both sides
 function fitOptLines(){
-  if(!isMouseUI()) return;
+  if(!isLayoutDesk()) return;
   document.querySelectorAll('.opt').forEach(btn=>{
     const cs=getComputedStyle(btn);
     const raw=btn.textContent.trim();
