@@ -94,7 +94,7 @@ body:not(.fonts-ready) h1.title{visibility:hidden;}
   font-size:16px; letter-spacing:.04em; opacity:.8; pointer-events:none; transition:opacity .8s ease-in-out;}
 .whisper.gone, .whisper.swap{opacity:0;}
 /* the same line, in the whisper's place, only while a second click can hurry the cards */
-.rush-hint{position:fixed; left:0; right:0; bottom:80px; z-index:46; margin:0; text-align:center;
+.rush-hint{position:fixed; left:0; right:0; bottom:var(--whisper-bottom, 80px); z-index:46; margin:0; text-align:center;
   pointer-events:none; opacity:0; color:var(--muted); font-family:'Trispace',sans-serif; font-weight:400;
   font-style:normal; line-height:1; transition:opacity .8s ease-in-out;}
 .rush-hint.on{opacity:.8;}
@@ -330,24 +330,36 @@ h1.title{position:fixed; top:calc(14px + env(safe-area-inset-top,0px)); left:50%
   font-size:13px; line-height:20px; letter-spacing:2.85px; opacity:.6; z-index:5; text-transform:uppercase;}
 /* desktop: a bigger deck and the title lower */
 @media (hover:hover) and (pointer:fine){
-  /* a little larger, and centred in the gap between the logo and the button block */
+  /* deck sits in the band between the tape and the button block; --deck-w is capped in CSS and
+     tightened further by fitOpeningLayout (app.js) so a short window never covers the tape */
   .velvet{--deck-w:210px; position:absolute; left:50%; width:min(92vw,520px); height:auto; margin:0;
     transform:translateX(-50%);
     top:calc(40px + env(safe-area-inset-top, 0px) + 72px * 678 / 840 * .88);
-    bottom:calc(80px + 36px + var(--whisper-size) + var(--btn-size) + 32px + var(--count-size));}
+    bottom:calc(var(--whisper-bottom) + 36px + var(--whisper-size) + var(--btn-size) + 32px + var(--count-size));}
   h1.title{top:calc(64px + env(safe-area-inset-top,0px));}
-  /* whisper sits 80px off the bottom; 36px above it is the button block, whose lower part is the
-     countdown slot. The slot stays 16px under "Карта дня" even while the numbers are hidden. */
-  #opening{--whisper-size:clamp(11px, .85vw, 14px); --btn-size:clamp(14px, 1.1111vw, 18px);
-    --count-size:clamp(14px, 1.1111vw, 18px);}
+  /* whisper clears the bottom edge; on a short screen --whisper-bottom shrinks (CSS + JS) */
+  #opening{--whisper-bottom:80px; --whisper-size:clamp(11px, .85vw, 14px);
+    --btn-size:clamp(14px, 1.1111vw, 18px); --count-size:clamp(14px, 1.1111vw, 18px);}
   .spread-options{position:absolute; left:0; right:0; margin-top:0; transform:none; align-items:flex-start;
-    bottom:calc(80px + 36px + var(--whisper-size));}
-  .whisper{position:absolute; left:0; right:0; bottom:80px; margin-top:0; transform:none; line-height:1;}
+    bottom:calc(var(--whisper-bottom) + 36px + var(--whisper-size));}
+  .whisper{position:absolute; left:0; right:0; bottom:var(--whisper-bottom); margin-top:0; transform:none; line-height:1;
+    font-size:var(--whisper-size);}
   .opt-col{display:flex; flex-direction:column; align-items:center; width:max-content;}
   .ask-sub{position:relative; left:auto; top:auto; transform:none; width:100%; height:var(--count-size); margin-top:16px;
     line-height:var(--count-size); text-align:center;}
   .ask-sub .cd-row{position:absolute; left:50%; top:0; transform:translateX(-50%); margin:0;}
   .ask-sub .countdown, .ask-sub .cd-row .countdown{margin:0; font-size:var(--count-size); line-height:var(--count-size); height:var(--count-size);}
+  @media (max-height:900px){
+    #opening{--whisper-bottom:48px;}
+  }
+  @media (max-height:760px){
+    #opening{--whisper-bottom:28px; --whisper-size:clamp(10px, .8vw, 12px);
+      --btn-size:clamp(12px, 1vw, 15px); --count-size:clamp(12px, 1vw, 15px);}
+    .ask-sub{margin-top:10px;}
+  }
+  @media (max-height:640px){
+    #opening{--whisper-bottom:18px;}
+  }
 }
 /* the language button (the language it switches to) in the top right corner and the sound in the top left, on the title's line; only on the resting
    deck, like the choice of spread. The buttons' padding is taken back by margins: big for a finger, 20px tall */

@@ -392,6 +392,7 @@ let shufflePhase='idle'; // idle -> dealing (-> idle once the fan is dealt / the
 function showStart(on){
   if(on) spreadOpts.querySelectorAll('.opt').forEach(o=>o.classList.remove('tap'));
   [askSub, spreadOpts, langSwitch, soundBtn, whisper].forEach(e=>e?.classList.toggle('gone', !on));
+  if(on) scheduleRelayout();
 }
 // the chalk outline stays behind the arcs and leaves when they do.
 // under the arcs it sits paler than on the main screen
@@ -2540,6 +2541,47 @@ function refitDeckHome(){
   if(openingEl.hidden || busy || shufflePhase!=='idle') return;
   gsap.set(deckStack,{x:0, y:0, scale:1, xPercent:-50, yPercent:-50});
 }
+// desktop opening: whisper sits closer on a short screen; the deck shrinks to the band between the
+// tape and the buttons so it never covers either
+function fitOpeningLayout(){
+  if(!isDesktop() || openingEl.hidden) return;
+  const opening=document.getElementById('opening');
+  const velvet=document.getElementById('velvet');
+  const tape=document.getElementById('introTapeWrap');
+  const opts=document.getElementById('spreadOpts');
+  const whisper=document.getElementById('whisper');
+  if(!opening || !velvet || !whisper) return;
+
+  const whisperBottom=innerHeight<640 ? 18 : innerHeight<760 ? 28 : innerHeight<900 ? 48 : 80;
+  opening.style.setProperty('--whisper-bottom', whisperBottom+'px');
+
+  // let the new bottom settle, then size the velvet band from the live tape and button tops
+  const apply=()=>{
+    const tapeBottom=Math.max(
+      tape?.getBoundingClientRect().bottom||0,
+      document.getElementById('introBrand')?.getBoundingClientRect().bottom||0,
+      56
+    );
+    const optsGone=opts?.classList.contains('gone');
+    const blockTop=(!optsGone && opts)
+      ? opts.getBoundingClientRect().top
+      : whisper.getBoundingClientRect().top;
+    const gap=Math.max(8, Math.min(16, innerHeight*0.015));
+    const top=tapeBottom+gap;
+    const bottom=Math.max(whisperBottom, innerHeight-blockTop+gap);
+    if(top+80 < innerHeight-bottom){
+      velvet.style.top=top+'px';
+      velvet.style.bottom=bottom+'px';
+    }
+    const band=velvet.getBoundingClientRect().height;
+    // leave a little air so the stacked edge does not kiss the tape or the countdown
+    const maxH=Math.max(72, band-10);
+    const w=Math.min(210, Math.max(64, maxH/1.7149));
+    velvet.style.setProperty('--deck-w', w+'px');
+  };
+  apply();
+  requestAnimationFrame(apply);
+}
 function refitChalkHome(){
   if(!isDesktop()) return;
   const plain=document.getElementById('chalkPlain'), frame=document.getElementById('chalkFrame');
@@ -2564,6 +2606,7 @@ function relayoutViewport(){
   }
   wantsIdleRelayout=false;
   refitDeckHome();
+  fitOpeningLayout();
   refitChalkHome();
   relayoutFanArc();
   relayoutOpenCards();
