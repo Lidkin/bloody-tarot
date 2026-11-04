@@ -1527,16 +1527,19 @@ fan.addEventListener('pointerup', e=>{
   if(Math.abs(dx)>40) turnStack(dx<0 ? 1 : -1);
   else if(inCard(spread.cards[spread.carousel.order[0]]._state, e.clientX, e.clientY)) turnStack(1);
 });
-// desktop three-up: column centres follow the caption widths (no wrap, no overlap);
-// the cards sit under those centres and only shrink to fit the gaps the captions leave
+// desktop three-up: one column per card (caption on top, card under it). Equal columns sit in a
+// parent band between the tape and the reading; the middle column’s axis is the screen centre.
+// Column height follows the band; the card takes all leftover height (size first, gap last).
 function spreadRowPoses(els){
-  const n=els.length, side=24, CAP_GAP=20, CARD_GAP=12, V_GAP=10;
+  const n=els.length, side=20, COL_GAP=18, CAP_CARD_GAP=6, EDGE=6;
   const tapeBottom=(document.getElementById('introTapeWrap')?.getBoundingClientRect().bottom)||0;
-  // short screens: captions sit closer under the tape
-  const topPad=innerHeight<720 ? 4 : innerHeight<820 ? 8 : innerHeight<940 ? 12 : 16;
-  const capTop=Math.max(tapeBottom+topPad, innerHeight<720 ? 40 : 56);
+  const topPad=innerHeight<760 ? 4 : 10;
+  const bandTop=tapeBottom+topPad;
   const sum=document.getElementById('fSummary');
+  const bandBot=sum.getBoundingClientRect().top-EDGE;
+  const bandH=Math.max(100, bandBot-bandTop);
   const availW=Math.max(160, innerWidth-2*side);
+  const midX=innerWidth/2;
 
   els.forEach((c,i)=>{
     const cap=spread.caps[i];
@@ -1547,53 +1550,56 @@ function spreadRowPoses(els){
     cap.style.fontSize='';
   });
 
-  // shrink the caption block (em-based) until the row fits the screen
-  const widthsOf=()=>spread.caps.map(c=>c.offsetWidth||0);
-  let total=0;
-  for(let step=0; step<14; step++){
-    const widths=widthsOf();
-    total=widths.reduce((a,b)=>a+b,0)+(n-1)*CAP_GAP;
-    if(total<=availW || step===13) break;
-    const s=Math.max(.55, (availW/total)*.96);
-    spread.caps.forEach(cap=>{
-      const cur=parseFloat(getComputedStyle(cap).fontSize)||14;
-      cap.style.fontSize=(cur*s)+'px';
-    });
+  // first pass: type sized so each caption fits a third of the band (no wrap)
+  const fitCaps=(maxW)=>{
+    for(let step=0; step<16; step++){
+      if(spread.caps.every(c=>c.offsetWidth<=maxW)) break;
+      spread.caps.forEach(cap=>{
+        const cur=parseFloat(getComputedStyle(cap).fontSize)||14;
+        cap.style.fontSize=Math.max(8, cur*.9)+'px';
+      });
+    }
+  };
+  fitCaps((availW-(n-1)*COL_GAP)/n);
+
+  let capH=Math.max(1, ...spread.caps.map(c=>c.offsetHeight||0));
+  // card claims the rest of the column height; tighten the gutters before shrinking the card
+  let cardH=Math.max(48, bandH-capH-CAP_CARD_GAP);
+  let cardW=cardH*CARD_ASPECT;
+  let capW=Math.max(...spread.caps.map(c=>c.offsetWidth||0));
+  let colW=Math.max(cardW, capW);
+  let colGap=COL_GAP;
+  const rowW=()=>n*colW+(n-1)*colGap;
+  if(rowW()>availW){
+    const ideal=Math.max(cardW, capW);
+    colGap=Math.max(8, Math.min(COL_GAP, (availW-n*ideal)/(n-1)));
+    if(rowW()>availW){
+      colW=(availW-(n-1)*colGap)/n;
+      fitCaps(colW);
+      capH=Math.max(1, ...spread.caps.map(c=>c.offsetHeight||0));
+      cardH=Math.min(Math.max(48, bandH-capH-CAP_CARD_GAP), colW/CARD_ASPECT);
+      cardW=cardH*CARD_ASPECT;
+      colW=Math.max(cardW, Math.min(colW, Math.max(...spread.caps.map(c=>c.offsetWidth||0))));
+      if(rowW()>availW){
+        colW=(availW-(n-1)*colGap)/n;
+        cardW=Math.min(cardW, colW);
+        cardH=cardW/CARD_ASPECT;
+      }
+    }
   }
 
-  const widths=widthsOf();
-  total=widths.reduce((a,b)=>a+b,0)+(n-1)*CAP_GAP;
-  let x=(innerWidth-total)/2;
-  const centers=[];
-  for(let i=0;i<n;i++){
-    centers.push(x+widths[i]/2);
-    x+=widths[i]+CAP_GAP;
-  }
-
-  let capH=0;
+  // equal pitch; middle column locked to the screen’s vertical axis
+  const pitch=colW+colGap;
+  const centers=[...Array(n)].map((_,i)=>midX+(i-(n-1)/2)*pitch);
   centers.forEach((cx,i)=>{
-    placeCap(i, cx, capTop, false);
-    capH=Math.max(capH, spread.caps[i].offsetHeight||0);
+    placeCap(i, cx, bandTop, false);
+    spread.caps[i].style.height=capH+'px';
   });
-  spread.caps.forEach(c=>c.style.height=capH+'px');
 
-  const descTop=sum.getBoundingClientRect().top;
-  const roomTop=capTop+capH+V_GAP;
-  const roomBot=descTop-V_GAP;
-  const roomH=Math.max(64, roomBot-roomTop);
-
-  // card width: limited by neighbour centres (caption-driven) and by vertical room
-  let maxW=Infinity;
-  for(let i=0;i<n-1;i++) maxW=Math.min(maxW, centers[i+1]-centers[i]-CARD_GAP);
-  maxW=Math.min(maxW, 2*(centers[0]-side), 2*(innerWidth-side-centers[n-1]));
-  maxW=Math.max(48, maxW);
-  const h=Math.min(roomH, maxW/CARD_ASPECT), w=h*CARD_ASPECT;
-  // short screens: keep the cards up under the captions instead of floating in empty space
-  const packTop=innerHeight<860;
-  const cardTop=packTop ? roomTop : roomTop+Math.max(0, (roomH-h)/2);
-  const mid=cardTop+h/2;
+  const cardTop=bandTop+capH+CAP_CARD_GAP;
+  const midY=cardTop+cardH/2;
   return {poses:els.map((_,i)=>({
-    x:centers[i], y:mid, rot:0, w, h, ry:180, tx:0, ty:0
+    x:centers[i], y:midY, rot:0, w:cardW, h:cardH, ry:180, tx:0, ty:0
   }))};
 }
 // poses of n face-up cards side by side that, with their captions above and `panel` under them, fit the viewport
