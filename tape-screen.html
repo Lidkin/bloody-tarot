@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tape screen preview</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;700&family=Montserrat:wght@600&family=Oswald:wght@500;700&family=Trispace:wght@100;300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css?v=139">
+<style>
+  /* jump straight to the docked splash — compare tapes on the live layout */
+  body.tape-preview{cursor:default;}
+  body.tape-preview .glow,
+  body.tape-preview .vignette{pointer-events:none;}
+  .tape-picker{
+    position:fixed; left:28px; bottom:28px;
+    z-index:100; display:flex; flex-direction:column; gap:6px; align-items:stretch;
+    max-width:220px;
+    padding:10px 12px; border-radius:10px;
+    background:rgba(8,2,2,.78); border:1px solid rgba(242,239,234,.18);
+    backdrop-filter:blur(8px);
+  }
+  .tape-picker button{
+    appearance:none; border:1px solid rgba(242,239,234,.28);
+    background:transparent; color:#f2efea;
+    font:500 13px/1.2 'IBM Plex Mono', monospace;
+    padding:8px 12px; border-radius:6px; cursor:pointer;
+  }
+  .tape-picker button:hover{border-color:#ed1c24; color:#fff;}
+  .tape-picker button.is-on{background:#ed1c24; border-color:#ed1c24; color:#fff;}
+  .tape-picker .hint{
+    width:100%; text-align:center; color:rgba(242,239,234,.55);
+    font:400 11px/1.3 'IBM Plex Mono', monospace; margin-top:2px;
+  }
+  @media (hover:hover) and (pointer:fine){
+    body.tape-preview #opening{padding-bottom:88px;}
+  }
+</style>
+</head>
+<body class="noir intro-done fonts-ready tape-preview">
+<div class="glow"></div>
+<canvas id="dust"></canvas>
+<div class="vignette"></div>
+<div class="chalk" id="chalk" aria-hidden="true">
+  <img id="chalkPlain" src="assets/SVG/contour%20without%20frame.svg?v=2" alt="">
+  <img id="chalkFrame" src="assets/SVG/contour%20with%20frame.svg?v=2" alt="">
+</div>
+
+<div id="intro" class="intro-layer" aria-hidden="true">
+  <div class="intro-brand" id="introBrand">
+    <img class="intro-logo" id="introLogo" src="assets/logo-big.png" alt="Bloody Feast Tarot">
+    <div class="intro-tape-wrap" id="introTapeWrap">
+      <div class="intro-tape" id="introTape" role="img" aria-label="Crime scene tape"></div>
+    </div>
+  </div>
+</div>
+
+<div class="lang-switch" id="langSwitch"><button id="langBtn" aria-label="Language">EN</button></div>
+
+<div class="scene" id="opening">
+  <div class="velvet" id="velvet">
+    <div class="deck-stack" id="deckStack">
+      <div class="dcard"><img src="assets/card-back.png" alt=""><div class="paper"></div></div>
+      <div class="dcard"><img src="assets/card-back.png" alt=""><div class="paper"></div></div>
+      <div class="dcard"><img src="assets/card-back.png" alt=""><div class="paper"></div></div>
+    </div>
+  </div>
+  <div class="spread-options" id="spreadOpts">
+    <div class="opt-col"><button class="opt" data-mode="day">Карта дня</button></div>
+    <button class="opt" data-mode="three">Три карты</button>
+  </div>
+  <div class="whisper" id="whisper">хочешь знать?</div>
+</div>
+
+<nav class="tape-picker" id="tapePicker" aria-label="Tape variants">
+  <button type="button" data-tape="Trispace 36.svg" class="is-on">Trispace 36</button>
+  <button type="button" data-tape="Trispace 43.svg">Trispace 43</button>
+  <button type="button" data-tape="Trispace 43 Cap.svg">Trispace 43 Cap</button>
+  <button type="button" data-tape="Oswald 45.svg">Oswald 45</button>
+  <div class="hint">← → переключают ленту · реальный сплэш без анимации входа</div>
+</nav>
+
+<script>
+const TAPES=[
+  'Trispace 36.svg',
+  'Trispace 43.svg',
+  'Trispace 43 Cap.svg',
+  'Oswald 45.svg',
+];
+
+async function loadTape(name){
+  const host=document.getElementById('introTape');
+  const raw=await fetch(encodeURI('assets/SVG/'+name)).then(r=>r.text());
+  const doc=new DOMParser().parseFromString(raw,'image/svg+xml');
+  const svg=doc.querySelector('svg');
+  if(!svg || !host) return null;
+  svg.setAttribute('preserveAspectRatio','xMinYMid meet');
+  for(const img of svg.querySelectorAll('image')){
+    const href=img.getAttribute('href')||img.getAttributeNS('http://www.w3.org/1999/xlink','href');
+    if(href){
+      img.setAttributeNS('http://www.w3.org/1999/xlink','href',href);
+      img.setAttribute('href',href);
+    }
+  }
+  host.replaceChildren(svg);
+  return svg;
+}
+
+function redLetters(svg){
+  return [...svg.querySelectorAll('path.cls-1, path.st1')];
+}
+function letterBox(letters){
+  let minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;
+  for(const letter of letters){
+    const b=letter.getBBox();
+    minX=Math.min(minX,b.x); maxX=Math.max(maxX,b.x+b.width);
+    minY=Math.min(minY,b.y); maxY=Math.max(maxY,b.y+b.height);
+  }
+  return {cx:(minX+maxX)/2};
+}
+
+function isDesk(){
+  return matchMedia('(hover:hover) and (pointer:fine)').matches;
+}
+
+function placeTape(svg){
+  const tape=document.getElementById('introTapeWrap');
+  const host=document.getElementById('introTape');
+  const brand=document.getElementById('introBrand');
+  if(!svg || !tape || !host) return;
+  const letters=redLetters(svg);
+  const vb=svg.viewBox.baseVal;
+  if(!letters.length || !vb?.width) return;
+  const redFrac=letterBox(letters).cx/vb.width;
+  const desk=isDesk();
+  if(!desk){
+    tape.style.height='35px';
+    void host.offsetWidth;
+    const hostW=host.offsetWidth||1;
+    const L=tape.getBoundingClientRect().left;
+    const p=100*(innerWidth/2-L-redFrac*hostW)/hostW;
+    host.style.transform=`translateX(${p}%)`;
+    return;
+  }
+  const safeTop=parseFloat(getComputedStyle(document.documentElement).paddingTop)||0;
+  const left=28, top=40+safeTop, width=72;
+  const cssTapeH=Math.max(14, Math.min(23, innerWidth*0.03));
+  const aspect=vb.width/vb.height;
+  const L=left+width;
+  const mid=innerWidth/2;
+  const minW=Math.max((mid-L)/redFrac,(innerWidth-mid)/(1-redFrac))+4;
+  const H=Math.max(cssTapeH, minW/aspect);
+  tape.style.height=H+'px';
+  brand.style.left=left+'px';
+  brand.style.top=top+'px';
+  brand.style.width=width+'px';
+  void host.offsetWidth;
+  const W=host.offsetWidth||1;
+  const p=100*(mid-L-redFrac*W)/W;
+  host.style.transform=`translateX(${p}%)`;
+}
+
+let current=0;
+async function show(i){
+  current=(i+TAPES.length)%TAPES.length;
+  const name=TAPES[current];
+  document.querySelectorAll('.tape-picker button[data-tape]').forEach(btn=>{
+    btn.classList.toggle('is-on', btn.dataset.tape===name);
+  });
+  const svg=await loadTape(name);
+  requestAnimationFrame(()=>placeTape(svg));
+}
+
+document.getElementById('tapePicker').addEventListener('click', e=>{
+  const btn=e.target.closest('button[data-tape]');
+  if(!btn) return;
+  show(TAPES.indexOf(btn.dataset.tape));
+});
+addEventListener('keydown', e=>{
+  if(e.key==='ArrowRight' || e.key==='ArrowDown') show(current+1);
+  if(e.key==='ArrowLeft' || e.key==='ArrowUp') show(current-1);
+});
+addEventListener('resize', ()=>{
+  const svg=document.querySelector('#introTape svg');
+  if(svg) placeTape(svg);
+});
+
+show(0);
+</script>
+</body>
+</html>
