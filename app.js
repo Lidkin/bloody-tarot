@@ -206,7 +206,7 @@ for(let i=0;i<78;i++){
 
 /* ---------- language ---------- */
 const UI={
-ru:{title:'Таро Лидии Хаит', whisper:'хочешь знать?', rush:'кликни ещё — быстрее',
+ru:{title:'Таро Лидии Хаит', whisper:'хочешь знать?', rush:'кликни ещё — быстрее', rushTap:'тапни дважды — быстрее',
   optDay:'Карта дня', optThree:'Три карты', positions:['Прошлое','Настоящее','Будущее'],
   upright:'Прямое положение', reversed:'Перевёрнутое положение',
   pickAsk:['выбери три карты','выбери настоящее','выбери будущее'], pickDone:'выбор сделан',
@@ -230,7 +230,7 @@ ru:{title:'Таро Лидии Хаит', whisper:'хочешь знать?', ru
     n=>`${n} легла перевёрнутой — здесь энергия застревает.`,
     'Две карты перевёрнуты — сначала стоит разобраться с тем, что мешает.',
     'Все карты перевёрнуты — время посмотреть внутрь себя, прежде чем действовать.']},
-en:{title:'Tarot by Lidiia Khait', whisper:'want to know?', rush:'click again — faster',
+en:{title:'Tarot by Lidiia Khait', whisper:'want to know?', rush:'click again — faster', rushTap:'double-tap — faster',
   optDay:'Card of the day', optThree:'Three cards', positions:['Past','Present','Future'],
   upright:'Upright', reversed:'Reversed',
   pickAsk:['choose three cards','choose the present','choose the future'], pickDone:'the choice is made',
@@ -398,7 +398,7 @@ function showStart(on){
 // under the arcs it sits paler than on the main screen
 function showChalk(on){
   const el=document.getElementById('chalk');
-  if(!el || !isDesktop()) return;
+  if(!el || !isLayoutDesk()) return;
   gsap.to(el,{autoAlpha:on?1:0, duration:.6, overwrite:true});
 }
 function phoneTapeBottom(){
@@ -411,7 +411,7 @@ function placePhoneChalk(){}
 function phoneDeckChalk(){}
 function chalkWeight(arc){
   const plain=document.getElementById('chalkPlain');
-  if(!plain || !isDesktop()) return;
+  if(!plain || !isLayoutDesk()) return;
   gsap.to(plain,{opacity:arc ? .15 : .3, duration:.6, overwrite:true});
 }
 spreadOpts.querySelectorAll('.opt').forEach(o=>o.addEventListener('click', ()=>{
@@ -459,7 +459,7 @@ function afterShufflePass(then){ passing ? afterPass=then : then(); }
 // phones: until the deck is touched in this visit, the whisper now and then gives way to "коснись колоды"
 let deckTouched=false, hintShown=false;
 setInterval(()=>{
-  if(isDesktop() || whisper.classList.contains('gone') || (deckTouched && !hintShown)) return;
+  if(isLayoutDesk() || whisper.classList.contains('gone') || (deckTouched && !hintShown)) return;
   whisper.classList.add('swap');
   setTimeout(()=>{
     hintShown=!hintShown && !deckTouched;
@@ -505,7 +505,25 @@ function tiltDeck(nx, ny, dur=.6){
 gsap.set(deckStack,{x:0, y:0, xPercent:-50, yPercent:-50}); // centred in % so it stays centred at any size
 renderDeckTilt();
 
-const isPortraitMobile=()=>matchMedia('(orientation: portrait)').matches &&
+/* device: desk = mouse desktop; tablet = large touch (desktop layout + phone tap chrome);
+   phone = small touch. Layout desk = desk|tablet. Mouse UI = desk only. */
+function isTabletDevice(){
+  return navigator.maxTouchPoints>1 && Math.min(screen.width, screen.height)>=600;
+}
+function isDesktop(){ return matchMedia('(hover:hover) and (pointer:fine)').matches; }
+function isLayoutDesk(){ return isDesktop() || isTabletDevice(); }
+function isMouseUI(){ return isDesktop() && !isTabletDevice(); }
+function isPhone(){ return !isLayoutDesk(); }
+function syncDeviceClass(){
+  const tab=isTabletDevice(), phone=isPhone();
+  document.documentElement.classList.toggle('tablet', tab);
+  document.documentElement.classList.toggle('phone', phone);
+  document.documentElement.classList.toggle('desk', isMouseUI());
+  document.body.classList.toggle('tablet', tab);
+  document.body.classList.toggle('phone', phone);
+}
+syncDeviceClass();
+const isPortraitMobile=()=>isPhone() && matchMedia('(orientation: portrait)').matches &&
   (matchMedia('(pointer: coarse)').matches || innerWidth<600);
 
 // Portrait phones: the deck stays where it is; its top card slowly slides up, then
@@ -739,12 +757,12 @@ function renderCard(el, s){
   // the same stepped picture it had while turning.
   const tx=s.tx||0, ty=s.ty||0, tilted=tx||ty;
   const inStack=!!(spread&&spread.carousel&&spread.cards.includes(el));
-  const exact=isDesktop() && s.ry>90 && !busy && (el===activeCard || inStack);
+  const exact=isLayoutDesk() && s.ry>90 && !busy && (el===activeCard || inStack);
   const lw=exact ? s.w : Math.max(8, Math.pow(1.25, Math.ceil(Math.log(s.w)/Math.log(1.25)))), k=exact ? 1 : s.w/lw;
   if(el._lw!==lw){ el._lw=lw; el.style.setProperty('--cw', lw+'px'); el.style.setProperty('--ch', lw*s.h/s.w+'px'); }
   const up=s.ry>1; if(el._up!==up){ el._up=up; el.classList.toggle('up', up); }
   // the phone's flip is sharp while the picture is moving, and goes soft the moment that layer is dropped
-  if(!isDesktop()){
+  if(!isLayoutDesk()){
     const hold=s.ry>90 ? 'transform' : '';
     if(el._hold!==hold){ el._hold=hold; el.style.willChange=hold; }
   }
@@ -831,7 +849,7 @@ function setHandOn(el){
   if(handOnEl) handOnEl.classList.add('hand-on');
 }
 function syncHandCursor(x, y){
-  if(!isDesktop()){
+  if(!isMouseUI()){
     document.documentElement.classList.remove('cur-hand');
     setHandOn(null);
     return null;
@@ -871,18 +889,31 @@ fan.addEventListener('pointermove', e=>{
 });
 fan.addEventListener('pointerleave', ()=>{ if(fanIdle()){ setHover(null); if(spread?.list) showPickAsk(); } });
 // the whisper's place, while a click can hurry the tape, the dealing or the gathering
+function rushHintText(){ return tr(isMouseUI() ? 'rush' : 'rushTap'); }
 function showRushHint(on){
   const el=document.getElementById('rushHint');
-  if(el) el.classList.toggle('on', !!(on && isDesktop()));
+  if(!el) return;
+  if(on && isLayoutDesk()){ el.textContent=rushHintText(); el.classList.add('on'); }
+  else el.classList.remove('on');
 }
-// a mouse click anywhere while the opening plays, while the fan is dealing, or while it is gathered
-// back into the deck, plays that motion at double speed instead of choosing a card
-addEventListener('pointerdown', e=>{
-  if(e.pointerType && e.pointerType!=='mouse') return;
+// mouse click, or a double-tap on a tablet, hurries the intro / deal / gather
+function rushMotion(){
   if(dealTl) dealTl.timeScale(2);
   if(gatherTl) gatherTl.timeScale(2);
   if(introTl) introTl.timeScale(2);
   else if(document.body.classList.contains('intro')) introRush=true;
+}
+let lastTouchRush=0;
+addEventListener('pointerdown', e=>{
+  if(!e.pointerType || e.pointerType==='mouse'){
+    rushMotion();
+    return;
+  }
+  // tablet (and phone): double-tap anywhere to speed the current motion
+  if(!isTabletDevice() && !isPhone()) return;
+  const now=performance.now();
+  if(now-lastTouchRush<340) rushMotion();
+  lastTouchRush=now;
 });
 fan.addEventListener('click', e=>{
   if(dealTl){ dealTl.timeScale(2); return; }
@@ -897,7 +928,7 @@ addEventListener('pointermove', e=>{
   syncHandCursor(e.clientX, e.clientY);
 });
 addEventListener('pointerdown', e=>{
-  if(!isDesktop() || (e.pointerType && e.pointerType!=='mouse') || e.button!==0) return;
+  if(!isMouseUI() || (e.pointerType && e.pointerType!=='mouse') || e.button!==0) return;
   const hot=hotUnderCursor(e.clientX, e.clientY);
   if(!hot) return;
   if(e.target===hot || hot.contains(e.target)) return;
@@ -926,7 +957,7 @@ function openedPose(el, card){
   // every described card uses the day card's sheet, on the phone as on the desktop:
   // the period, the name and the quote sit above the card, the reading under it
   const sheet=!!spread;
-  const stepOpen=isDesktop() && sheet && spread.i<POSITIONS.length-1;
+  const stepOpen=isLayoutDesk() && sheet && spread.i<POSITIONS.length-1;
   document.body.classList.toggle('day-open', true);
   document.body.classList.toggle('step-open', stepOpen);
   syncFanArcsClass();
@@ -943,7 +974,7 @@ function openedPose(el, card){
 const cardHead=document.getElementById('cardHead');
 function fitCardHead(){
   const h=document.getElementById('mName'); h.style.fontSize=h.style.letterSpacing='';
-  const start=isDesktop() ? 20 : 18, track=isDesktop() ? .06 : 0;
+  const start=isLayoutDesk() ? 20 : 18, track=isLayoutDesk() ? .06 : 0;
   for(let f=start; f>=12 && cardHead.offsetWidth>innerWidth-28; f-=.5){ h.style.fontSize=f+'px'; h.style.letterSpacing=f*track+'px'; }
 }
 // the name takes the title's place for as long as the description is shown
@@ -963,7 +994,7 @@ function fitAbove(panel){
   const GAP=16, panelH=panel.offsetHeight, ASPECT=CARD_ASPECT;
   const availW=innerWidth-2*FIT_MARGIN;
   // phone: the same sheet as the open card. There is no older panel to fall back to.
-  if(!isDesktop()){
+  if(!isLayoutDesk()){
     if(panel===meaningPanel){
       panel.style.top='auto';
       panel.style.bottom='calc(24px + env(safe-area-inset-bottom, 0px))';
@@ -1222,7 +1253,7 @@ function openSpreadCard(i){
 }
 // the tape stays "Tarot by Lidia Khait". This only clears a period that an older build may have left on the plate.
 function setTapePeriod(text){
-  if(!isDesktop()) return;
+  if(!isLayoutDesk()) return;
   const zoom=document.querySelector('.tape-zoom');
   if(!zoom) return;
   let lab=zoom.querySelector('.tape-label');
@@ -1273,7 +1304,7 @@ function nextSpreadCard(){
   busy=true; const el=activeCard, s=el._state, render=()=>renderCard(el,s);
   // the sheet drops its day-card layout the moment it closes; hide it first so that snap is not seen
   const sheet=document.body.classList.contains('step-open');
-  const phone=!isDesktop() && document.body.classList.contains('day-open');
+  const phone=!isLayoutDesk() && document.body.classList.contains('day-open');
   if(sheet){ meaningPanel.style.transition='none'; meaningPanel.style.opacity='0'; }
   if(phone) concealSheet();
   meaningPanel.classList.remove('show'); hideBigName();
@@ -1304,8 +1335,8 @@ function nextSpreadCard(){
 // shop; phones - the carousel
 function showSpreadSummary(){
   busy=true; const el=activeCard, els=spread.cards;
-  const sheet=isDesktop() && !el._fromDeck && document.body.classList.contains('day-open');
-  const phone=!isDesktop() && document.body.classList.contains('day-open');
+  const sheet=isLayoutDesk() && !el._fromDeck && document.body.classList.contains('day-open');
+  const phone=!isLayoutDesk() && document.body.classList.contains('day-open');
   if(sheet){ meaningPanel.style.transition='none'; meaningPanel.style.opacity='0'; }
   if(phone) concealSheet();
   meaningPanel.classList.remove('show'); hideBigName(); setTapePeriod(''); el.classList.remove('lit');
@@ -1315,7 +1346,7 @@ function showSpreadSummary(){
   setFinale(els);
   if(el._fromDeck){ showCarousel(); return; }
   // desktop: as large as the gap between the captions and the reading, and centred in it
-  const laid=isDesktop() ? spreadRowPoses(els) : null;
+  const laid=isLayoutDesk() ? spreadRowPoses(els) : null;
   const poses=laid ? laid.poses : fitRow(finale, els.length);
   els.forEach((c,i)=>{
     const s=c._state; gsap.killTweensOf(s); c.classList.remove('dim');
@@ -1414,7 +1445,7 @@ carPrev.addEventListener('click', ()=>spread?.carousel && turnStack(-1));
 carNext.addEventListener('click', ()=>spread?.carousel && turnStack(1));
 // a tap on the card's name, or the line under the buttons, puts the spread's own paragraph back
 function returnSpreadSummary(){
-  if(busy || isDesktop() || !spread?.carousel || !document.body.classList.contains('car-leaf')) return;
+  if(busy || isLayoutDesk() || !spread?.carousel || !document.body.classList.contains('car-leaf')) return;
   busy=true;
   const sum=document.getElementById('fSummary');
   gsap.killTweensOf([cardHead, fCard, sum]);
@@ -1443,8 +1474,8 @@ function syncSpreadCue(){
   const deck=document.getElementById('fDeck');
   if(!btn || !deck) return;
   const card=document.body.classList.contains('car-leaf');
-  if(!isDesktop() && card) btn.textContent=tr('spreadBack');
-  if(!isDesktop() && document.body.classList.contains('car-open') && !card) deck.hidden=false;
+  if(!isLayoutDesk() && card) btn.textContent=tr('spreadBack');
+  if(!isLayoutDesk() && document.body.classList.contains('car-open') && !card) deck.hidden=false;
 }
 cardHead.addEventListener('click', returnSpreadSummary);
 document.getElementById('spreadBack').addEventListener('click', returnSpreadSummary);
@@ -1607,7 +1638,7 @@ function spreadRowPoses(els){
 }
 // poses of n face-up cards side by side that, with their captions above and `panel` under them, fit the viewport
 function fitRow(panel, n){
-  const GAP=16, CAP=isDesktop() ? 128 : 66, SP=.14, side=isPortraitMobile() ? 16 : FIT_MARGIN;
+  const GAP=16, CAP=isLayoutDesk() ? 128 : 66, SP=.14, side=isPortraitMobile() ? 16 : FIT_MARGIN;
   const minTop=Math.max(FIT_MARGIN, document.querySelector('h1.title').getBoundingClientRect().bottom+24)+CAP;
   // the panel (the closing block) stands on the bottom of the screen: the row is centred in the room above it
   const room=panel.getBoundingClientRect().top-GAP-minTop, availW=innerWidth-2*side;
@@ -1680,8 +1711,6 @@ function resetTable(){
   syncFanArcsClass();
 }
 
-const isDesktop=()=>matchMedia('(hover:hover) and (pointer:fine)').matches;
-
 // The card lies open: its description surfaces, and on desktop its name, huge, behind it.
 function onCardOpened(el){
   setEndRow(spread && spread.i<POSITIONS.length-1);
@@ -1700,7 +1729,7 @@ function onCardOpened(el){
 const endPhrase=document.getElementById('endPhrase'), endRule=document.getElementById('endRule');
 // between the cards of a spread there is only the way on to the next one
 function setEndRow(next){
-  if(!isDesktop()){
+  if(!isLayoutDesk()){
     endRule.style.display='none';
     endPhrase.style.display='';
     endPhrase.textContent=spread && next ? tr('toward')[spread.i] : tr('nowYouKnow');
@@ -1761,7 +1790,7 @@ const BIG_DIM='rgba(0,0,0,.55)'; // behind the card: a shadow pressed into the v
 // letters over the card dissolve into it gradually instead of jumping behind it
 let bigFront=null, bigNameLive=false;
 function fitBigName(){
-  if(!isDesktop() || !bigNameLive || !bigName.isConnected) return;
+  if(!isLayoutDesk() || !bigNameLive || !bigName.isConnected) return;
   const FILL=innerWidth*.96, n=bigName.textContent.length;
   bigName.style.letterSpacing=''; bigName.style.paddingLeft='';
   bigName.style.fontSize='100px';
@@ -1782,7 +1811,7 @@ function fitBigName(){
   }
 }
 function showBigName(el){
-  if(!isDesktop()) return;
+  if(!isLayoutDesk()) return;
   if(bigFront){ gsap.killTweensOf(bigFront); bigFront.remove(); }
   bigName.textContent=el._card.name; bigName.style.letterSpacing=''; bigName.style.paddingLeft='';
   gsap.killTweensOf(bigName); bigName.style.color='';
@@ -1817,7 +1846,7 @@ function hideBigName(){
 // each is a way to the shop
 let showcase=[];
 function showShowcase(el){
-  if(!isDesktop()) return;
+  if(!isLayoutDesk()) return;
   const s=el._state, others=DECK.filter(c=>c!==el._card);
   for(let i=others.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [others[i],others[j]]=[others[j],others[i]]; }
   const picks=others.slice(0,4);
@@ -1912,7 +1941,7 @@ window.addEventListener('pointermove', e=>{
       const on=e.pointerType==='mouse' && cursorSamples(e.clientX, e.clientY).some(([x,y])=>inCard(c._state, x, y));
       c.classList.toggle('lit', on); if(on) over=c;
     });
-    if(isDesktop() && !spread.carousel) showSummaryText(over); // the stack already shows its top card's meaning
+    if(isLayoutDesk() && !spread.carousel) showSummaryText(over); // the stack already shows its top card's meaning
     return;
   }
   const s=activeCard._state; if(!s || holdFlat) return;
@@ -1962,7 +1991,7 @@ window.addEventListener('deviceorientation', e=>{
 });
 // iOS lets a page read the phone's tilt only after asking, from a tap
 function askTiltPermission(){
-  if(isDesktop() || !window.DeviceOrientationEvent || typeof DeviceOrientationEvent.requestPermission!=='function') return;
+  if(isLayoutDesk() || !window.DeviceOrientationEvent || typeof DeviceOrientationEvent.requestPermission!=='function') return;
   DeviceOrientationEvent.requestPermission().catch(()=>{});
 }
 
@@ -1977,14 +2006,14 @@ document.getElementById('finishBtn').addEventListener('click', e=>{
   if(!activeCard || busy) return;
   // phones: the tapped button first fills with red, so the tap is seen, then does its work
   const btn=e.currentTarget;
-  if(!isDesktop() && !btn._tapped){
+  if(!isMouseUI() && !btn._tapped){
     btn.classList.add('tap'); btn._tapped=true; busy=true;
     setTimeout(()=>{ busy=false; btn.click(); btn._tapped=false; }, 420);
     return;
   }
   if(spread){ spread.i<POSITIONS.length-1 ? nextSpreadCard() : showSpreadSummary(); return; }
   // desktop card of the day keeps the updated screen; only the closing row replaces the finish button
-  if(isDesktop()){
+  if(isLayoutDesk()){
     busy=true; const el=activeCard;
     const text=document.getElementById('mText'), box=text.getBoundingClientRect();
     setFinale([el]);
@@ -2030,7 +2059,7 @@ function setFinale(els){
   prepareStory(els);
   document.getElementById('etsyBtn').href=etsyLink(els[0]._card);
   document.getElementById('fDeck').innerHTML=tr(one ? 'deckOne' : 'deckMany');
-  if(!isDesktop()){
+  if(!isLayoutDesk()){
     // the same line as the desktop finale: under the buttons, on both closing screens
     document.getElementById('fDeck').hidden=false;
     document.getElementById('fDeck').innerHTML=tr('deckMany');
@@ -2046,7 +2075,7 @@ function setFinale(els){
   sum.hidden=one; sum.textContent=one ? '' : spreadSummary(els);
   sum.classList.remove('card-text'); sum.style.minHeight=''; summaryFor=null;
   // it keeps the height of the longest of those texts, so the buttons below do not jump
-  if(!one && isDesktop() && !els[0]._fromDeck){
+  if(!one && isLayoutDesk() && !els[0]._fromDeck){
     const h=[sum.textContent, ...els.map(cardMeaning)].map((t,i)=>{
       sum.textContent=t; sum.classList.toggle('card-text', i>0); return sum.offsetHeight; });
     sum.classList.remove('card-text');
@@ -2058,7 +2087,7 @@ function setFinale(els){
 // three labels share one line, as on the desktop. The long shop label drops under the other two.
 function fitFinaleRow(){
   const row=document.querySelector('.finale-row');
-  if(isDesktop()){ row.classList.remove('shop-below'); return; }
+  if(isLayoutDesk()){ row.classList.remove('shop-below'); return; }
   row.classList.remove('shop-below');
   const btns=['shareBtn','etsyBtn','gatherBtn'].map(id=>document.getElementById(id)).filter(el=>!el.hidden);
   const need=btns.reduce((w,el)=>w+el.scrollWidth,0)+6*(btns.length-1)+8;
@@ -2094,7 +2123,7 @@ document.getElementById('gatherBtn').addEventListener('click', ()=>{
   busy=true; const el=activeCard;
   // the closing row and the description fade on a delay; dropping the day-card layout first
   // would show the old finish button for that whole delay. Hide both before the layout returns.
-  const phoneLeave=!isDesktop() && (document.body.classList.contains('day-open') || document.body.classList.contains('car-open') || document.body.classList.contains('card-open') || finale.classList.contains('show') || meaningPanel.classList.contains('show'));
+  const phoneLeave=!isLayoutDesk() && (document.body.classList.contains('day-open') || document.body.classList.contains('car-open') || document.body.classList.contains('card-open') || finale.classList.contains('show') || meaningPanel.classList.contains('show'));
   if(phoneLeave) concealSheet();
   if(document.body.classList.contains('day-done')){
     meaningPanel.style.transition=finale.style.transition='none';
@@ -2406,6 +2435,8 @@ function applyLang(){
   document.documentElement.lang=lang; document.title=tr('title');
   POSITIONS.splice(0, POSITIONS.length, ...tr('positions'));
   document.querySelectorAll('[data-i18n]').forEach(e=>e.textContent=tr(e.dataset.i18n));
+  const rushEl=document.getElementById('rushHint');
+  if(rushEl) rushEl.textContent=rushHintText();
   const other=lang==='ru' ? 'en' : 'ru';
   langBtn.textContent=other.toUpperCase(); langBtn.dataset.lang=other;
   setAskSub(); fitTitle(); fitOptLines(); fitCountdown(); placePhoneChalk();
@@ -2424,7 +2455,7 @@ function fitTitle(){
 document.fonts.ready.then(fitTitle);
 // the red line under a reading grows to the ink of the word, the same distance past both sides
 function fitOptLines(){
-  if(!isDesktop()) return;
+  if(!isMouseUI()) return;
   document.querySelectorAll('.opt').forEach(btn=>{
     const cs=getComputedStyle(btn);
     const raw=btn.textContent.trim();
@@ -2457,11 +2488,10 @@ langBtn.addEventListener('click', ()=>{
 const browserLangs=navigator.languages?.length ? navigator.languages : [navigator.language||'en'];
 langSwitch.classList.toggle('off', browserLangs.every(l=>/^en\b/i.test(l)) && lang==='en');
 applyLang();
-// a tablet is a touch screen whose short side is at least the iPad mini. Phones stay under that.
-const isTabletDevice=()=>navigator.maxTouchPoints>1 && Math.min(screen.width, screen.height)>=600;
 // phones may keep upright when opened from the home screen; tablets are asked to stay landscape.
 // A browser page cannot lock the rotation, so the note covers the screen when it is the wrong way.
 function syncOrient(){
+  syncDeviceClass();
   document.body.classList.toggle('tablet-portrait', isTabletDevice() && matchMedia('(orientation: portrait)').matches);
 }
 syncOrient();
@@ -2537,7 +2567,7 @@ function relayoutOpenCards(){
     return;
   }
   // desktop three-up closing row
-  if(spread?.summary && spread.cards?.length && finale.classList.contains('show') && isDesktop()){
+  if(spread?.summary && spread.cards?.length && finale.classList.contains('show') && isLayoutDesk()){
     const els=spread.cards;
     const laid=spreadRowPoses(els);
     els.forEach((c,i)=>{
@@ -2585,7 +2615,7 @@ function whisperBottomPx(){
 }
 // desktop opening: deck shrinks to the band between the tape and the buttons so it never covers either
 function fitOpeningLayout(){
-  if(!isDesktop() || openingEl.hidden) return;
+  if(!isLayoutDesk() || openingEl.hidden) return;
   const velvet=document.getElementById('velvet');
   const tape=document.getElementById('introTapeWrap');
   const opts=document.getElementById('spreadOpts');
@@ -2620,7 +2650,7 @@ function fitOpeningLayout(){
   requestAnimationFrame(apply);
 }
 function refitChalkHome(){
-  if(!isDesktop()) return;
+  if(!isLayoutDesk()) return;
   const plain=document.getElementById('chalkPlain'), frame=document.getElementById('chalkFrame');
   if(!plain) return;
   const op=parseFloat(gsap.getProperty(plain,'opacity'))||0;
@@ -2674,7 +2704,7 @@ function bindViewportWatch(){
 }
 bindViewportWatch();
 if(isTabletDevice()) screen.orientation?.lock?.('landscape').catch(()=>{});
-else if(!isDesktop()) screen.orientation?.lock?.('portrait').catch(()=>{});
+else if(isPhone()) screen.orientation?.lock?.('portrait').catch(()=>{});
 
 document.addEventListener('contextmenu', e=>{ if(e.target.closest('img, .card, canvas')) e.preventDefault(); });
 document.addEventListener('dragstart', e=>{ if(e.target.tagName==='IMG') e.preventDefault(); });
@@ -2800,7 +2830,7 @@ async function phoneSplash(){
 /* ---------- intro: large logo → top-left, tape slides until a label hits center, then swaps ---------- */
 (async function runIntro(){
   // phones: logo first, then it dissolves into the deck. The tape stays, with the words centered.
-  if(!isDesktop()){
+  if(!isLayoutDesk()){
     phoneSplash();
     return;
   }
@@ -2819,7 +2849,7 @@ async function phoneSplash(){
     fitTitle();
   };
 
-  const desk=()=>matchMedia('(hover:hover) and (pointer:fine)').matches;
+  const desk=()=>isLayoutDesk();
   const dockTarget=()=>{
     const d=desk(), safeTop=parseFloat(getComputedStyle(document.documentElement).paddingTop)||0;
     const left=d ? 28 : 14, top=d ? 40+safeTop : 10+safeTop;

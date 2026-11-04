@@ -40,6 +40,13 @@ canvas#dust{position:fixed; inset:0; z-index:1; pointer-events:none;}
   .chalk img{position:absolute; left:50%; top:50%; width:min(92vw, 1120px); opacity:0;
     user-select:none; -webkit-user-drag:none; transform-origin:50% 50%;}
 }
+/* tablet: same layout as desktop */
+
+  html.tablet .chalk{display:block; position:fixed; inset:0; z-index:1; pointer-events:none;}
+  html.tablet .chalk img{position:absolute; left:50%; top:50%; width:min(92vw, 1120px); opacity:0;
+    user-select:none; -webkit-user-drag:none; transform-origin:50% 50%;}
+
+
 .glow{position:fixed; inset:0; z-index:0; pointer-events:none;
   background:radial-gradient(ellipse 55% 40% at 50% 42%, var(--glow), transparent 70%);
   animation:flicker 5s infinite ease-in-out;}
@@ -127,16 +134,25 @@ body:not(.fonts-ready) .ask-sub{visibility:hidden;}
   .opt:not(.done):hover::after,
   .opt:not(.done).hand-on::after{transform:scaleX(1);}
 }
+/* tablet: same layout as desktop */
+
+  html.tablet .opt:not(.done):hover::after,
+html.tablet .opt:not(.done).hand-on::after{transform:scaleX(1);}
+
+
 /* phones: a thin frame shows round one reading, then round the other - pick one; once the card of the day is
    drawn, only "Три карты" keeps calling. It lies outside the words' box, so nothing moves */
 @media not all and (hover:hover) and (pointer:fine){
-  .opt::before{content:''; position:absolute; top:0; bottom:0; left:-18px; right:-15px; border:.67px solid rgba(var(--accent-rgb),.55);
+  html:not(.tablet) .opt::before{content:''; position:absolute; top:0; bottom:0; left:-18px; right:-15px; border:.67px solid rgba(var(--accent-rgb),.55);
     border-radius:24px; opacity:0; animation:frame 8s ease-in-out infinite; pointer-events:none;}
-  .opt-col + .opt::before{animation-delay:4s;}
+  html:not(.tablet) .opt-col + .opt::before{animation-delay:4s;}
   /* hidden, never stopped: a stopped frame would start its cycle over and blink together with the other */
-  .opt.done::before, .opt:not(.done):active::before, .opt.tap::before{visibility:hidden;}
+  html:not(.tablet) .opt.done::before,
+html:not(.tablet) .opt:not(.done):active::before,
+html:not(.tablet) .opt.tap::before{visibility:hidden;}
   /* a tap: only the words turn red */
-  .opt:not(.done):active, .opt.tap{color:var(--red); text-shadow:0 0 10px rgba(228,36,35,.7), 0 0 24px rgba(228,36,35,.45);}
+  html:not(.tablet) .opt:not(.done):active,
+html:not(.tablet) .opt.tap{color:var(--red); text-shadow:0 0 10px rgba(228,36,35,.7), 0 0 24px rgba(228,36,35,.45);}
 }
 @keyframes frame{0%{opacity:0;} 20%, 30%{opacity:1;} 50%, 100%{opacity:0;}}
 body:not(.fonts-ready) .spread-options{visibility:hidden;}
@@ -151,11 +167,11 @@ body:not(.fonts-ready) .spread-options{visibility:hidden;}
 .pick-line{font-family:var(--head-font); font-size:1em; font-weight:700; line-height:1.38; letter-spacing:.19em; text-transform:uppercase;}
 .pick-go{margin-top:.5em; font-size:max(13px, .5em); line-height:1.6;}
 .pick-hint{position:absolute; top:0; display:grid; justify-items:center;}
-.pick-word{grid-area:1/1; font-family:var(--head-font); font-size:1.3em; font-weight:700; letter-spacing:.19em; margin-right:-.19em; white-space:nowrap;
+.pick-word{grid-area:1/1; font-family:var(--head-font); font-size:1.3em; font-weight:100; letter-spacing:.19em; margin-right:-.19em; white-space:nowrap;
   color:var(--accent); text-transform:uppercase; text-shadow:0 0 12px #000, 0 0 4px #000;
   opacity:0; transform:translateY(8px); transition:opacity .5s ease, transform .5s ease;}
 .pick-word.on{opacity:1; transform:none; transition-delay:.25s;}
-.pick-word.pick-ask{font-family:inherit; font-size:.9em; font-style:italic; letter-spacing:.95px; margin-right:0; text-transform:none; color:var(--ink);}
+.pick-word.pick-ask{font-family:inherit; font-size:.9em; font-weight:300; font-style:normal; letter-spacing:.95px; margin-right:0; text-transform:none; color:var(--ink);}
 .spread-cap{position:fixed; z-index:1500; display:flex; flex-direction:column; align-items:center; gap:3px;
   text-align:center; transform:translate(-50%,0); opacity:0; transition:opacity .5s ease-in-out; pointer-events:none;}
 .spread-cap.above{transform:translate(-50%,-100%);}
@@ -255,6 +271,9 @@ body:not(.noir) .big-name{font-family:'Cinzel',serif; color:#5e4c25;}
   text-transform:uppercase; margin-bottom:6px;}
 .meaning-panel .pos-label:empty{display:none;}
 @media (hover:hover) and (pointer:fine){ #mPos{display:none;} }
+/* tablet: same layout as desktop */
+ html.tablet #mPos{display:none;} 
+
 /* the suit's drawing over the name: the long wand and sword by width, the cup and pentacle by height */
 .meaning-panel h2{font-family:var(--head-font); font-weight:500; color:var(--accent); letter-spacing:1.2px; font-size:20px; margin:0 0 2px;}
 /* the card's own title from the guidebook, Minor Arcana only */
@@ -283,6 +302,18 @@ body:not(.noir) .big-name{font-family:'Cinzel',serif; color:#5e4c25;}
   .link-btn:hover,
   .link-btn.hand-on{color:var(--ink);}
 }
+/* tablet: same layout as desktop */
+
+  html.tablet .finish-btn:hover .arrow,
+html.tablet .finish-btn.hand-on .arrow{transform:translateX(5px); transition-delay:.35s, 0s;}
+  html.tablet .return-btn:hover,
+html.tablet .return-btn.hand-on{color:var(--ink);}
+  html.tablet .cta:hover,
+html.tablet .cta.hand-on{color:#ff4d4c;}
+  html.tablet .link-btn:hover,
+html.tablet .link-btn.hand-on{color:var(--ink);}
+
+
 .finish-btn.tap .fill{animation:none; background-position:50% 0;}
 .finish-btn.tap .arrow{transform:translateX(5px);}
 .return-btn:active{background:rgba(228,36,35,.15); border-color:var(--red);}
@@ -326,9 +357,25 @@ body.noir .cta{background:none; color:var(--red); box-shadow:none;}
   .finale-row .return-btn{order:-1; justify-self:end;}
   .finale-row .link-btn{justify-self:start;}
 }
+/* tablet: same layout as desktop */
+
+  html.tablet .finale{max-width:760px;}
+  html.tablet .finale .summary{max-width:640px;}
+  html.tablet .finale #fDeck{max-width:none; white-space:nowrap;}
+  /* the shop button on the centre line of the screen, the other two pressed to its sides whatever their width */
+  html.tablet .finale-row{display:grid; grid-template-columns:1fr auto 1fr; column-gap:22px; width:100%;}
+  html.tablet .finale-row .cta{order:0;}
+  html.tablet .finale-row .row-break{display:none;}
+  html.tablet .finale-row .return-btn{order:-1; justify-self:end;}
+  html.tablet .finale-row .link-btn{justify-self:start;}
+
+
 /* the closing block stands on the bottom of the screen; the cards find room above it (fitAbove / fitRow) */
 .finale{top:auto; bottom:calc(28px + env(safe-area-inset-bottom,0px));}
 @media (hover:hover) and (pointer:fine){ .finale{bottom:calc(40px + env(safe-area-inset-bottom,0px));} }
+/* tablet: same layout as desktop */
+ html.tablet .finale{bottom:calc(40px + env(safe-area-inset-bottom,0px));} 
+
 .link-btn{background:none; border:none; color:var(--accent); font-family:var(--head-font); font-weight:600; font-size:24px;
   letter-spacing:1.14px; text-transform:uppercase; cursor:var(--cur-on); padding:6px 8px;}
 .link-btn .ic{display:inline-block; font-size:1.35em; line-height:0; vertical-align:-.08em; margin-right:2px;}
@@ -362,6 +409,35 @@ h1.title{position:fixed; top:calc(14px + env(safe-area-inset-top,0px)); left:50%
     .ask-sub{margin-top:10px;}
   }
 }
+/* tablet: same layout as desktop */
+
+  /* deck sits in the band between the tape and the button block; --deck-w is capped in CSS and
+     tightened further by fitOpeningLayout (app.js) so a short window never covers the tape */
+  html.tablet .velvet{--deck-w:210px; position:absolute; left:50%; width:min(92vw,520px); height:auto; margin:0;
+    transform:translateX(-50%);
+    top:calc(40px + env(safe-area-inset-top, 0px) + 72px * 678 / 840 * .88);
+    bottom:calc(var(--whisper-bottom) + 36px + var(--whisper-size) + var(--btn-size) + 32px + var(--count-size));}
+  html.tablet h1.title{top:calc(64px + env(safe-area-inset-top,0px));}
+  /* whisper uses html --whisper-bottom (80px, or 28px under 759px — not on fan-arcs) */
+  html.tablet #opening{--whisper-size:clamp(11px, .85vw, 14px);
+    --btn-size:clamp(14px, 1.1111vw, 18px); --count-size:clamp(14px, 1.1111vw, 18px);}
+  html.tablet .spread-options{position:absolute; left:0; right:0; margin-top:0; transform:none; align-items:flex-start;
+    bottom:calc(var(--whisper-bottom) + 36px + var(--whisper-size));}
+  html.tablet .whisper{position:absolute; left:0; right:0; bottom:var(--whisper-bottom); margin-top:0; transform:none; line-height:1;
+    font-size:var(--whisper-size);}
+  html.tablet .opt-col{display:flex; flex-direction:column; align-items:center; width:max-content;}
+  html.tablet .ask-sub{position:relative; left:auto; top:auto; transform:none; width:100%; height:var(--count-size); margin-top:16px;
+    line-height:var(--count-size); text-align:center;}
+  html.tablet .ask-sub .cd-row{position:absolute; left:50%; top:0; transform:translateX(-50%); margin:0;}
+  html.tablet .ask-sub .countdown,
+html.tablet .ask-sub .cd-row .countdown{margin:0; font-size:var(--count-size); line-height:var(--count-size); height:var(--count-size);}
+  @media (max-height:758px){
+    html.tablet #opening{--whisper-size:clamp(10px, .8vw, 12px);
+      --btn-size:clamp(12px, 1vw, 15px); --count-size:clamp(12px, 1vw, 15px);}
+    html.tablet .ask-sub{margin-top:10px;}
+  }
+
+
 /* the language button (the language it switches to) in the top right corner and the sound in the top left, on the title's line; only on the resting
    deck, like the choice of spread. The buttons' padding is taken back by margins: big for a finger, 20px tall */
 .lang-switch, .sound-btn{position:fixed; top:calc(14px + env(safe-area-inset-top,0px)); height:20px;
@@ -394,6 +470,15 @@ h1.title{position:fixed; top:calc(14px + env(safe-area-inset-top,0px)); left:50%
     box-shadow:0 0 12px rgba(228,36,35,.85), 0 0 26px rgba(228,36,35,.45);
   }
 }
+/* tablet: same layout as desktop */
+
+  html.tablet .lang-switch button:hover,
+html.tablet .lang-switch button.hand-on{
+    background:#2a0808;
+    box-shadow:0 0 12px rgba(228,36,35,.85), 0 0 26px rgba(228,36,35,.45);
+  }
+
+
 @media (hover:hover){
   .sound-btn:hover,
   .sound-btn.hand-on{color:var(--ink);}
@@ -402,6 +487,12 @@ h1.title{position:fixed; top:calc(14px + env(safe-area-inset-top,0px)); left:50%
   .sound-btn{top:calc(40px + env(safe-area-inset-top,0px)); left:28px;}
   .lang-switch{right:28px; top:calc(40px + env(safe-area-inset-top,0px) + 72px * 678 / 840 * .38 - 17px);}
 }
+/* tablet: same layout as desktop */
+
+  html.tablet .sound-btn{top:calc(40px + env(safe-area-inset-top,0px)); left:28px;}
+  html.tablet .lang-switch{right:28px; top:calc(40px + env(safe-area-inset-top,0px) + 72px * 678 / 840 * .38 - 17px);}
+
+
 body:not(.fonts-ready) .lang-switch{visibility:hidden;}
 body.noir h1.title{letter-spacing:3.8px; font-weight:700;}
 body.noir .meaning-panel h2, body.noir .card-head h2{font-weight:500;}
@@ -418,6 +509,9 @@ body.car-open #fName{display:none;}
 .card-head .head-title{display:none;}
 .card-head .head-pos{display:none;}
 @media (hover:hover) and (pointer:fine){ .card-head{top:calc(64px + env(safe-area-inset-top,0px));} }
+/* tablet: same layout as desktop */
+ html.tablet .card-head{top:calc(64px + env(safe-area-inset-top,0px));} 
+
 /* narrow phones: a smaller title; fitTitle (app.js) keeps it on one line clear of RU / EN */
 @media (max-width:480px){ body.noir h1.title{font-size:12px; letter-spacing:2.85px;} }
 /* a phone held sideways: the page is made for upright phones and a browser page cannot lock the rotation,
@@ -428,10 +522,13 @@ body.car-open #fName{display:none;}
     gap:14px; background:#050303; color:var(--ink); font-size:19px; font-style:italic; letter-spacing:.5px; text-align:center;}
   .rotate-note .rot-ic{font-size:34px; font-style:normal; color:var(--red); line-height:1;}
 }
-/* a tablet held upright: the page is made for a wide screen, and a browser page cannot lock the rotation */
+/* a tablet held upright: the page is made for a wide screen, and a browser page cannot lock the rotation.
+   Type matches the quoted card titles (Trispace / Plex 300). */
 body.tablet-portrait .tablet-note{position:fixed; inset:0; z-index:10000; display:flex; flex-direction:column; align-items:center; justify-content:center;
-  gap:14px; padding:24px; background:#050303; color:var(--ink); font-size:19px; font-style:italic; letter-spacing:.5px; text-align:center;}
-body.tablet-portrait .tablet-note .rot-ic{font-size:34px; font-style:normal; color:var(--red); line-height:1;}
+  gap:14px; padding:24px; background:#050303; color:var(--ink);
+  font-family:'Trispace',sans-serif; font-weight:300; font-style:normal; font-size:19px; letter-spacing:0; text-align:center;}
+body.tablet-portrait .tablet-note .rot-ic{font-size:34px; font-style:normal; font-weight:300; color:var(--red); line-height:1;}
+html[lang=ru] body.tablet-portrait .tablet-note{font-family:'IBM Plex Mono',monospace; font-weight:300;}
 /* phones, three cards: arrows in the free margins beside the stack; placeCarArrows (app.js) sets their height */
 .car-arrow{position:fixed; z-index:1200; transform:translate(-50%,-50%); background:none; border:none; padding:14px 12px;
   font-family:var(--head-font); font-weight:700; font-size:40px; line-height:1; color:var(--accent); opacity:0; pointer-events:none;
@@ -453,6 +550,15 @@ body.intro #opening{opacity:0 !important; pointer-events:none;}
   body.intro .whisper{opacity:0 !important; pointer-events:none;}
   body.intro #deckStack{opacity:0;}
 }
+/* tablet: same layout as desktop */
+
+  /* the deck has to show during the intro, while the buttons stay hidden until the logo is in the corner */
+  html.tablet body.intro #opening{opacity:1 !important; pointer-events:none;}
+  html.tablet body.intro .spread-options,
+html.tablet body.intro .whisper{opacity:0 !important; pointer-events:none;}
+  html.tablet body.intro #deckStack{opacity:0;}
+
+
 body.intro-done h1.title{opacity:0 !important; pointer-events:none;} /* brand mark replaces the text title */
 .intro-brand{position:fixed; left:50%; top:50%; transform:translate(-50%,-50%);
   display:block; z-index:41; width:min(72vw, 420px); will-change:transform, width, top, left;}
@@ -473,6 +579,12 @@ body.intro-done .intro-tape-wrap{
   body.intro-done .intro-brand{left:28px; top:calc(40px + env(safe-area-inset-top,0px)); width:72px;}
   body.intro-done .intro-tape-wrap{width:calc(100vw - 28px - 72px - env(safe-area-inset-right,0px));}
 }
+/* tablet: same layout as desktop */
+
+  html.tablet body.intro-done .intro-brand{left:28px; top:calc(40px + env(safe-area-inset-top,0px)); width:72px;}
+  html.tablet body.intro-done .intro-tape-wrap{width:calc(100vw - 28px - 72px - env(safe-area-inset-right,0px));}
+
+
 /* the tape's own label, lifted out of the rail after the slide so it can grow past the strip */
 .tape-zoom{position:fixed; z-index:43; pointer-events:none; transform-origin:50% 50%;}
 .tape-zoom svg{display:block; width:100%; height:100%;}
@@ -496,138 +608,166 @@ body.intro-done .intro-brand{transition:opacity .5s ease-in-out;}
    On load the logo is alone, then the deck screen replaces it. The tape stays across the top. */
 @media not all and (hover:hover) and (pointer:fine){
   /* the contour stays off on phones until there is a place where the deck does not hide it */
-  body.intro .intro-logo{opacity:0;}
-  body.intro .intro-tape-wrap{opacity:0;}
-  body.intro-done .intro-logo{display:none;}
-  body.intro-done .intro-brand{
+  html:not(.tablet) body.intro .intro-logo{opacity:0;}
+  html:not(.tablet) body.intro .intro-tape-wrap{opacity:0;}
+  html:not(.tablet) body.intro-done .intro-logo{display:none;}
+  html:not(.tablet) body.intro-done .intro-brand{
     left:0; top:env(safe-area-inset-top, 0px);
     width:100%; height:0; transform:none;}
   /* fixed, and not inside the centred logo, so the plate can sit on the screen's top edge */
-  body.tape-grow .intro-tape-wrap,
-  body.intro-done .intro-tape-wrap{
+  html:not(.tablet) body.tape-grow .intro-tape-wrap,
+html:not(.tablet) body.intro-done .intro-tape-wrap{
     position:fixed; left:0; top:env(safe-area-inset-top, 0px);
     width:100vw; height:35px; transform:none; overflow:hidden; z-index:42;}
-  #opening{padding-top:calc(40px + env(safe-area-inset-top, 0px));
+  html:not(.tablet) #opening{padding-top:calc(40px + env(safe-area-inset-top, 0px));
     padding-bottom:calc(24px + 16px + 16px + 28px + env(safe-area-inset-bottom, 0px));
     box-sizing:border-box;}
-  .spread-options{position:absolute; left:0; right:0; margin-top:0; gap:28px; align-items:flex-start;
+  html:not(.tablet) .spread-options{position:absolute; left:0; right:0; margin-top:0; gap:28px; align-items:flex-start;
     bottom:calc(24px + 16px + 18px + env(safe-area-inset-bottom, 0px));}
-  .opt-col{display:flex; flex-direction:column; align-items:center;}
-  .ask-sub{position:relative; left:auto; top:auto; transform:none; width:100%; height:16px; margin-top:8px;
+  html:not(.tablet) .opt-col{display:flex; flex-direction:column; align-items:center;}
+  html:not(.tablet) .ask-sub{position:relative; left:auto; top:auto; transform:none; width:100%; height:16px; margin-top:8px;
     line-height:16px;}
-  .ask-sub .cd-row{position:absolute; left:50%; top:0; transform:translateX(-50%); margin:0;}
-  .whisper{position:absolute; left:0; right:0; margin-top:0;
+  html:not(.tablet) .ask-sub .cd-row{position:absolute; left:50%; top:0; transform:translateX(-50%); margin:0;}
+  html:not(.tablet) .whisper{position:absolute; left:0; right:0; margin-top:0;
     bottom:calc(18px + env(safe-area-inset-bottom, 0px));}
-  .rush-hint{display:none;}
-  .lang-switch{width:22px; height:22px; z-index:44;
+  html:not(.tablet) .rush-hint{display:none;}
+  html:not(.tablet) .lang-switch{width:22px; height:22px; z-index:44;
     top:calc(env(safe-area-inset-top, 0px) + 1px);
     right:calc(8px + env(safe-area-inset-right, 0px));
     font-size:10px; font-weight:700; letter-spacing:.04em; line-height:1;}
-  .lang-switch button{width:22px; height:22px; margin:0; padding:0; border-radius:50%;
+  html:not(.tablet) .lang-switch button{width:22px; height:22px; margin:0; padding:0; border-radius:50%;
     background:#0d0000; border:none; color:var(--red);
     font:inherit; letter-spacing:inherit; display:flex; align-items:center; justify-content:center; box-shadow:none;}
-  h1.title{opacity:0 !important; pointer-events:none;}
-  .whisper, .end-phrase{font-family:'Trispace',sans-serif; font-weight:400; font-style:normal;
+  html:not(.tablet) h1.title{opacity:0 !important; pointer-events:none;}
+  html:not(.tablet) .whisper,
+html:not(.tablet) .end-phrase{font-family:'Trispace',sans-serif; font-weight:400; font-style:normal;
     letter-spacing:.04em; font-size:14px;}
   /* the same muted colour the desktop whisper has before a hover turns it red */
-  .end-phrase{color:color-mix(in srgb, var(--muted) 80%, transparent);}
-  .opt, .finish-btn, .return-btn, .cta, .link-btn{font-family:'Oswald',sans-serif; font-weight:500;
+  html:not(.tablet) .end-phrase{color:color-mix(in srgb, var(--muted) 80%, transparent);}
+  html:not(.tablet) .opt,
+html:not(.tablet) .finish-btn,
+html:not(.tablet) .return-btn,
+html:not(.tablet) .cta,
+html:not(.tablet) .link-btn{font-family:'Oswald',sans-serif; font-weight:500;
     letter-spacing:0; line-height:1; font-size:16px;}
-  .opt{margin-right:0;}
-  .cap-pos, .meaning-panel .pos-label{font-family:'Trispace',sans-serif; font-weight:400;
+  html:not(.tablet) .opt{margin-right:0;}
+  html:not(.tablet) .cap-pos,
+html:not(.tablet) .meaning-panel .pos-label{font-family:'Trispace',sans-serif; font-weight:400;
     letter-spacing:.12em; font-size:13px; color:var(--red);}
-  .cap-name, .meaning-panel h2, .card-head h2{font-family:'Trispace',sans-serif; font-weight:500;
+  html:not(.tablet) .cap-name,
+html:not(.tablet) .meaning-panel h2,
+html:not(.tablet) .card-head h2{font-family:'Trispace',sans-serif; font-weight:500;
     letter-spacing:0; font-size:18px;}
-  .meaning-panel .card-title, .card-head .head-title, .cap-title{font-family:'Trispace',sans-serif;
+  html:not(.tablet) .meaning-panel .card-title,
+html:not(.tablet) .card-head .head-title,
+html:not(.tablet) .cap-title{font-family:'Trispace',sans-serif;
     font-weight:300; font-style:normal; letter-spacing:0; font-size:14px; line-height:1.2; color:var(--ink); opacity:1;}
-  .cap-title{display:block; margin-top:6px;}
-  .cap-title:empty{display:none;}
-  #mText, #fText, .finale .summary{font-family:'Trispace',sans-serif; font-weight:300; letter-spacing:0;
+  html:not(.tablet) .cap-title{display:block; margin-top:6px;}
+  html:not(.tablet) .cap-title:empty{display:none;}
+  html:not(.tablet) #mText,
+html:not(.tablet) #fText,
+html:not(.tablet) .finale .summary{font-family:'Trispace',sans-serif; font-weight:300; letter-spacing:0;
     font-size:15px; line-height:1.4;}
-  .ask-sub .countdown{font-family:'Trispace',sans-serif; font-weight:700; letter-spacing:.171em; font-size:14px;}
-  #fDeck{font-family:'Trispace',sans-serif; font-weight:300; font-style:normal; letter-spacing:0; font-size:13px;}
-  #fDeck b{color:inherit; font-weight:inherit;}
-  .finale .summary{font-style:normal;}
-  .velvet{--deck-w:200px;}
-  .finish-btn{color:var(--accent);}
-  .finish-btn .fill{color:transparent; -webkit-text-fill-color:transparent; -webkit-background-clip:text; background-clip:text;
+  html:not(.tablet) .ask-sub .countdown{font-family:'Trispace',sans-serif; font-weight:700; letter-spacing:.171em; font-size:14px;}
+  html:not(.tablet) #fDeck{font-family:'Trispace',sans-serif; font-weight:300; font-style:normal; letter-spacing:0; font-size:13px;}
+  html:not(.tablet) #fDeck b{color:inherit; font-weight:inherit;}
+  html:not(.tablet) .finale .summary{font-style:normal;}
+  html:not(.tablet) .velvet{--deck-w:200px;}
+  html:not(.tablet) .finish-btn{color:var(--accent);}
+  html:not(.tablet) .finish-btn .fill{color:transparent; -webkit-text-fill-color:transparent; -webkit-background-clip:text; background-clip:text;
     background-image:linear-gradient(90deg, var(--accent) 37.5%, var(--red) 37.5% 62.5%, var(--accent) 62.5%);
     background-size:400% 100%; background-position:100% 0; animation:call 3.6s ease-in-out infinite;}
   /* a filled pill: the page glow breathes behind a transparent one, and the button itself seemed to flicker */
-  .return-btn{border:1px solid rgba(var(--accent-rgb),.72); padding:9px 12px; border-radius:24px; background:#140606;}
-  .cta, body.noir .cta{background:var(--red); color:#fff; padding:10px 14px; border-radius:26px;
+  html:not(.tablet) .return-btn{border:1px solid rgba(var(--accent-rgb),.72); padding:9px 12px; border-radius:24px; background:#140606;}
+  html:not(.tablet) .cta,
+html:not(.tablet) body.noir .cta{background:var(--red); color:#fff; padding:10px 14px; border-radius:26px;
     box-shadow:0 0 18px rgba(228,36,35,.4);}
-  .link-btn{color:var(--accent); text-shadow:0 0 12px rgba(var(--accent-rgb),.45);}
+  html:not(.tablet) .link-btn{color:var(--accent); text-shadow:0 0 12px rgba(var(--accent-rgb),.45);}
   /* one sheet only: the period, the name and the quote above the card, the reading across the width,
      the button, then the whisper. The old centred panel, the in-panel caption and the row with the rule
      are not a second layout waiting underneath. */
-  #mPos, #mTitle, #fPos, #fName, #fTitle, #endRule, .finish-btn .arrow{display:none;}
-  #meaningPanel, #finale{left:0; right:0; bottom:calc(24px + env(safe-area-inset-bottom, 0px));
+  html:not(.tablet) #mPos,
+html:not(.tablet) #mTitle,
+html:not(.tablet) #fPos,
+html:not(.tablet) #fName,
+html:not(.tablet) #fTitle,
+html:not(.tablet) #endRule,
+html:not(.tablet) .finish-btn .arrow{display:none;}
+  html:not(.tablet) #meaningPanel,
+html:not(.tablet) #finale{left:0; right:0; bottom:calc(24px + env(safe-area-inset-bottom, 0px));
     top:auto; transform:none; max-width:none; width:100%;}
-  #mText, #fSummary, #fText{width:100%; max-width:none; padding:0 20px; box-sizing:border-box; margin:0 0 16px;}
-  #finale p{max-width:none;}
-  #meaningPanel .meaning-end{flex-direction:column-reverse; gap:12px; margin-top:0;}
+  html:not(.tablet) #mText,
+html:not(.tablet) #fSummary,
+html:not(.tablet) #fText{width:100%; max-width:none; padding:0 20px; box-sizing:border-box; margin:0 0 16px;}
+  html:not(.tablet) #finale p{max-width:none;}
+  html:not(.tablet) #meaningPanel .meaning-end{flex-direction:column-reverse; gap:12px; margin-top:0;}
   /* the same closing order as the desktop: the buttons, then the line about the deck and the shop */
-  #finale{display:flex; flex-direction:column; align-items:center;}
-  #finale #fCard, #finale #fSummary{order:0;}
-  #finale .finale-row{order:1; display:grid; grid-template-columns:1fr auto 1fr; align-items:center;
+  html:not(.tablet) #finale{display:flex; flex-direction:column; align-items:center;}
+  html:not(.tablet) #finale #fCard,
+html:not(.tablet) #finale #fSummary{order:0;}
+  html:not(.tablet) #finale .finale-row{order:1; display:grid; grid-template-columns:1fr auto 1fr; align-items:center;
     column-gap:6px; width:100%; margin:0; padding:0 4px; box-sizing:border-box;}
-  #finale .finale-row .row-break{display:none;}
-  #finale .finale-row .return-btn,
-  #finale .finale-row .cta,
-  #finale .finale-row .link-btn{white-space:nowrap;}
-  #finale .finale-row .return-btn{order:0; justify-self:end; padding:9px 10px;}
-  #finale .finale-row .cta{order:1; justify-self:center;}
-  #finale .finale-row .link-btn{order:2; justify-self:start; position:relative; padding:9px 2px;}
-  #finale .finale-row .link-btn::after{content:''; position:absolute; left:0; right:0; bottom:1px; height:1px;
+  html:not(.tablet) #finale .finale-row .row-break{display:none;}
+  html:not(.tablet) #finale .finale-row .return-btn,
+html:not(.tablet) #finale .finale-row .cta,
+html:not(.tablet) #finale .finale-row .link-btn{white-space:nowrap;}
+  html:not(.tablet) #finale .finale-row .return-btn{order:0; justify-self:end; padding:9px 10px;}
+  html:not(.tablet) #finale .finale-row .cta{order:1; justify-self:center;}
+  html:not(.tablet) #finale .finale-row .link-btn{order:2; justify-self:start; position:relative; padding:9px 2px;}
+  html:not(.tablet) #finale .finale-row .link-btn::after{content:''; position:absolute; left:0; right:0; bottom:1px; height:1px;
     background:var(--red); transform:scaleY(.5); transform-origin:bottom center;}
   /* the long shop label cannot share the line; it drops under the other two, still above the deck line */
-  #finale .finale-row.shop-below{display:flex; flex-wrap:wrap; justify-content:center; column-gap:22px; row-gap:12px;}
-  #finale .finale-row.shop-below .return-btn{order:1;}
-  #finale .finale-row.shop-below .link-btn{order:2;}
-  #finale .finale-row.shop-below .cta{order:3; flex-basis:100%;}
+  html:not(.tablet) #finale .finale-row.shop-below{display:flex; flex-wrap:wrap; justify-content:center; column-gap:22px; row-gap:12px;}
+  html:not(.tablet) #finale .finale-row.shop-below .return-btn{order:1;}
+  html:not(.tablet) #finale .finale-row.shop-below .link-btn{order:2;}
+  html:not(.tablet) #finale .finale-row.shop-below .cta{order:3; flex-basis:100%;}
   /* the deck line keeps its height while a card is open, so the buttons above it do not move */
-  #finale .finale-cue{display:block; order:2; position:relative; width:100%; margin:14px 0 0;}
-  #finale #fDeck{display:block; max-width:none; white-space:normal; width:100%; box-sizing:border-box;
+  html:not(.tablet) #finale .finale-cue{display:block; order:2; position:relative; width:100%; margin:14px 0 0;}
+  html:not(.tablet) #finale #fDeck{display:block; max-width:none; white-space:normal; width:100%; box-sizing:border-box;
     padding:0 20px; margin:0;
     font-family:'Trispace',sans-serif; font-weight:300; font-style:normal; letter-spacing:0;
     font-size:13px; color:var(--muted); opacity:.8;
     transition:opacity .7s ease;}
-  #finale #spreadBack{position:absolute; left:50%; top:32px; transform:translateX(-50%); display:block;
+  html:not(.tablet) #finale #spreadBack{position:absolute; left:50%; top:32px; transform:translateX(-50%); display:block;
     width:max-content; max-width:calc(100% - 40px); margin:0; padding:6px 2px;
     background:none; border:none; box-shadow:none; appearance:none; -webkit-appearance:none;
     color:var(--accent); font-family:'Oswald',sans-serif; font-weight:500; font-style:normal;
     font-size:16px; letter-spacing:0; line-height:1; text-align:center; text-transform:uppercase;
     cursor:var(--cur-on); opacity:0; visibility:hidden; pointer-events:none;
     transition:opacity .7s ease, visibility 0s linear .7s;}
-  body.car-open.car-leaf #finale #fDeck{opacity:0;}
-  body.car-open.car-leaf #finale #spreadBack{opacity:1; visibility:visible; pointer-events:auto;
+  html:not(.tablet) body.car-open.car-leaf #finale #fDeck{opacity:0;}
+  html:not(.tablet) body.car-open.car-leaf #finale #spreadBack{opacity:1; visibility:visible; pointer-events:auto;
     transition:opacity .7s ease, visibility 0s linear 0s;}
   /* the spread's own paragraph, in the card text's face, between two hairlines */
-  body.car-open #fSummary{position:relative; font-style:normal; padding:14px 20px;}
-  body.car-open #fSummary::before,
-  body.car-open #fSummary::after{content:''; position:absolute; left:0; right:0; height:1px; background:var(--red);
+  html:not(.tablet) body.car-open #fSummary{position:relative; font-style:normal; padding:14px 20px;}
+  html:not(.tablet) body.car-open #fSummary::before,
+html:not(.tablet) body.car-open #fSummary::after{content:''; position:absolute; left:0; right:0; height:1px; background:var(--red);
     transform:scaleY(.5); pointer-events:none;}
-  body.car-open #fSummary::before{top:0; transform-origin:top center;}
-  body.car-open #fSummary::after{bottom:0; transform-origin:bottom center;}
-  body.car-open.car-leaf .card-head{pointer-events:auto;}
-  .card-head{white-space:normal; display:flex; flex-direction:column; align-items:center;}
-  .card-head .head-pos:not(:empty){display:block; font-family:'Trispace',sans-serif; font-weight:400;
+  html:not(.tablet) body.car-open #fSummary::before{top:0; transform-origin:top center;}
+  html:not(.tablet) body.car-open #fSummary::after{bottom:0; transform-origin:bottom center;}
+  html:not(.tablet) body.car-open.car-leaf .card-head{pointer-events:auto;}
+  html:not(.tablet) .card-head{white-space:normal; display:flex; flex-direction:column; align-items:center;}
+  html:not(.tablet) .card-head .head-pos:not(:empty){display:block; font-family:'Trispace',sans-serif; font-weight:400;
     letter-spacing:.12em; margin:0 -.12em 6px 0; text-transform:uppercase; color:var(--red); line-height:1.2; font-size:13px;}
-  .card-head h2{white-space:nowrap;}
-  .card-head .head-title{display:block; min-height:1.2em; margin-top:6px; white-space:nowrap;}
+  html:not(.tablet) .card-head h2{white-space:nowrap;}
+  html:not(.tablet) .card-head .head-title{display:block; min-height:1.2em; margin-top:6px; white-space:nowrap;}
   /* the spread's own words stay until a card is turned; the caption waits in its place */
-  body.car-open:not(.car-leaf) .card-head{opacity:0;}
+  html:not(.tablet) body.car-open:not(.car-leaf) .card-head{opacity:0;}
 }
 @media not all and (hover:hover) and (pointer:fine){
-  html[lang=ru] .cap-pos, html[lang=ru] .meaning-panel .pos-label,
-  html[lang=ru] .card-head .head-pos{
+  html:not(.tablet)[lang=ru] .cap-pos,
+html:not(.tablet)[lang=ru] .meaning-panel .pos-label,
+html:not(.tablet)[lang=ru] .card-head .head-pos{
     font-family:'IBM Plex Mono',monospace; font-weight:400; letter-spacing:.12em;}
-  html[lang=ru] .cap-name, html[lang=ru] .meaning-panel h2, html[lang=ru] .card-head h2{
+  html:not(.tablet)[lang=ru] .cap-name,
+html:not(.tablet)[lang=ru] .meaning-panel h2,
+html:not(.tablet)[lang=ru] .card-head h2{
     font-family:'IBM Plex Mono',monospace; font-weight:500; letter-spacing:.05em;}
-  html[lang=ru] #mText, html[lang=ru] #fText, html[lang=ru] .finale .summary{
+  html:not(.tablet)[lang=ru] #mText,
+html:not(.tablet)[lang=ru] #fText,
+html:not(.tablet)[lang=ru] .finale .summary{
     font-family:'IBM Plex Mono',monospace; font-weight:400; letter-spacing:.05em;}
-  html[lang=ru] #fDeck{font-family:'IBM Plex Mono',monospace; font-weight:300; font-style:normal; letter-spacing:0;}
+  html:not(.tablet)[lang=ru] #fDeck{font-family:'IBM Plex Mono',monospace; font-weight:300; font-style:normal; letter-spacing:0;}
 }
 
 /* desktop type. Sizes sit on the 1440px frame and stay inside the band discussed for other monitors.
@@ -664,9 +804,9 @@ body.intro-done .intro-brand{transition:opacity .5s ease-in-out;}
   .link-btn.hand-on{color:var(--ink);}
   .cap-pos, .meaning-panel .pos-label, .pick-word:not(.pick-ask){font-family:'Trispace',sans-serif; font-weight:400; letter-spacing:0;
     font-size:clamp(13px, .9722vw, 16px);}
-  .pick-word:not(.pick-ask){letter-spacing:.12em; margin-right:-.12em; font-size:clamp(13px, 1.15vw, 20px); color:var(--accent);}
+  .pick-word:not(.pick-ask){font-weight:100; letter-spacing:.12em; margin-right:-.12em; font-size:clamp(13px, 1.15vw, 20px); color:var(--accent);}
   /* the ask stays the whisper; the position is the row caption's mono, both sized from the screen */
-  .pick-word.pick-ask{font-family:'Trispace',sans-serif; font-weight:400; font-style:normal; letter-spacing:.04em;
+  .pick-word.pick-ask{font-family:'Trispace',sans-serif; font-weight:300; font-style:normal; letter-spacing:.04em;
     font-size:clamp(11px, .9vw, 15px); color:var(--ink); margin-right:0;}
   .cap-name, .meaning-panel h2, .card-head h2{font-family:'Trispace',sans-serif; font-weight:500; letter-spacing:0;
     font-size:clamp(16px, 1.25vw, 22px);}
@@ -678,6 +818,72 @@ body.intro-done .intro-brand{transition:opacity .5s ease-in-out;}
     font-size:clamp(12px, .95vw, 15px); color:var(--muted); opacity:.8;}
   #fDeck b{color:inherit; font-weight:inherit;}
 }
+/* tablet: same layout as desktop */
+
+  /* both asides share one size, a step under the buttons and the card text */
+  html.tablet .whisper,
+html.tablet .end-phrase,
+html.tablet .rush-hint{font-family:'Trispace',sans-serif; font-weight:400; font-style:normal; letter-spacing:.04em;
+    font-size:clamp(11px, .85vw, 14px);}
+  html.tablet .opt,
+html.tablet .finish-btn,
+html.tablet .return-btn,
+html.tablet .cta,
+html.tablet .link-btn{font-family:'Oswald',sans-serif; font-weight:500; letter-spacing:0; line-height:1;
+    font-size:clamp(14px, 1.1111vw, 18px);}
+  html.tablet .opt{margin-right:0; padding:8px 0; color:var(--accent); background:none; border:none; border-radius:0;
+    text-shadow:0 0 12px rgba(var(--accent-rgb),.45);}
+  html.tablet .opt::after{left:var(--line-l, 0px); right:var(--line-r, 0px);}
+  html.tablet .finish-btn{padding:6px 0; color:var(--accent); background:none; border:none; border-radius:0;}
+  html.tablet .finish-btn .fill{color:transparent; -webkit-text-fill-color:transparent; -webkit-background-clip:text; background-clip:text;
+    background-image:linear-gradient(90deg, var(--accent) 37.5%, var(--red) 37.5% 62.5%, var(--accent) 62.5%);
+    background-size:400% 100%; background-position:100% 0;}
+  /* chalk glove: quiet. bare glove on the button: the word starts calling */
+  html.tablet .finish-btn.hand-on .fill{animation:call 3.6s ease-in-out infinite;}
+  html.tablet .finish-btn:hover,
+html.tablet .finish-btn:hover .fill,
+html.tablet .finish-btn.hand-on,
+html.tablet .finish-btn.hand-on .fill{color:transparent; -webkit-text-fill-color:transparent;}
+  html.tablet .return-btn{color:var(--accent); background:none; border:1px solid rgba(var(--accent-rgb),.4);
+    padding:9px 20px; border-radius:24px;}
+  html.tablet .return-btn:hover,
+html.tablet .return-btn.hand-on{color:var(--accent); background:rgba(228,36,35,.15); border-color:var(--red);}
+  /* the same vertical padding and border as Share, so the red pill is the same height */
+  html.tablet .cta,
+html.tablet body.noir .cta{color:#fff; -webkit-text-fill-color:#fff; background:var(--red);
+    border:1px solid transparent; padding:9px 30px; border-radius:26px; box-shadow:0 0 18px rgba(228,36,35,.4);}
+  html.tablet .cta:hover,
+html.tablet body.noir .cta:hover,
+html.tablet .cta.hand-on,
+html.tablet body.noir .cta.hand-on{color:#fff; -webkit-text-fill-color:#fff; transform:translateY(-1px);
+    box-shadow:0 0 28px rgba(228,36,35,.65);}
+  html.tablet .link-btn{color:var(--muted); background:none; border:none; border-radius:0; padding:9px 6px; box-shadow:none;}
+  html.tablet .link-btn:hover,
+html.tablet .link-btn.hand-on{color:var(--ink);}
+  html.tablet .cap-pos,
+html.tablet .meaning-panel .pos-label,
+html.tablet .pick-word:not(.pick-ask){font-family:'Trispace',sans-serif; font-weight:400; letter-spacing:0;
+    font-size:clamp(13px, .9722vw, 16px);}
+  html.tablet .pick-word:not(.pick-ask){font-weight:100; letter-spacing:.12em; margin-right:-.12em; font-size:clamp(13px, 1.15vw, 20px); color:var(--accent);}
+  /* the ask stays the whisper; the position is the row caption's mono, both sized from the screen */
+  html.tablet .pick-word.pick-ask{font-family:'Trispace',sans-serif; font-weight:300; font-style:normal; letter-spacing:.04em;
+    font-size:clamp(11px, .9vw, 15px); color:var(--ink); margin-right:0;}
+  html.tablet .cap-name,
+html.tablet .meaning-panel h2,
+html.tablet .card-head h2{font-family:'Trispace',sans-serif; font-weight:500; letter-spacing:0;
+    font-size:clamp(16px, 1.25vw, 22px);}
+  html.tablet .meaning-panel .card-title,
+html.tablet .card-head .head-title{font-family:'Trispace',sans-serif; font-weight:300; font-style:normal; letter-spacing:0;
+    font-size:clamp(14px, 1.05vw, 18px);}
+  html.tablet #mText,
+html.tablet #fText,
+html.tablet .finale .summary{font-family:'Trispace',sans-serif; font-weight:300; letter-spacing:0;
+    font-size:clamp(14px, 1.1111vw, 18px);}
+  html.tablet #fDeck{font-family:'Trispace',sans-serif; font-weight:300; font-style:normal; letter-spacing:0;
+    font-size:clamp(12px, .95vw, 15px); color:var(--muted); opacity:.8;}
+  html.tablet #fDeck b{color:inherit; font-weight:inherit;}
+
+
 @media (hover:hover) and (pointer:fine){
   html[lang=ru] .cap-pos, html[lang=ru] .meaning-panel .pos-label, html[lang=ru] .pick-word:not(.pick-ask),
   html[lang=ru] body.day-open .card-head .head-pos{font-family:'IBM Plex Mono',monospace; font-weight:400; letter-spacing:.05em;}
@@ -687,6 +893,23 @@ body.intro-done .intro-brand{transition:opacity .5s ease-in-out;}
   html[lang=ru] #mText, html[lang=ru] #fText, html[lang=ru] .finale .summary{font-family:'IBM Plex Mono',monospace; font-weight:400; letter-spacing:.05em;}
   html[lang=ru] #fDeck{font-family:'IBM Plex Mono',monospace; font-weight:300; font-style:normal; letter-spacing:0;}
 }
+/* tablet: same layout as desktop */
+
+  html.tablet[lang=ru] .cap-pos,
+html.tablet[lang=ru] .meaning-panel .pos-label,
+html.tablet[lang=ru] .pick-word:not(.pick-ask),
+html.tablet[lang=ru] body.day-open .card-head .head-pos{font-family:'IBM Plex Mono',monospace; font-weight:400; letter-spacing:.05em;}
+  html.tablet[lang=ru] .pick-word:not(.pick-ask),
+html.tablet[lang=ru] body.day-open .card-head .head-pos{letter-spacing:.12em;}
+  html.tablet[lang=ru] .cap-name,
+html.tablet[lang=ru] .meaning-panel h2,
+html.tablet[lang=ru] .card-head h2{font-family:'IBM Plex Mono',monospace; font-weight:500; letter-spacing:.05em;}
+  html.tablet[lang=ru] #mText,
+html.tablet[lang=ru] #fText,
+html.tablet[lang=ru] .finale .summary{font-family:'IBM Plex Mono',monospace; font-weight:400; letter-spacing:.05em;}
+  html.tablet[lang=ru] #fDeck{font-family:'IBM Plex Mono',monospace; font-weight:300; font-style:normal; letter-spacing:0;}
+
+
 /* desktop card of the day: name, a reserved quote, the card, then the reading across the screen,
    the whisper, and a finish button 80px off the bottom */
 @media (hover:hover) and (pointer:fine){
@@ -792,6 +1015,112 @@ body.intro-done .intro-brand{transition:opacity .5s ease-in-out;}
   body.spread-row #finale .finale-row .link-btn.hand-on::after{transform:scaleX(1);}
   body.spread-row #finale .row-break{display:none;}
 }
+/* tablet: same layout as desktop */
+
+  html.tablet body.day-open .card-head{white-space:normal; display:flex; flex-direction:column; align-items:center;}
+  html.tablet body.day-open .card-head .head-pos:not(:empty){display:block; font-family:'Trispace',sans-serif; font-weight:400;
+    letter-spacing:.12em; margin:0 -.12em 8px 0; text-transform:uppercase; color:var(--red); line-height:1.2;
+    font-size:clamp(13px, 1.15vw, 20px);}
+  html.tablet body.day-open .card-head h2{white-space:nowrap;}
+  html.tablet body.day-open .card-head .head-title{display:block; min-height:1.2em; line-height:1.2; margin-top:8px; white-space:nowrap;}
+  html.tablet body.day-open #mTitle{display:none;}
+  html.tablet body.day-open #meaningPanel{left:0; right:0; bottom:var(--whisper-bottom); top:auto; transform:none; max-width:none; width:100%;}
+  html.tablet body.day-open #mText{width:100%; max-width:none; padding:0 24px; box-sizing:border-box;}
+  html.tablet body.day-open #meaningPanel .meaning-end{flex-direction:column-reverse; gap:16px; margin-top:0;}
+  html.tablet body.day-open #endRule,
+html.tablet body.day-open .finish-btn .arrow{display:none;}
+  html.tablet body.day-open .finish-btn{padding:8px 0; color:var(--red); text-shadow:none;
+    font-size:clamp(16px, 1.25vw, 20px);}
+  /* red sits on the button, then on hover drains downward onto the whisper */
+  html.tablet body.day-open .finish-btn .fill{color:transparent; -webkit-text-fill-color:transparent;
+    background-image:linear-gradient(to bottom, #fff 0 50%, var(--red) 50% 100%);
+    background-size:100% 200%; background-position:0 100%; background-repeat:no-repeat;
+    -webkit-background-clip:text; background-clip:text; animation:none;
+    transition:background-position 1.6s ease;}
+  html.tablet body.day-open .finish-btn:hover .fill,
+html.tablet body.day-open .finish-btn.hand-on .fill{background-position:0 0; transition-duration:.6s;}
+  html.tablet body.day-open .end-phrase{font-size:clamp(12px, .95vw, 16px); opacity:0;
+    color:transparent; -webkit-text-fill-color:transparent;
+    background-image:linear-gradient(to bottom, color-mix(in srgb, var(--muted) 80%, transparent) 0 50%, var(--red) 50% 100%);
+    background-size:100% 200%; background-position:0 0; background-repeat:no-repeat;
+    -webkit-background-clip:text; background-clip:text;
+    transition:background-position 1.4s ease;}
+  /* whisper starts taking red before the big word has finished turning white */
+  html.tablet body.day-open .meaning-end:has(.finish-btn:hover) .end-phrase,
+html.tablet body.day-open .meaning-end:has(.finish-btn.hand-on) .end-phrase{background-position:0 100%; transition-delay:.05s;}
+  /* after Finish the same screen stays; the closing row takes the button's place, 80px off the bottom */
+  html.tablet body.day-open.day-done #meaningPanel .meaning-end{display:none;}
+  html.tablet body.day-open.day-done #mText{margin-bottom:0;}
+  html.tablet body.day-open.day-done #finale{left:0; right:0; top:auto; bottom:var(--whisper-bottom); width:100%; max-width:none; transform:none;}
+  html.tablet body.day-open.day-done #finale #fDeck{order:2; max-width:none; white-space:normal; padding:0 24px; margin:16px 0 0;
+    font-size:clamp(12px, .95vw, 15px);}
+  html.tablet body.day-open.day-done #finale .finale-row{order:1;}
+  html.tablet body.day-open.day-done #finale .finale-row{display:grid; grid-template-columns:1fr auto 1fr; align-items:center; column-gap:22px; width:100%;}
+  html.tablet body.day-open.day-done #finale .return-btn,
+html.tablet body.day-open.day-done #finale .cta,
+html.tablet body.day-open.day-done #finale .link-btn{font-size:clamp(16px, 1.25vw, 20px);}
+  html.tablet body.day-open.day-done #finale .finale-row .return-btn{order:0; justify-self:end;}
+  html.tablet body.day-open.day-done #finale .finale-row .cta{order:1; justify-self:center;}
+  html.tablet body.day-open.day-done #finale .finale-row .link-btn{order:2; justify-self:start; position:relative;
+    color:var(--accent); text-shadow:0 0 12px rgba(var(--accent-rgb),.45);}
+  html.tablet body.day-open.day-done #finale .finale-row .link-btn::after{content:''; position:absolute; left:6px; right:6px; bottom:0;
+    height:1px; background:var(--red); transform:scaleX(0); transition:transform .35s ease;}
+  html.tablet body.day-open.day-done #finale .finale-row .link-btn:hover,
+html.tablet body.day-open.day-done #finale .finale-row .link-btn.hand-on{color:var(--accent);}
+  html.tablet body.day-open.day-done #finale .finale-row .link-btn:hover::after,
+html.tablet body.day-open.day-done #finale .finale-row .link-btn.hand-on::after{transform:scaleX(1);}
+  html.tablet body.day-open.day-done #finale .row-break{display:none;}
+  /* three cards in a row: captions sit up under the tape, the reading is full width, the buttons match the day card.
+     Cap root font-size is set in em so app.js can shrink the whole block when the window is narrow;
+     lines never wrap — column spacing follows caption width. */
+  html.tablet body.spread-row .spread-cap{font-size:clamp(12px, 1.05vw, 15px); width:max-content; max-width:none;}
+  html.tablet body.spread-row .cap-pos{color:var(--red); letter-spacing:.12em; margin-right:-.12em; line-height:1.2;
+    font-size:1.2em; white-space:nowrap; transition:color .9s ease;}
+  html.tablet body.spread-row .spread-cap.hot .cap-pos{color:#fff;}
+  html.tablet body.spread-row .cap-name{text-transform:none; color:var(--accent); font-size:1.35em; line-height:1.2;
+    white-space:nowrap; letter-spacing:.04em;}
+  html.tablet body.spread-row .cap-title{display:block; font-family:'Trispace',sans-serif; font-weight:300; font-style:normal;
+    letter-spacing:0; font-size:1.15em; line-height:1.2; color:var(--ink); opacity:1; margin-top:.45em;
+    white-space:nowrap;}
+  html.tablet body.spread-row .cap-title:empty{display:none;}
+  @media (max-height:758px){
+    html.tablet body.spread-row .spread-cap{font-size:clamp(11px, 1vw, 13px); gap:1px;}
+    html.tablet body.spread-row .cap-title{margin-top:.3em;}
+    html.tablet body.spread-row #fSummary{padding:12px 20px;}
+    html.tablet body.spread-row #finale #fDeck{margin-top:10px;}
+    html.tablet body.spread-row #finale .finale-row{margin-top:12px;}
+  }
+  html.tablet body.spread-row #finale{left:0; right:0; top:auto; bottom:var(--whisper-bottom); width:100%; max-width:none; transform:none;}
+  /* reading block: equal air inside the red rules; side inset matches the deck note below */
+  html.tablet body.spread-row #fSummary{position:relative; max-width:none; width:100%; box-sizing:border-box;
+    padding:16px 28px; margin:0; font-style:normal; border:none; line-height:1.45;}
+  /* a scaled hairline: a 1px rule is the thinnest border the browser will keep, so this draws half of that */
+  html.tablet body.spread-row #fSummary::before,
+html.tablet body.spread-row #fSummary::after{content:''; position:absolute; left:0; right:0; height:1px; background:var(--red);
+    transform:scaleY(.5); pointer-events:none;}
+  html.tablet body.spread-row #fSummary::before{top:0; transform-origin:top center;}
+  html.tablet body.spread-row #fSummary::after{bottom:0; transform-origin:bottom center;}
+  html.tablet body.spread-row #fSummary.card-text::before,
+html.tablet body.spread-row #fSummary.card-text::after{background:transparent;}
+  html.tablet body.spread-row #finale #fDeck{display:block; order:2; max-width:none; white-space:normal; padding:0 28px; margin:14px 0 0;
+    font-size:clamp(12px, .95vw, 15px);}
+  html.tablet body.spread-row #finale .finale-row{order:1; display:grid; grid-template-columns:1fr auto 1fr; align-items:center; column-gap:22px; width:100%; margin-top:14px;}
+  html.tablet body.spread-row #finale .return-btn,
+html.tablet body.spread-row #finale .cta,
+html.tablet body.spread-row #finale .link-btn{font-size:clamp(16px, 1.25vw, 20px);}
+  html.tablet body.spread-row #finale .finale-row .return-btn{order:0; justify-self:end;}
+  html.tablet body.spread-row #finale .finale-row .cta{order:1; justify-self:center;}
+  html.tablet body.spread-row #finale .finale-row .link-btn{order:2; justify-self:start; position:relative;
+    color:var(--accent); text-shadow:0 0 12px rgba(var(--accent-rgb),.45);}
+  html.tablet body.spread-row #finale .finale-row .link-btn::after{content:''; position:absolute; left:6px; right:6px; bottom:0;
+    height:1px; background:var(--red); transform:scaleX(0); transition:transform .35s ease;}
+  html.tablet body.spread-row #finale .finale-row .link-btn:hover,
+html.tablet body.spread-row #finale .finale-row .link-btn.hand-on{color:var(--accent);}
+  html.tablet body.spread-row #finale .finale-row .link-btn:hover::after,
+html.tablet body.spread-row #finale .finale-row .link-btn.hand-on::after{transform:scaleX(1);}
+  html.tablet body.spread-row #finale .row-break{display:none;}
+
+
 
 /* RU: IBM Plex Mono stands in for Trispace (Oswald stays on the buttons) */
 html[lang=ru]{
@@ -819,3 +1148,18 @@ html[lang=ru] .finale .summary,
 html[lang=ru] .pick-word:not(.pick-ask){
   font-family:'IBM Plex Mono',monospace;
 }
+
+
+/* —— tablet touch controls: phone frames / tap red; no mouse underline —— */
+html.tablet .opt::before{content:''; position:absolute; top:0; bottom:0; left:-18px; right:-15px; border:.67px solid rgba(var(--accent-rgb),.55);
+  border-radius:24px; opacity:0; animation:frame 8s ease-in-out infinite; pointer-events:none;}
+html.tablet .opt-col + .opt::before{animation-delay:4s;}
+html.tablet .opt.done::before,
+html.tablet .opt:not(.done):active::before,
+html.tablet .opt.tap::before{visibility:hidden;}
+html.tablet .opt:not(.done):active,
+html.tablet .opt.tap{color:var(--red); text-shadow:0 0 10px rgba(228,36,35,.7), 0 0 24px rgba(228,36,35,.45);}
+html.tablet .opt:not(.done):hover::after,
+html.tablet .opt:not(.done).hand-on::after{transform:none;}
+html.tablet, html.tablet *{cursor:auto;}
+html.tablet .rush-hint{display:block;}
