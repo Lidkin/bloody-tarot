@@ -433,7 +433,7 @@ body.intro-done h1.title{opacity:0 !important; pointer-events:none;} /* brand ma
   -webkit-user-drag:none; transform-origin:left center; clip-path:inset(0 0 0 0);}
 /* rail starts at the logo's right edge (not under transparent type); the strip slides in via translateX */
 .intro-tape-wrap{position:absolute; left:100%; top:38%; transform:translateY(-50%);
-  z-index:1; height:clamp(10px, 2.1vw, 16px); width:0; overflow:hidden; pointer-events:none;}
+  z-index:1; height:clamp(12px, 2.52vw, 19px); width:0; overflow:hidden; pointer-events:none;}
 .intro-tape{display:block; height:100%; width:max-content; will-change:transform;}
 .intro-tape svg{display:block; height:100%; width:auto;}
 /* docked brand; rail to the right edge; EN sits on the same axis above the tape */
@@ -479,7 +479,7 @@ body.intro-done .intro-brand{transition:opacity .5s ease-in-out;}
   body.tape-grow .intro-tape-wrap,
   body.intro-done .intro-tape-wrap{
     position:fixed; left:0; top:env(safe-area-inset-top, 0px);
-    width:100vw; height:24px; transform:none; overflow:hidden; z-index:42;}
+    width:100vw; height:29px; transform:none; overflow:hidden; z-index:42;}
   #opening{padding-top:calc(40px + env(safe-area-inset-top, 0px));
     padding-bottom:calc(24px + 16px + 16px + 28px + env(safe-area-inset-bottom, 0px));
     box-sizing:border-box;}

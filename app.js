@@ -1261,7 +1261,7 @@ function showSpreadSummary(){
       spread.caps[i].querySelector('.cap-name').textContent=c._card.name;
       spread.caps[i].querySelector('.cap-title').textContent=c._card.title ? tr('q')(c._card.title) : '';
       spread.caps[i].style.width=poses[i].w*1.1+'px'; // a long name wraps instead of running into the next one
-      const capTop=Math.max(72, (document.querySelector('.tape-zoom')?.getBoundingClientRect().bottom)||0)+16;
+      const capTop=Math.max(72, (document.getElementById('introTapeWrap')?.getBoundingClientRect().bottom)||0)+16;
       placeCap(i, poses[i].x, capTop, false);
     }
     gsap.to(s,{...poses[i], duration:1, delay:.08*i, ease:'power2.inOut', onUpdate:()=>renderCard(c,s)});
@@ -1464,7 +1464,7 @@ fan.addEventListener('pointerup', e=>{
 // desktop three-up: the cards fill the band between the caption block and the reading, and sit in its middle
 function spreadRowPoses(els){
   const n=els.length, SP=.12, side=36, GAP=16;
-  const capTop=Math.max(72, (document.querySelector('.tape-zoom')?.getBoundingClientRect().bottom)||0)+16;
+  const capTop=Math.max(72, (document.getElementById('introTapeWrap')?.getBoundingClientRect().bottom)||0)+16;
   const sum=document.getElementById('fSummary');
   const availW=innerWidth-2*side, maxH=availW/(CARD_ASPECT*(n+(n-1)*SP));
   let w=maxH*CARD_ASPECT, capH=0, descTop=0;
@@ -2361,42 +2361,15 @@ function tapeLetterBox(letters){
   }
   return {minX, maxX, minY, maxY, cx:(minX+maxX)/2, cy:(minY+maxY)/2};
 }
-// red phrase + its white plate (vector plate for the old asset; synthesized when the plate lives in the PNG)
+// red phrase center (and approximate plate width) as fractions of the strip — no zoom plate
 function prepareTapePlate(svg){
   const letters=tapeRedLetters(svg);
   const vb=svg.viewBox.baseVal;
-  if(!letters.length || !vb?.width) return {redFrac:0, plateFrac:0, plateGroup:null};
+  if(!letters.length || !vb?.width) return {redFrac:0, plateFrac:0};
   const box=tapeLetterBox(letters);
-  let plate=[...svg.querySelectorAll('rect.st2, rect.tape-plate')].find(rect=>{
-    const x=+rect.getAttribute('x'), w=+rect.getAttribute('width');
-    return box.cx>=x && box.cx<=x+w;
-  });
-  if(!plate){
-    const padX=Math.max(12, (box.maxX-box.minX)*.07);
-    const px=box.minX-padX, pw=(box.maxX-box.minX)+2*padX;
-    const py=vb.y+vb.height*.02, ph=vb.height*.96;
-    // once the plate lifts into .tape-zoom, cover the PNG's empty white so the rail stays black
-    const cover=document.createElementNS('http://www.w3.org/2000/svg','rect');
-    cover.setAttribute('x', px); cover.setAttribute('y', py);
-    cover.setAttribute('width', pw); cover.setAttribute('height', ph);
-    cover.setAttribute('fill', '#0d0000');
-    svg.appendChild(cover);
-    plate=document.createElementNS('http://www.w3.org/2000/svg','rect');
-    plate.setAttribute('class','st2 tape-plate');
-    plate.setAttribute('fill','#fff');
-    plate.setAttribute('x', px); plate.setAttribute('y', py);
-    plate.setAttribute('width', pw); plate.setAttribute('height', ph);
-  }
-  const px=+plate.getAttribute('x'), pw=+plate.getAttribute('width');
-  const py=+plate.getAttribute('y'), ph=+plate.getAttribute('height');
-  const dx=(px+pw/2)-box.cx, dy=(py+ph/2)-box.cy;
-  const plateGroup=document.createElementNS('http://www.w3.org/2000/svg','g');
-  const shift=document.createElementNS('http://www.w3.org/2000/svg','g');
-  if(dx || dy) shift.setAttribute('transform', `translate(${dx} ${dy})`);
-  svg.appendChild(plateGroup);
-  shift.append(...letters);
-  plateGroup.append(plate, shift);
-  return {redFrac:(px+pw/2)/vb.width, plateFrac:pw/vb.width, plateGroup};
+  const padX=Math.max(12, (box.maxX-box.minX)*.07);
+  const pw=(box.maxX-box.minX)+2*padX;
+  return {redFrac:box.cx/vb.width, plateFrac:pw/vb.width};
 }
 
 /* ---------- phone: the logo is the first thing, then it dissolves into the deck.
@@ -2417,7 +2390,7 @@ async function phoneSplash(){
   })();
   const placeTape=()=>{
     if(!svgEl || !redFrac || !tape || !tapeHost) return;
-    tape.style.height='24px';
+    tape.style.height='29px';
     void tapeHost.offsetWidth;
     const hostW=tapeHost.offsetWidth||1;
     const L=tape.getBoundingClientRect().left;
@@ -2509,45 +2482,12 @@ async function phoneSplash(){
   };
 
   const svgEl=tapeHost.querySelector('svg');
-  const tapePlate=svgEl ? prepareTapePlate(svgEl) : {redFrac:0, plateGroup:null};
+  const tapePlate=svgEl ? prepareTapePlate(svgEl) : {redFrac:0};
   let redFrac=tapePlate.redFrac;
-  const plateGroup=tapePlate.plateGroup;
-  const zoom=document.createElement('div');
-  zoom.className='tape-zoom';
-  zoom.setAttribute('aria-hidden','true');
-  document.body.appendChild(zoom);
-  let zoomed=false, zoomTween=null;
-  // after the tape stops, the same plate scales up past the rail
-  const growPlate=(animate)=>{
-    if(!plateGroup) return;
-    const b=plateGroup.getBBox();
-    const r=plateGroup.getBoundingClientRect();
-    if(r.width<2 || r.height<2) return;
-    if(!zoom.firstChild){
-      const mini=document.createElementNS('http://www.w3.org/2000/svg','svg');
-      mini.setAttribute('viewBox', `${b.x} ${b.y} ${b.width} ${b.height}`);
-      mini.setAttribute('preserveAspectRatio','xMidYMid meet');
-      const style=document.createElementNS('http://www.w3.org/2000/svg','style');
-      style.textContent='.st1,.cls-1{fill:#ed1c24}.st2,.tape-plate{fill:#fff}';
-      mini.append(style, plateGroup.cloneNode(true));
-      zoom.appendChild(mini);
-    }
-    plateGroup.setAttribute('visibility','hidden');
-    const scale=1.7;
-    gsap.set(zoom,{left:r.left, top:r.top, width:r.width, height:r.height, transformOrigin:'50% 50%'});
-    if(animate && !zoomed){
-      zoomed=true;
-      zoomTween=gsap.fromTo(zoom,{scale:1},{scale, duration:.55, ease:'power2.out'});
-    }else{
-      zoomTween?.kill();
-      gsap.set(zoom,{scale});
-      zoomed=true;
-    }
-  };
 
   // tape height follows the CSS clamp, but grows on a wide screen so the one red label
   // can sit on the viewport center while the strip still covers the rail
-  const cssTapeH=()=>Math.max(10, Math.min(16, innerWidth*0.021));
+  const cssTapeH=()=>Math.max(12, Math.min(19, innerWidth*0.0252));
   let endP=0, slideTween=null, logoTween=null, tapeReady=false;
   const syncTape=(snap)=>{
     if(!svgEl || !redFrac) return 0;
@@ -2573,7 +2513,6 @@ async function phoneSplash(){
     const p=syncTape(false);
     if(document.body.classList.contains('intro-done')){
       gsap.set(tapeHost,{xPercent:p});
-      if(zoomed) growPlate(false);
     }
     else if(slideTween && slideTween.isActive()){
       const rest=Math.max(.05, slideTween.duration()*(1-slideTween.progress()));
@@ -2603,7 +2542,7 @@ async function phoneSplash(){
     tapeReady=true;
     if(plain) gsap.set(plain,{...layChalk(), rotateX:0, scale:1, opacity:.3});
     if(frame) gsap.set(frame,{opacity:0});
-    requestAnimationFrame(()=>{ syncTape(true); growPlate(false); });
+    requestAnimationFrame(()=>syncTape(true));
     finish();
     return;
   }
@@ -2633,7 +2572,7 @@ async function phoneSplash(){
     gsap.set(brand,{clearProps:'left,top,width,xPercent,yPercent,transform'});
     gsap.set(tape,{clearProps:'width,autoAlpha'});
     gsap.set(logo,{clearProps:'clipPath'});
-    requestAnimationFrame(()=>{ syncTape(true); growPlate(true); });
+    requestAnimationFrame(()=>syncTape(true));
     finish();
   }})
     .to(logo,{opacity:1, scale:1, duration:1.15, ease:'power2.out'}, 0.2)
