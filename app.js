@@ -2330,6 +2330,75 @@ else if(!isDesktop()) screen.orientation?.lock?.('portrait').catch(()=>{});
 document.addEventListener('contextmenu', e=>{ if(e.target.closest('img, .card, canvas')) e.preventDefault(); });
 document.addEventListener('dragstart', e=>{ if(e.target.tagName==='IMG') e.preventDefault(); });
 
+/* ---------- crime-scene tape (Trispace 36): outlined letters + a PNG strip ---------- */
+const TAPE_SVG='assets/SVG/Trispace 36.svg';
+async function loadTapeSvg(host){
+  const raw=await fetch(encodeURI(TAPE_SVG)).then(r=>r.text());
+  const doc=new DOMParser().parseFromString(raw, 'image/svg+xml');
+  const svg=doc.querySelector('svg');
+  if(!svg || !host) return null;
+  svg.setAttribute('preserveAspectRatio','xMinYMid meet');
+  // the strip is a PNG; keep both href forms so the image still paints after the node moves into HTML
+  for(const img of svg.querySelectorAll('image')){
+    const href=img.getAttribute('href') || img.getAttributeNS('http://www.w3.org/1999/xlink','href');
+    if(href){
+      img.setAttributeNS('http://www.w3.org/1999/xlink','href', href);
+      img.setAttribute('href', href);
+    }
+  }
+  host.replaceChildren(svg);
+  return svg;
+}
+function tapeRedLetters(svg){
+  return [...svg.querySelectorAll('path.cls-1, path.st1')];
+}
+function tapeLetterBox(letters){
+  let minX=Infinity, maxX=-Infinity, minY=Infinity, maxY=-Infinity;
+  for(const letter of letters){
+    const b=letter.getBBox();
+    minX=Math.min(minX, b.x); maxX=Math.max(maxX, b.x+b.width);
+    minY=Math.min(minY, b.y); maxY=Math.max(maxY, b.y+b.height);
+  }
+  return {minX, maxX, minY, maxY, cx:(minX+maxX)/2, cy:(minY+maxY)/2};
+}
+// red phrase + its white plate (vector plate for the old asset; synthesized when the plate lives in the PNG)
+function prepareTapePlate(svg){
+  const letters=tapeRedLetters(svg);
+  const vb=svg.viewBox.baseVal;
+  if(!letters.length || !vb?.width) return {redFrac:0, plateFrac:0, plateGroup:null};
+  const box=tapeLetterBox(letters);
+  let plate=[...svg.querySelectorAll('rect.st2, rect.tape-plate')].find(rect=>{
+    const x=+rect.getAttribute('x'), w=+rect.getAttribute('width');
+    return box.cx>=x && box.cx<=x+w;
+  });
+  if(!plate){
+    const padX=Math.max(12, (box.maxX-box.minX)*.07);
+    const px=box.minX-padX, pw=(box.maxX-box.minX)+2*padX;
+    const py=vb.y+vb.height*.02, ph=vb.height*.96;
+    // once the plate lifts into .tape-zoom, cover the PNG's empty white so the rail stays black
+    const cover=document.createElementNS('http://www.w3.org/2000/svg','rect');
+    cover.setAttribute('x', px); cover.setAttribute('y', py);
+    cover.setAttribute('width', pw); cover.setAttribute('height', ph);
+    cover.setAttribute('fill', '#0d0000');
+    svg.appendChild(cover);
+    plate=document.createElementNS('http://www.w3.org/2000/svg','rect');
+    plate.setAttribute('class','st2 tape-plate');
+    plate.setAttribute('fill','#fff');
+    plate.setAttribute('x', px); plate.setAttribute('y', py);
+    plate.setAttribute('width', pw); plate.setAttribute('height', ph);
+  }
+  const px=+plate.getAttribute('x'), pw=+plate.getAttribute('width');
+  const py=+plate.getAttribute('y'), ph=+plate.getAttribute('height');
+  const dx=(px+pw/2)-box.cx, dy=(py+ph/2)-box.cy;
+  const plateGroup=document.createElementNS('http://www.w3.org/2000/svg','g');
+  const shift=document.createElementNS('http://www.w3.org/2000/svg','g');
+  if(dx || dy) shift.setAttribute('transform', `translate(${dx} ${dy})`);
+  svg.appendChild(plateGroup);
+  shift.append(...letters);
+  plateGroup.append(plate, shift);
+  return {redFrac:(px+pw/2)/vb.width, plateFrac:pw/vb.width, plateGroup};
+}
+
 /* ---------- phone: the logo is the first thing, then it dissolves into the deck.
    While it dissolves, the tape's plate appears at the top centre and the stripes grow out to both edges.
    The words stay put. The outline comes in with the deck and leaves when a card turns face up. ---------- */
@@ -2341,43 +2410,10 @@ async function phoneSplash(){
   if(tape && tape.parentElement!==document.body) document.body.appendChild(tape);
   let svgEl=null, redFrac=0, plateFrac=0;
   const prep=(async()=>{
-    try{
-      const raw=await fetch(encodeURI('assets/SVG/Border LIne.svg')).then(r=>r.text());
-      const doc=new DOMParser().parseFromString(raw, 'image/svg+xml');
-      svgEl=doc.querySelector('svg');
-      if(svgEl && tapeHost){
-        svgEl.setAttribute('preserveAspectRatio','xMinYMid meet');
-        tapeHost.replaceChildren(svgEl);
-      }
-    }catch(e){ return; }
+    try{ svgEl=await loadTapeSvg(tapeHost); }catch(e){ return; }
     if(!svgEl) return;
-    const letters=[...svgEl.querySelectorAll('path.st1')];
-    const vb=svgEl.viewBox.baseVal.width;
-    let minX=Infinity, maxX=-Infinity, minY=Infinity, maxY=-Infinity;
-    for(const letter of letters){
-      const b=letter.getBBox();
-      minX=Math.min(minX, b.x); maxX=Math.max(maxX, b.x+b.width);
-      minY=Math.min(minY, b.y); maxY=Math.max(maxY, b.y+b.height);
-    }
-    if(vb && maxX>minX) redFrac=(minX+maxX)/2/vb;
-    const textCx=(minX+maxX)/2, textCy=(minY+maxY)/2;
-    const plate=[...svgEl.querySelectorAll('rect.st2')].find(rect=>{
-      const x=+rect.getAttribute('x'), w=+rect.getAttribute('width');
-      return textCx>=x && textCx<=x+w;
-    });
-    if(plate && letters.length){
-      const px=+plate.getAttribute('x'), pw=+plate.getAttribute('width');
-      const py=+plate.getAttribute('y'), ph=+plate.getAttribute('height');
-      const dx=(px+pw/2)-textCx, dy=(py+ph/2)-textCy;
-      const group=document.createElementNS('http://www.w3.org/2000/svg','g');
-      const shift=document.createElementNS('http://www.w3.org/2000/svg','g');
-      if(dx || dy) shift.setAttribute('transform', `translate(${dx} ${dy})`);
-      svgEl.appendChild(group);
-      shift.append(...letters);
-      group.append(plate, shift);
-      redFrac=(px+pw/2)/vb;
-      plateFrac=pw/vb;
-    }
+    const prepPlate=prepareTapePlate(svgEl);
+    redFrac=prepPlate.redFrac; plateFrac=prepPlate.plateFrac;
   })();
   const placeTape=()=>{
     if(!svgEl || !redFrac || !tape || !tapeHost) return;
@@ -2452,16 +2488,8 @@ async function phoneSplash(){
     layer=document.getElementById('intro');
   if(!brand || !logo || !tape){ document.body.classList.remove('intro'); document.body.classList.add('intro-done'); return; }
 
-  // outlined tape (Border LIne.svg): letters are paths, so no webfont is needed
-  try{
-    const raw=await fetch(encodeURI('assets/SVG/Border LIne.svg')).then(r=>r.text());
-    const doc=new DOMParser().parseFromString(raw, 'image/svg+xml');
-    const svg=doc.querySelector('svg');
-    if(svg && tapeHost){
-      svg.setAttribute('preserveAspectRatio','xMinYMid meet');
-      tapeHost.replaceChildren(svg);
-    }
-  }catch(e){}
+  // outlined tape (Trispace 36.svg): letters are paths, so no webfont is needed
+  try{ await loadTapeSvg(tapeHost); }catch(e){}
 
   const finish=()=>{
     layer?.setAttribute('aria-hidden','true');
@@ -2480,46 +2508,10 @@ async function phoneSplash(){
     return {left, top, width, tapeW};
   };
 
-  // red letters are one path.st1 cluster; their center, as a fraction of the viewBox, never changes
-  let svgEl=tapeHost.querySelector('svg'), redFrac=0;
-  if(svgEl){
-    const letters=[...svgEl.querySelectorAll('path.st1')];
-    const vb=svgEl.viewBox.baseVal.width;
-    let minX=Infinity, maxX=-Infinity;
-    for(const letter of letters){
-      const b=letter.getBBox();
-      minX=Math.min(minX, b.x); maxX=Math.max(maxX, b.x+b.width);
-    }
-    if(vb && maxX>minX) redFrac=(minX+maxX)/2/vb;
-  }
-  // the white plate under the red words; shift the letters so they sit in its center
-  let plateGroup=null;
-  if(svgEl && redFrac){
-    const letters=[...svgEl.querySelectorAll('path.st1')];
-    let minX=Infinity, maxX=-Infinity, minY=Infinity, maxY=-Infinity;
-    for(const letter of letters){
-      const b=letter.getBBox();
-      minX=Math.min(minX, b.x); maxX=Math.max(maxX, b.x+b.width);
-      minY=Math.min(minY, b.y); maxY=Math.max(maxY, b.y+b.height);
-    }
-    const textCx=(minX+maxX)/2, textCy=(minY+maxY)/2;
-    const plate=[...svgEl.querySelectorAll('rect.st2')].find(rect=>{
-      const x=+rect.getAttribute('x'), w=+rect.getAttribute('width');
-      return textCx>=x && textCx<=x+w;
-    });
-    if(plate && letters.length){
-      const px=+plate.getAttribute('x'), py=+plate.getAttribute('y');
-      const pw=+plate.getAttribute('width'), ph=+plate.getAttribute('height');
-      const dx=(px+pw/2)-textCx, dy=(py+ph/2)-textCy;
-      plateGroup=document.createElementNS('http://www.w3.org/2000/svg','g');
-      const shift=document.createElementNS('http://www.w3.org/2000/svg','g');
-      if(dx || dy) shift.setAttribute('transform', `translate(${dx} ${dy})`);
-      svgEl.appendChild(plateGroup);
-      shift.append(...letters);
-      plateGroup.append(plate, shift);
-      redFrac=(px+pw/2)/svgEl.viewBox.baseVal.width;
-    }
-  }
+  const svgEl=tapeHost.querySelector('svg');
+  const tapePlate=svgEl ? prepareTapePlate(svgEl) : {redFrac:0, plateGroup:null};
+  let redFrac=tapePlate.redFrac;
+  const plateGroup=tapePlate.plateGroup;
   const zoom=document.createElement('div');
   zoom.className='tape-zoom';
   zoom.setAttribute('aria-hidden','true');
@@ -2536,7 +2528,7 @@ async function phoneSplash(){
       mini.setAttribute('viewBox', `${b.x} ${b.y} ${b.width} ${b.height}`);
       mini.setAttribute('preserveAspectRatio','xMidYMid meet');
       const style=document.createElementNS('http://www.w3.org/2000/svg','style');
-      style.textContent='.st1{fill:#ed1c24}.st2{fill:#fff}';
+      style.textContent='.st1,.cls-1{fill:#ed1c24}.st2,.tape-plate{fill:#fff}';
       mini.append(style, plateGroup.cloneNode(true));
       zoom.appendChild(mini);
     }

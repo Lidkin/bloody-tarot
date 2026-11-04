@@ -453,7 +453,8 @@ body.intro-done .intro-tape-wrap{
   color:#ed1c24; font-family:'Montserrat',sans-serif; font-weight:600; letter-spacing:.01em;
   line-height:1; white-space:nowrap; opacity:0; pointer-events:none;}
 body.tape-period .tape-label{opacity:1;}
-body.tape-period .tape-zoom path.st1{visibility:hidden;}
+body.tape-period .tape-zoom path.st1,
+body.tape-period .tape-zoom path.cls-1{visibility:hidden;}
 body.card-open .tape-zoom, body.car-open .tape-zoom{opacity:0; transition:opacity .5s ease-in-out;}
 /* while a card is open, tuck the brand like the old title */
 body.card-open .intro-brand, body.car-open .intro-brand{opacity:0; transition:opacity .5s ease-in-out;}
