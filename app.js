@@ -1522,37 +1522,73 @@ fan.addEventListener('pointerup', e=>{
   if(Math.abs(dx)>40) turnStack(dx<0 ? 1 : -1);
   else if(inCard(spread.cards[spread.carousel.order[0]]._state, e.clientX, e.clientY)) turnStack(1);
 });
-// desktop three-up: the cards fill the band between the caption block and the reading, and sit in its middle
+// desktop three-up: column centres follow the caption widths (no wrap, no overlap);
+// the cards sit under those centres and only shrink to fit the gaps the captions leave
 function spreadRowPoses(els){
-  const n=els.length, SP=.12, side=36, GAP=16;
-  const capTop=Math.max(72, (document.getElementById('introTapeWrap')?.getBoundingClientRect().bottom)||0)+16;
+  const n=els.length, side=24, CAP_GAP=20, CARD_GAP=12, V_GAP=10;
+  const tapeBottom=(document.getElementById('introTapeWrap')?.getBoundingClientRect().bottom)||0;
+  // short screens: captions sit closer under the tape
+  const topPad=innerHeight<720 ? 4 : innerHeight<820 ? 8 : innerHeight<940 ? 12 : 16;
+  const capTop=Math.max(tapeBottom+topPad, innerHeight<720 ? 40 : 56);
   const sum=document.getElementById('fSummary');
-  const availW=innerWidth-2*side, maxH=availW/(CARD_ASPECT*(n+(n-1)*SP));
-  let w=maxH*CARD_ASPECT, capH=0, descTop=0;
-  const place=()=>{
-    els.forEach((c,i)=>{
-      const cap=spread.caps[i];
-      cap.querySelector('.cap-name').textContent=c._card.name;
-      cap.querySelector('.cap-title').textContent=c._card.title ? tr('q')(c._card.title) : '';
-      cap.style.width=w*1.1+'px';
-      cap.style.height='';
-      placeCap(i, innerWidth/2+(i-(n-1)/2)*w*(1+SP), capTop, false);
+  const availW=Math.max(160, innerWidth-2*side);
+
+  els.forEach((c,i)=>{
+    const cap=spread.caps[i];
+    cap.querySelector('.cap-name').textContent=c._card.name;
+    cap.querySelector('.cap-title').textContent=c._card.title ? tr('q')(c._card.title) : '';
+    cap.style.width='max-content';
+    cap.style.height='';
+    cap.style.fontSize='';
+  });
+
+  // shrink the caption block (em-based) until the row fits the screen
+  const widthsOf=()=>spread.caps.map(c=>c.offsetWidth||0);
+  let total=0;
+  for(let step=0; step<14; step++){
+    const widths=widthsOf();
+    total=widths.reduce((a,b)=>a+b,0)+(n-1)*CAP_GAP;
+    if(total<=availW || step===13) break;
+    const s=Math.max(.55, (availW/total)*.96);
+    spread.caps.forEach(cap=>{
+      const cur=parseFloat(getComputedStyle(cap).fontSize)||14;
+      cap.style.fontSize=(cur*s)+'px';
     });
-    capH=Math.max(...spread.caps.map(c=>c.offsetHeight));
-    spread.caps.forEach(c=>c.style.height=capH+'px');
-    descTop=sum.getBoundingClientRect().top;
-  };
-  for(let pass=0; pass<4; pass++){
-    place();
-    const room=descTop-(capTop+capH)-2*GAP;
-    const h=Math.min(Math.max(room, 80), maxH), next=h*CARD_ASPECT;
-    if(Math.abs(next-w)<1){ w=next; break; }
-    w=next;
   }
-  place();
-  const h=w/CARD_ASPECT, mid=(capTop+capH+descTop)/2;
+
+  const widths=widthsOf();
+  total=widths.reduce((a,b)=>a+b,0)+(n-1)*CAP_GAP;
+  let x=(innerWidth-total)/2;
+  const centers=[];
+  for(let i=0;i<n;i++){
+    centers.push(x+widths[i]/2);
+    x+=widths[i]+CAP_GAP;
+  }
+
+  let capH=0;
+  centers.forEach((cx,i)=>{
+    placeCap(i, cx, capTop, false);
+    capH=Math.max(capH, spread.caps[i].offsetHeight||0);
+  });
+  spread.caps.forEach(c=>c.style.height=capH+'px');
+
+  const descTop=sum.getBoundingClientRect().top;
+  const roomTop=capTop+capH+V_GAP;
+  const roomBot=descTop-V_GAP;
+  const roomH=Math.max(64, roomBot-roomTop);
+
+  // card width: limited by neighbour centres (caption-driven) and by vertical room
+  let maxW=Infinity;
+  for(let i=0;i<n-1;i++) maxW=Math.min(maxW, centers[i+1]-centers[i]-CARD_GAP);
+  maxW=Math.min(maxW, 2*(centers[0]-side), 2*(innerWidth-side-centers[n-1]));
+  maxW=Math.max(48, maxW);
+  const h=Math.min(roomH, maxW/CARD_ASPECT), w=h*CARD_ASPECT;
+  // short screens: keep the cards up under the captions instead of floating in empty space
+  const packTop=innerHeight<860;
+  const cardTop=packTop ? roomTop : roomTop+Math.max(0, (roomH-h)/2);
+  const mid=cardTop+h/2;
   return {poses:els.map((_,i)=>({
-    x:innerWidth/2+(i-(n-1)/2)*w*(1+SP), y:mid, rot:0, w, h, ry:180, tx:0, ty:0
+    x:centers[i], y:mid, rot:0, w, h, ry:180, tx:0, ty:0
   }))};
 }
 // poses of n face-up cards side by side that, with their captions above and `panel` under them, fit the viewport

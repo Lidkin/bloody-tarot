@@ -729,14 +729,26 @@ body.intro-done .intro-brand{transition:opacity .5s ease-in-out;}
   body.day-open.day-done #finale .finale-row .link-btn:hover::after,
   body.day-open.day-done #finale .finale-row .link-btn.hand-on::after{transform:scaleX(1);}
   body.day-open.day-done #finale .row-break{display:none;}
-  /* three cards in a row: captions sit up under the tape, the reading is full width, the buttons match the day card */
+  /* three cards in a row: captions sit up under the tape, the reading is full width, the buttons match the day card.
+     Cap root font-size is set in em so app.js can shrink the whole block when the window is narrow;
+     lines never wrap — column spacing follows caption width. */
+  body.spread-row .spread-cap{font-size:clamp(12px, 1.05vw, 15px); width:max-content; max-width:none;}
   body.spread-row .cap-pos{color:var(--red); letter-spacing:.12em; margin-right:-.12em; line-height:1.2;
-    font-size:clamp(13px, 1.15vw, 20px); transition:color .9s ease;}
+    font-size:1.2em; white-space:nowrap; transition:color .9s ease;}
   body.spread-row .spread-cap.hot .cap-pos{color:#fff;}
-  body.spread-row .cap-name{text-transform:none; color:var(--accent);}
+  body.spread-row .cap-name{text-transform:none; color:var(--accent); font-size:1.35em; line-height:1.2;
+    white-space:nowrap; letter-spacing:.04em;}
   body.spread-row .cap-title{display:block; font-family:'Trispace',sans-serif; font-weight:300; font-style:normal;
-    letter-spacing:0; font-size:clamp(14px, 1.05vw, 18px); line-height:1.2; color:var(--ink); opacity:1; margin-top:8px;}
+    letter-spacing:0; font-size:1.15em; line-height:1.2; color:var(--ink); opacity:1; margin-top:.45em;
+    white-space:nowrap;}
   body.spread-row .cap-title:empty{display:none;}
+  @media (max-height:780px){
+    body.spread-row .spread-cap{font-size:clamp(11px, 1vw, 13px); gap:1px;}
+    body.spread-row .cap-title{margin-top:.3em;}
+    body.spread-row #finale{bottom:48px;}
+    body.spread-row #finale #fDeck{margin-top:10px;}
+    body.spread-row #finale .finale-row{margin-top:10px;}
+  }
   body.spread-row #finale{left:0; right:0; top:auto; bottom:80px; width:100%; max-width:none; transform:none;}
   body.spread-row #fSummary{position:relative; max-width:none; width:100%; box-sizing:border-box; padding:14px 24px; margin:0;
     font-style:normal; border:none;}
