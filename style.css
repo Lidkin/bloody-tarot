@@ -1150,6 +1150,16 @@ html[lang=ru] .pick-word:not(.pick-ask){
 }
 
 
-/* tablet = desktop UI; only extras are rotate-note + double-tap rush hint (no phone frames) */
+/* tablet = desktop layout; buttons keep the phone tap frames / red press */
 html.tablet, html.tablet *{cursor:auto;}
 html.tablet .rush-hint{display:block;}
+html.tablet .opt::before{content:''; position:absolute; top:0; bottom:0; left:-18px; right:-15px; border:.67px solid rgba(var(--accent-rgb),.55);
+  border-radius:24px; opacity:0; animation:frame 8s ease-in-out infinite; pointer-events:none;}
+html.tablet .opt-col + .opt::before{animation-delay:4s;}
+html.tablet .opt.done::before,
+html.tablet .opt:not(.done):active::before,
+html.tablet .opt.tap::before{visibility:hidden;}
+html.tablet .opt:not(.done):active,
+html.tablet .opt.tap{color:var(--red); text-shadow:0 0 10px rgba(228,36,35,.7), 0 0 24px rgba(228,36,35,.45);}
+html.tablet .opt:not(.done):hover::after,
+html.tablet .opt:not(.done).hand-on::after{transform:none;}

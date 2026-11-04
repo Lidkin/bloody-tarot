@@ -932,6 +932,15 @@ addEventListener('pointerdown', e=>{
 });
 fan.addEventListener('click', e=>{
   if(dealTl){ dealTl.timeScale(2); return; }
+  // tablet (and touch): tap a laid-out card like pointing at it with the cursor — its meaning replaces the summary
+  if(spread?.summary && isLayoutDesk() && !spread.carousel){
+    const hit=cardAt(e.clientX, e.clientY);
+    const el=hit && spread.cards.includes(hit) ? hit : null;
+    const next=el && summaryFor!==el ? el : null;
+    spread.cards.forEach(c=>c.classList.toggle('lit', c===next));
+    showSummaryText(next);
+    return;
+  }
   if(!fanIdle()) return;
   const el=cardAtCursor(e.clientX, e.clientY);
   if(el) spread ? pickCard(el) : openCard(el, el._card);
@@ -1951,9 +1960,11 @@ window.addEventListener('pointermove', e=>{
     return;
   }
   if(spread?.summary){ // the open spread: the card under the cursor lights up and its meaning replaces the summary
+    // mouse / pen follow the pointer; a finger tap is handled on click (tablet has no hover)
+    if(e.pointerType && e.pointerType!=='mouse' && e.pointerType!=='pen') return;
     let over=null;
     spread.cards.forEach(c=>{
-      const on=e.pointerType==='mouse' && cursorSamples(e.clientX, e.clientY).some(([x,y])=>inCard(c._state, x, y));
+      const on=cursorSamples(e.clientX, e.clientY).some(([x,y])=>inCard(c._state, x, y));
       c.classList.toggle('lit', on); if(on) over=c;
     });
     if(isLayoutDesk() && !spread.carousel) showSummaryText(over); // the stack already shows its top card's meaning
@@ -2019,9 +2030,9 @@ const etsyLink=card=>`${ETSY_URL}?utm_source=tarot-app&utm_medium=${mode==='thre
 // "Завершить гадание": the description gives way to the closing screen, the card makes room for it
 document.getElementById('finishBtn').addEventListener('click', e=>{
   if(!activeCard || busy) return;
-  // phones only: the tapped button first fills with red, so the tap is seen, then does its work
+  // phone / tablet: the tapped button first fills with red, so the tap is seen, then does its work
   const btn=e.currentTarget;
-  if(isPhone() && !btn._tapped){
+  if(!isMouseUI() && !btn._tapped){
     btn.classList.add('tap'); btn._tapped=true; busy=true;
     setTimeout(()=>{ busy=false; btn.click(); btn._tapped=false; }, 420);
     return;
