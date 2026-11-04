@@ -1743,32 +1743,45 @@ function inkReveal(el, {byWord=false, delay=0, stagger=.05, dur=.9}={}){
 
 // desktop: the name of the opened card, set huge right across the screen. It surfaces in front of the
 // card, then sinks through it and stays behind it, darkening into the background so as not to compete
-// with the card's artwork
+// with the card's artwork. Once settled it stays on the viewport centre: width drives the type size,
+// height only moves the centre.
 const bigName=document.createElement('div'); bigName.className='big-name';
 const BIG_FRONT=1001, BIG_BEHIND=950; // the opened card is at z 1000
 const BIG_DIM='rgba(0,0,0,.55)'; // behind the card: a shadow pressed into the velvet
 // It is drawn twice, behind and in front of the card; the front copy fades as the name sinks, so the
 // letters over the card dissolve into it gradually instead of jumping behind it
-let bigFront=null;
+let bigFront=null, bigNameLive=false;
+function fitBigName(){
+  if(!isDesktop() || !bigNameLive || !bigName.isConnected) return;
+  const FILL=innerWidth*.96, n=bigName.textContent.length;
+  bigName.style.letterSpacing=''; bigName.style.paddingLeft='';
+  bigName.style.fontSize='100px';
+  bigName.style.fontSize=(100*FILL/Math.max(bigName.scrollWidth,1))+'px';
+  if(bigName.scrollWidth<FILL && n>1){
+    const sp=(FILL-bigName.scrollWidth)/(n+1);
+    bigName.style.letterSpacing=sp+'px'; bigName.style.paddingLeft=sp+'px';
+  }
+  const top=innerHeight/2+'px';
+  bigName.style.top=top;
+  gsap.set(bigName,{x:0, y:0, xPercent:-50, yPercent:-50});
+  if(bigFront?.isConnected){
+    bigFront.style.fontSize=bigName.style.fontSize;
+    bigFront.style.letterSpacing=bigName.style.letterSpacing;
+    bigFront.style.paddingLeft=bigName.style.paddingLeft;
+    bigFront.style.top=top;
+    gsap.set(bigFront,{x:0, y:0, xPercent:-50, yPercent:-50});
+  }
+}
 function showBigName(el){
   if(!isDesktop()) return;
-  const s=el._state;
   if(bigFront){ gsap.killTweensOf(bigFront); bigFront.remove(); }
   bigName.textContent=el._card.name; bigName.style.letterSpacing=''; bigName.style.paddingLeft='';
   gsap.killTweensOf(bigName); bigName.style.color='';
   bigName.style.zIndex=BIG_BEHIND;
   const FRONT=1.1; // its scale while in front of the card; it ends at 1
   fan.appendChild(bigName);
-  // sized from the screen width alone, so a shorter card does not shrink the letters.
-  // the word fills 96% of the viewport; a name that still falls short is tracked out to that width
-  const FILL=innerWidth*.96, n=bigName.textContent.length;
-  bigName.style.fontSize='100px';
-  bigName.style.fontSize=(100*FILL/Math.max(bigName.scrollWidth,1))+'px';
-  bigName.style.top=s.y+'px';
-  if(bigName.scrollWidth<FILL && n>1){
-    const sp=(FILL-bigName.scrollWidth)/(n+1);
-    bigName.style.letterSpacing=sp+'px'; bigName.style.paddingLeft=sp+'px'; // balances the space after the last letter
-  }
+  bigNameLive=true;
+  fitBigName();
   bigFront=bigName.cloneNode(true); bigFront.style.zIndex=BIG_FRONT; fan.appendChild(bigFront);
   const both=[bigName, bigFront];
   gsap.set(both,{opacity:1, x:0, y:0, xPercent:-50, yPercent:-50, scale:FRONT});
@@ -1784,6 +1797,7 @@ function showBigName(el){
   return recede+1.4;
 }
 function hideBigName(){
+  bigNameLive=false;
   [bigName, bigFront].forEach(b=>{
     if(!b || !b.isConnected) return;
     gsap.killTweensOf(b); gsap.to(b,{opacity:0, duration:.5, onComplete:()=>b.remove()});
@@ -2614,6 +2628,7 @@ function relayoutViewport(){
   fitCountdown();
   refitTape();
   placePhoneChalk();
+  fitBigName(); // width → type size, height → screen-centre; independent of card motion
   // tape / type always; card poses wait until motion is idle so we do not fight GSAP
   if(busy || dealTl || gatherTl || introTl){
     wantsIdleRelayout=true;
