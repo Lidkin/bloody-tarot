@@ -603,7 +603,7 @@ body.intro-done .intro-brand{transition:opacity .5s ease-in-out;}
     font-family:'IBM Plex Mono',monospace; font-weight:500; letter-spacing:.05em;}
   html[lang=ru] #mText, html[lang=ru] #fText, html[lang=ru] .finale .summary{
     font-family:'IBM Plex Mono',monospace; font-weight:400; letter-spacing:.05em;}
-  html[lang=ru] #fDeck{font-family:'Trispace',sans-serif; font-weight:300; font-style:normal; letter-spacing:0;}
+  html[lang=ru] #fDeck{font-family:'IBM Plex Mono',monospace; font-weight:300; font-style:normal; letter-spacing:0;}
 }
 
 /* desktop type. Sizes sit on the 1440px frame and stay inside the band discussed for other monitors.
@@ -655,7 +655,7 @@ body.intro-done .intro-brand{transition:opacity .5s ease-in-out;}
   html[lang=ru] body.day-open .card-head .head-pos{letter-spacing:.12em;}
   html[lang=ru] .cap-name, html[lang=ru] .meaning-panel h2, html[lang=ru] .card-head h2{font-family:'IBM Plex Mono',monospace; font-weight:500; letter-spacing:.05em;}
   html[lang=ru] #mText, html[lang=ru] #fText, html[lang=ru] .finale .summary{font-family:'IBM Plex Mono',monospace; font-weight:400; letter-spacing:.05em;}
-  html[lang=ru] #fDeck{font-family:'Trispace',sans-serif; font-weight:300; font-style:normal; letter-spacing:0;}
+  html[lang=ru] #fDeck{font-family:'IBM Plex Mono',monospace; font-weight:300; font-style:normal; letter-spacing:0;}
 }
 /* desktop card of the day: name, a reserved quote, the card, then the reading across the screen,
    the whisper, and a finish button 80px off the bottom */
@@ -741,4 +741,31 @@ body.intro-done .intro-brand{transition:opacity .5s ease-in-out;}
   body.spread-row #finale .finale-row .link-btn:hover{color:var(--accent);}
   body.spread-row #finale .finale-row .link-btn:hover::after{transform:scaleX(1);}
   body.spread-row #finale .row-break{display:none;}
+}
+
+/* RU: IBM Plex Mono stands in for Trispace (Oswald stays on the buttons) */
+html[lang=ru]{
+  --head-font:'IBM Plex Mono',monospace;
+  font-family:'IBM Plex Mono',monospace;
+}
+html[lang=ru] .whisper,
+html[lang=ru] .end-phrase,
+html[lang=ru] .rush-hint,
+html[lang=ru] .pick-word.pick-ask,
+html[lang=ru] .meaning-panel .card-title,
+html[lang=ru] .card-head .head-title,
+html[lang=ru] .cap-title,
+html[lang=ru] #fDeck,
+html[lang=ru] .ask-sub .countdown,
+html[lang=ru] .cap-pos,
+html[lang=ru] .meaning-panel .pos-label,
+html[lang=ru] .cap-name,
+html[lang=ru] .meaning-panel h2,
+html[lang=ru] .card-head h2,
+html[lang=ru] .card-head .head-pos,
+html[lang=ru] #mText,
+html[lang=ru] #fText,
+html[lang=ru] .finale .summary,
+html[lang=ru] .pick-word:not(.pick-ask){
+  font-family:'IBM Plex Mono',monospace;
 }
