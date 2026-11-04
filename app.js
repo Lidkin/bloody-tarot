@@ -280,8 +280,8 @@ document.fonts.ready.then(()=>document.body.classList.add('fonts-ready'));
 
 /* ---------- particles ---------- */
 const canvas=document.getElementById('dust'), ctx=canvas.getContext('2d');
-function resize(){canvas.width=innerWidth; canvas.height=innerHeight;}
-resize(); addEventListener('resize',resize);
+function sizeDust(){canvas.width=innerWidth; canvas.height=innerHeight;}
+sizeDust();
 const P = Array.from({length:70},()=>({x:Math.random()*innerWidth,y:Math.random()*innerHeight,r:Math.random()*1.6+.3,
   vy:-(Math.random()*.25+.05), vx:(Math.random()-.5)*.15, a:Math.random()*.5+.2,
   mix:Math.random(), flash:0}));
@@ -1127,7 +1127,7 @@ function placePickListWide(){
   list.style.top=bottom-list.offsetHeight+'px';
   list.style.left=pivotX+'px';
 }
-addEventListener('resize', ()=>{ if(spread?.list) placePickList(); });
+// pick-list / fan / tape refit on viewport change: see scheduleRelayout below
 function showPickAsk(){
   if(!spread?.list) return;
   const n=spread.cards.length, list=spread.list, ask=list.querySelector('.pick-ask');
@@ -2345,7 +2345,7 @@ function fitTitle(){
     t.style.fontSize=f+'px'; t.style.letterSpacing=(f*.19)+'px';
   }
 }
-document.fonts.ready.then(fitTitle); addEventListener('resize', fitTitle);
+document.fonts.ready.then(fitTitle);
 // the red line under a reading grows to the ink of the word, the same distance past both sides
 function fitOptLines(){
   if(!isDesktop()) return;
@@ -2368,8 +2368,8 @@ function fitOptLines(){
     btn.style.setProperty('--line-r', Math.max(0, pad+adv-(max+1))+'px');
   });
 }
-document.fonts.ready.then(fitOptLines); addEventListener('resize', fitOptLines);
-document.fonts.ready.then(()=>fitCountdown()); addEventListener('resize', ()=>fitCountdown());
+document.fonts.ready.then(fitOptLines);
+document.fonts.ready.then(()=>fitCountdown());
 // one button, showing the language it switches to
 const langBtn=document.getElementById('langBtn');
 langBtn.addEventListener('click', ()=>{
@@ -2389,8 +2389,172 @@ function syncOrient(){
   document.body.classList.toggle('tablet-portrait', isTabletDevice() && matchMedia('(orientation: portrait)').matches);
 }
 syncOrient();
-addEventListener('resize', syncOrient);
-screen.orientation?.addEventListener?.('change', syncOrient);
+screen.orientation?.addEventListener?.('change', ()=>{ syncOrient(); scheduleRelayout(); });
+
+/* ---------- viewport: refit when the window moves between screens or changes size ----------
+   Moving a window across displays often skips a clean resize, or fires one before layout settles.
+   One scheduler listens for resize, visualViewport, DPR, and a size fingerprint. */
+let refitTape=()=>{};
+let relayoutQueued=false, relayoutPending=false, wantsIdleRelayout=false, viewportKey='';
+function viewportFingerprint(){
+  const vv=visualViewport;
+  return [innerWidth, innerHeight, devicePixelRatio,
+    vv?.width|0, vv?.height|0, vv?.scale||1, screen?.width, screen?.height].join('|');
+}
+function scheduleRelayout(){
+  relayoutPending=true;
+  if(relayoutQueued) return;
+  relayoutQueued=true;
+  // two frames: after a display move, the first paint can still report the old metrics
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    relayoutQueued=false;
+    if(!relayoutPending) return;
+    relayoutPending=false;
+    relayoutViewport();
+  }));
+}
+function relayoutFanArc(){
+  if(fanScreen.hidden || !fanLayout) return;
+  if(dealTl || gatherTl || introTl) return;
+  const L=layoutFan();
+  const outer=[], inner=[];
+  for(const el of fan.querySelectorAll('.fcard:not(.mover)')){
+    if(el.classList.contains('showcase')) continue;
+    if(spread?.cards?.includes(el) && (spread.summary || spread.carousel)) continue;
+    if(el===activeCard && (meaningPanel.classList.contains('show') || finale.classList.contains('show'))) continue;
+    (el.classList.contains('mirrored') ? inner : outer).push(el);
+  }
+  const assign=(els, radius, mirrored)=>{
+    const n=els.length; if(!n) return;
+    els.sort((a,b)=>mirrored ? (+b.dataset.angle)-(+a.dataset.angle) : (+a.dataset.angle)-(+b.dataset.angle));
+    const {angleStart:start, angleEnd:end, pivotX, pivotY}=L;
+    els.forEach((el,i)=>{
+      const f=n>1 ? i/(n-1) : 0;
+      const angle=mirrored ? end-(end-start)*f : start+(end-start)*f;
+      el.dataset.pivotX=pivotX; el.dataset.pivotY=pivotY;
+      el.dataset.angle=angle; el.dataset.radius=radius;
+      if(el._state && (el===hoverCard || el.classList.contains('picked'))){
+        const lift=el.classList.contains('picked') ? cardH : (el===hoverCard ? cardH/2 : 0);
+        Object.assign(el._state, arcState(el, lift));
+        renderCard(el, el._state);
+      }else if(!el._state){
+        el.style.left=pivotX+'px'; el.style.top=pivotY+'px';
+        el.style.transform=`rotate(${angle}deg) translateY(-${radius}px)`;
+      }
+    });
+  };
+  assign(outer, L.rOuter, false);
+  assign(inner, L.rInner, true);
+  if(spread?.list) placePickList();
+}
+function relayoutOpenCards(){
+  if(busy || dealTl || gatherTl) return;
+  // phone / desktop carousel stack
+  if(spread?.carousel && document.body.classList.contains('car-open')){
+    placeStack(document.body.classList.contains('car-leaf'));
+    spread.carousel.order.forEach((k,d)=>{
+      const c=spread.cards[k], s=c._state; if(!s) return;
+      gsap.killTweensOf(s);
+      Object.assign(s, stackPose(d));
+      renderCard(c, s);
+    });
+    return;
+  }
+  // desktop three-up closing row
+  if(spread?.summary && spread.cards?.length && finale.classList.contains('show') && isDesktop()){
+    const els=spread.cards;
+    const laid=spreadRowPoses(els);
+    els.forEach((c,i)=>{
+      const s=c._state; if(!s) return;
+      gsap.killTweensOf(s);
+      Object.assign(s, laid.poses[i]);
+      renderCard(c, s);
+    });
+    fitFinaleRow();
+    return;
+  }
+  // one open card with its reading
+  if(activeCard?._state && meaningPanel.classList.contains('show')){
+    fitCardHead();
+    const pose=fitAbove(meaningPanel);
+    gsap.killTweensOf(activeCard._state);
+    Object.assign(activeCard._state, pose);
+    renderCard(activeCard, activeCard._state);
+    if(showcase.length){
+      const s=activeCard._state;
+      let h=s.h*.62, w=h*CARD_ASPECT;
+      const k=Math.min(1, (innerWidth/2-16-s.w/2-24)/(1.6*w));
+      if(k>=.55){
+        h*=k; w*=k;
+        showcase.forEach(c=>{
+          const {dir, i}=c._home||{};
+          if(dir==null) return;
+          const far=Math.abs(dir)-1;
+          c._home={x:s.x+dir*(s.w/2+24+w*(.35+.75*far)), y:s.y+h*(.05+.1*far), rot:dir*(5+8*far), dir, i};
+          c._state.w=w; c._state.h=h;
+          fanOutCard(c, 0);
+        });
+      }
+    }
+    return;
+  }
+  if(finale.classList.contains('show')) fitFinaleRow();
+}
+function refitDeckHome(){
+  if(openingEl.hidden || busy || shufflePhase!=='idle') return;
+  gsap.set(deckStack,{x:0, y:0, scale:1, xPercent:-50, yPercent:-50});
+}
+function refitChalkHome(){
+  if(!isDesktop()) return;
+  const plain=document.getElementById('chalkPlain'), frame=document.getElementById('chalkFrame');
+  if(!plain) return;
+  const op=parseFloat(gsap.getProperty(plain,'opacity'))||0;
+  gsap.set(plain,{xPercent:-50, yPercent:-50, transformOrigin:'50% 50%', rotateX:0, scale:1, opacity:op});
+  if(frame) gsap.set(frame,{xPercent:-50, yPercent:-50, transformOrigin:'50% 50%', opacity:0});
+}
+function relayoutViewport(){
+  viewportKey=viewportFingerprint();
+  sizeDust();
+  syncOrient();
+  fitTitle();
+  fitOptLines();
+  fitCountdown();
+  refitTape();
+  placePhoneChalk();
+  // tape / type always; card poses wait until motion is idle so we do not fight GSAP
+  if(busy || dealTl || gatherTl || introTl){
+    wantsIdleRelayout=true;
+    return;
+  }
+  wantsIdleRelayout=false;
+  refitDeckHome();
+  refitChalkHome();
+  relayoutFanArc();
+  relayoutOpenCards();
+}
+function bindViewportWatch(){
+  const kick=()=>scheduleRelayout();
+  addEventListener('resize', kick);
+  visualViewport?.addEventListener('resize', kick);
+  visualViewport?.addEventListener('scroll', kick);
+  addEventListener('orientationchange', kick);
+  document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) kick(); });
+  // DPR change when the window crosses displays (often without a CSS-pixel resize)
+  const watchDpr=()=>{
+    const mq=matchMedia(`(resolution: ${devicePixelRatio}dppx)`);
+    const onChange=()=>{ mq.removeEventListener?.('change', onChange); mq.removeListener?.(onChange); watchDpr(); kick(); };
+    if(mq.addEventListener) mq.addEventListener('change', onChange);
+    else mq.addListener?.(onChange);
+  };
+  watchDpr();
+  // fingerprint + deferred idle pass: display moves that skip resize, and refits that waited on animation
+  setInterval(()=>{
+    const k=viewportFingerprint();
+    if(k!==viewportKey) kick();
+    else if(wantsIdleRelayout && !(busy || dealTl || gatherTl || introTl)) kick();
+  }, 400);
+}
+bindViewportWatch();
 if(isTabletDevice()) screen.orientation?.lock?.('landscape').catch(()=>{});
 else if(!isDesktop()) screen.orientation?.lock?.('portrait').catch(()=>{});
 
@@ -2464,6 +2628,11 @@ async function phoneSplash(){
     const p=100*(innerWidth/2-L-redFrac*hostW)/hostW;
     gsap.set(tapeHost,{xPercent:p});
   };
+  refitTape=()=>{
+    if(!svgEl) return;
+    if(document.body.classList.contains('intro-done') || document.body.classList.contains('tape-grow'))
+      placeTape();
+  };
   // the plate is already centred; the clip only opens sideways, so the words never travel
   const growPhoneTape=()=>{
     if(!svgEl || !redFrac || document.body.classList.contains('intro-done')) return;
@@ -2494,12 +2663,6 @@ async function phoneSplash(){
     layer?.setAttribute('aria-hidden','true');
     if(!document.body.classList.contains('card-open') && !document.body.classList.contains('car-open')) phoneDeckChalk(true);
     prep.then(()=>requestAnimationFrame(()=>{ placeTape(); placePhoneChalk(); showStart(true); }));
-    if(!phoneSplash.listening){
-      phoneSplash.listening=true;
-      const refit=()=>{ if(document.body.classList.contains('intro-done')){ placeTape(); placePhoneChalk(); } };
-      addEventListener('resize', refit);
-      visualViewport?.addEventListener('resize', refit);
-    }
   };
   if(matchMedia('(prefers-reduced-motion: reduce)').matches){ prep.then(done); return; }
   // the logo starts at once; the tape is prepared while it is on screen, so a slow file never holds the first paint
@@ -2575,13 +2738,14 @@ async function phoneSplash(){
     if(snap) gsap.set(tapeHost,{xPercent:p});
     return p;
   };
-  const onResize=()=>{
+  refitTape=()=>{
     if(!tapeReady) return;
     const p=syncTape(false);
     if(document.body.classList.contains('intro-done')){
       gsap.set(tapeHost,{xPercent:p});
+      return;
     }
-    else if(slideTween && slideTween.isActive()){
+    if(slideTween && slideTween.isActive()){
       const rest=Math.max(.05, slideTween.duration()*(1-slideTween.progress()));
       const spec=dockTarget();
       const speed=introTl ? introTl.timeScale() : 1;
@@ -2595,8 +2759,6 @@ async function phoneSplash(){
       }
     }
   };
-  addEventListener('resize', onResize);
-  visualViewport?.addEventListener('resize', onResize);
 
   const frame=document.getElementById('chalkFrame'), plain=document.getElementById('chalkPlain');
   // inner hole of the drawn frame, measured on the 1192×553 picture
@@ -2639,7 +2801,7 @@ async function phoneSplash(){
     gsap.set(brand,{clearProps:'left,top,width,xPercent,yPercent,transform'});
     gsap.set(tape,{clearProps:'width,autoAlpha'});
     gsap.set(logo,{clearProps:'clipPath'});
-    requestAnimationFrame(()=>syncTape(true));
+    requestAnimationFrame(()=>{ syncTape(true); scheduleRelayout(); });
     finish();
   }})
     .to(logo,{opacity:1, scale:1, duration:1.15, ease:'power2.out'}, 0.2)
