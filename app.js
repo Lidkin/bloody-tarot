@@ -2397,8 +2397,8 @@ else if(!isDesktop()) screen.orientation?.lock?.('portrait').catch(()=>{});
 document.addEventListener('contextmenu', e=>{ if(e.target.closest('img, .card, canvas')) e.preventDefault(); });
 document.addEventListener('dragstart', e=>{ if(e.target.tagName==='IMG') e.preventDefault(); });
 
-/* ---------- crime-scene tape (Trispace 36): outlined letters + a PNG strip ---------- */
-const TAPE_SVG='assets/SVG/Trispace 36.svg';
+/* ---------- crime-scene tape (Trispace 43 Cap): outlined letters + a PNG strip ---------- */
+const TAPE_SVG='assets/SVG/Trispace 43 Cap.svg';
 async function loadTapeSvg(host){
   const raw=await fetch(encodeURI(TAPE_SVG)).then(r=>r.text());
   const doc=new DOMParser().parseFromString(raw, 'image/svg+xml');
@@ -2528,7 +2528,7 @@ async function phoneSplash(){
     layer=document.getElementById('intro');
   if(!brand || !logo || !tape){ document.body.classList.remove('intro'); document.body.classList.add('intro-done'); return; }
 
-  // outlined tape (Trispace 36.svg): letters are paths, so no webfont is needed
+  // outlined tape (Trispace 43 Cap.svg): letters are paths, so no webfont is needed
   try{ await loadTapeSvg(tapeHost); }catch(e){}
 
   const finish=()=>{

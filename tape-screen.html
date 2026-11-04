@@ -72,9 +72,9 @@
 </div>
 
 <nav class="tape-picker" id="tapePicker" aria-label="Tape variants">
-  <button type="button" data-tape="Trispace 36.svg" class="is-on">Trispace 36</button>
+  <button type="button" data-tape="Trispace 36.svg">Trispace 36</button>
   <button type="button" data-tape="Trispace 43.svg">Trispace 43</button>
-  <button type="button" data-tape="Trispace 43 Cap.svg">Trispace 43 Cap</button>
+  <button type="button" data-tape="Trispace 43 Cap.svg" class="is-on">Trispace 43 Cap</button>
   <button type="button" data-tape="Oswald 45.svg">Oswald 45</button>
   <div class="hint">← → переключают ленту · реальный сплэш без анимации входа</div>
 </nav>
@@ -86,6 +86,7 @@ const TAPES=[
   'Trispace 43 Cap.svg',
   'Oswald 45.svg',
 ];
+const DEFAULT_TAPE=2; // Trispace 43 Cap — live site tape
 
 async function loadTape(name){
   const host=document.getElementById('introTape');
@@ -184,7 +185,7 @@ addEventListener('resize', ()=>{
   if(svg) placeTape(svg);
 });
 
-show(0);
+show(DEFAULT_TAPE);
 </script>
 </body>
 </html>
