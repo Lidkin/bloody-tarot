@@ -23,6 +23,13 @@ body.noir{
 *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
 html,body{height:100%;margin:0; background:#050303; overflow:hidden; font-family:'Trispace',sans-serif;}
 body{color:var(--ink); position:relative;}
+/* whisper / end-phrase / finale clearance from the bottom edge; short windows pull it in,
+   except while the fan arcs are on screen (body.fan-arcs) */
+html{--whisper-bottom:80px;}
+@media (max-height:758px){
+  html{--whisper-bottom:28px;}
+  html.fan-arcs{--whisper-bottom:80px;}
+}
 canvas#dust{position:fixed; inset:0; z-index:1; pointer-events:none;}
 .vignette{position:fixed; inset:0; z-index:2; pointer-events:none;
   background:radial-gradient(ellipse at 50% 45%, transparent 30%, rgba(0,0,0,.75) 100%);}
@@ -337,8 +344,8 @@ h1.title{position:fixed; top:calc(14px + env(safe-area-inset-top,0px)); left:50%
     top:calc(40px + env(safe-area-inset-top, 0px) + 72px * 678 / 840 * .88);
     bottom:calc(var(--whisper-bottom) + 36px + var(--whisper-size) + var(--btn-size) + 32px + var(--count-size));}
   h1.title{top:calc(64px + env(safe-area-inset-top,0px));}
-  /* whisper clears the bottom edge; on a short screen --whisper-bottom shrinks (CSS + JS) */
-  #opening{--whisper-bottom:80px; --whisper-size:clamp(11px, .85vw, 14px);
+  /* whisper uses html --whisper-bottom (80px, or 28px under 759px — not on fan-arcs) */
+  #opening{--whisper-size:clamp(11px, .85vw, 14px);
     --btn-size:clamp(14px, 1.1111vw, 18px); --count-size:clamp(14px, 1.1111vw, 18px);}
   .spread-options{position:absolute; left:0; right:0; margin-top:0; transform:none; align-items:flex-start;
     bottom:calc(var(--whisper-bottom) + 36px + var(--whisper-size));}
@@ -349,16 +356,10 @@ h1.title{position:fixed; top:calc(14px + env(safe-area-inset-top,0px)); left:50%
     line-height:var(--count-size); text-align:center;}
   .ask-sub .cd-row{position:absolute; left:50%; top:0; transform:translateX(-50%); margin:0;}
   .ask-sub .countdown, .ask-sub .cd-row .countdown{margin:0; font-size:var(--count-size); line-height:var(--count-size); height:var(--count-size);}
-  @media (max-height:900px){
-    #opening{--whisper-bottom:48px;}
-  }
-  @media (max-height:760px){
-    #opening{--whisper-bottom:28px; --whisper-size:clamp(10px, .8vw, 12px);
+  @media (max-height:758px){
+    #opening{--whisper-size:clamp(10px, .8vw, 12px);
       --btn-size:clamp(12px, 1vw, 15px); --count-size:clamp(12px, 1vw, 15px);}
     .ask-sub{margin-top:10px;}
-  }
-  @media (max-height:640px){
-    #opening{--whisper-bottom:18px;}
   }
 }
 /* the language button (the language it switches to) in the top right corner and the sound in the top left, on the title's line; only on the resting
@@ -696,7 +697,7 @@ body.intro-done .intro-brand{transition:opacity .5s ease-in-out;}
   body.day-open .card-head h2{white-space:nowrap;}
   body.day-open .card-head .head-title{display:block; min-height:1.2em; line-height:1.2; margin-top:8px; white-space:nowrap;}
   body.day-open #mTitle{display:none;}
-  body.day-open #meaningPanel{left:0; right:0; bottom:80px; top:auto; transform:none; max-width:none; width:100%;}
+  body.day-open #meaningPanel{left:0; right:0; bottom:var(--whisper-bottom); top:auto; transform:none; max-width:none; width:100%;}
   body.day-open #mText{width:100%; max-width:none; padding:0 24px; box-sizing:border-box;}
   body.day-open #meaningPanel .meaning-end{flex-direction:column-reverse; gap:16px; margin-top:0;}
   body.day-open #endRule, body.day-open .finish-btn .arrow{display:none;}
@@ -722,7 +723,7 @@ body.intro-done .intro-brand{transition:opacity .5s ease-in-out;}
   /* after Finish the same screen stays; the closing row takes the button's place, 80px off the bottom */
   body.day-open.day-done #meaningPanel .meaning-end{display:none;}
   body.day-open.day-done #mText{margin-bottom:0;}
-  body.day-open.day-done #finale{left:0; right:0; top:auto; bottom:80px; width:100%; max-width:none; transform:none;}
+  body.day-open.day-done #finale{left:0; right:0; top:auto; bottom:var(--whisper-bottom); width:100%; max-width:none; transform:none;}
   body.day-open.day-done #finale #fDeck{order:2; max-width:none; white-space:normal; padding:0 24px; margin:16px 0 0;
     font-size:clamp(12px, .95vw, 15px);}
   body.day-open.day-done #finale .finale-row{order:1;}
@@ -754,14 +755,13 @@ body.intro-done .intro-brand{transition:opacity .5s ease-in-out;}
     letter-spacing:0; font-size:1.15em; line-height:1.2; color:var(--ink); opacity:1; margin-top:.45em;
     white-space:nowrap;}
   body.spread-row .cap-title:empty{display:none;}
-  @media (max-height:780px){
+  @media (max-height:758px){
     body.spread-row .spread-cap{font-size:clamp(11px, 1vw, 13px); gap:1px;}
     body.spread-row .cap-title{margin-top:.3em;}
-    body.spread-row #finale{bottom:48px;}
     body.spread-row #finale #fDeck{margin-top:10px;}
     body.spread-row #finale .finale-row{margin-top:10px;}
   }
-  body.spread-row #finale{left:0; right:0; top:auto; bottom:80px; width:100%; max-width:none; transform:none;}
+  body.spread-row #finale{left:0; right:0; top:auto; bottom:var(--whisper-bottom); width:100%; max-width:none; transform:none;}
   body.spread-row #fSummary{position:relative; max-width:none; width:100%; box-sizing:border-box; padding:14px 24px; margin:0;
     font-style:normal; border:none;}
   /* a scaled hairline: a 1px rule is the thinnest border the browser will keep, so this draws half of that */

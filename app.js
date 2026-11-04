@@ -651,6 +651,7 @@ function loadFace(el){
 function buildFan(onReady){
   hoverCard=null; fan.innerHTML=''; fan.appendChild(dimOverlay); resetTable();
   meaningPanel.classList.remove('show'); finale.classList.remove('show');
+  syncFanArcsClass();
   deckOrder=[...DECK.keys()];
   for(let i=deckOrder.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[deckOrder[i],deckOrder[j]]=[deckOrder[j],deckOrder[i]];}
   const {nOuter, angleStart, angleEnd, rOuter, rInner, pivotX, pivotY} = fanLayout || layoutFan();
@@ -928,6 +929,7 @@ function openedPose(el, card){
   const stepOpen=isDesktop() && sheet && spread.i<POSITIONS.length-1;
   document.body.classList.toggle('day-open', true);
   document.body.classList.toggle('step-open', stepOpen);
+  syncFanArcsClass();
   document.getElementById('mName').textContent=card.name;
   document.getElementById('mKicker').textContent=sheet ? POSITIONS[spread.i] : '';
   const quote=card.title ? tr('q')(card.title) : '';
@@ -953,6 +955,7 @@ new MutationObserver(()=>{
     meaningPanel.style.bottom=meaningPanel.style.top='';
     finale.style.top=finale.style.bottom='';
     const end=meaningPanel.querySelector('.meaning-end'); if(end) end.hidden=false;
+    syncFanArcsClass();
   }
 }).observe(meaningPanel, {attributes:true, attributeFilter:['class']});
 // pose of a face-up card that, together with `panel` right under it, fits the viewport minus FIT_MARGIN
@@ -985,7 +988,7 @@ function fitAbove(panel){
   // card of the day, and past and present: name and a reserved quote above the card, the text full
   // width underneath, and the button 80px off the bottom of the screen
   if(panel===meaningPanel && document.body.classList.contains('day-open')){
-    panel.style.top='auto'; panel.style.bottom='80px';
+    panel.style.top='auto'; panel.style.bottom='var(--whisper-bottom)';
     panel.style.left='0'; panel.style.right='0'; panel.style.width='100%'; panel.style.maxWidth='none';
     panel.style.transform='none';
     const nameGap=18, minTop=24, nameH=Math.max(cardHead.offsetHeight, 24);
@@ -1308,7 +1311,7 @@ function showSpreadSummary(){
   meaningPanel.classList.remove('show'); hideBigName(); setTapePeriod(''); el.classList.remove('lit');
   if(sheet){ void meaningPanel.offsetWidth; meaningPanel.style.transition=meaningPanel.style.opacity=''; }
   if(phone) unveilSheet();
-  if(sheet) document.body.classList.add('spread-row');
+  if(sheet){ document.body.classList.add('spread-row'); syncFanArcsClass(); }
   setFinale(els);
   if(el._fromDeck){ showCarousel(); return; }
   // desktop: as large as the gap between the captions and the reading, and centred in it
@@ -1346,6 +1349,7 @@ function showCarousel(){
   const sum=document.getElementById('fSummary');
   document.body.classList.add('car-open');
   document.body.classList.remove('car-leaf', 'car-ready');
+  syncFanArcsClass();
   syncSpreadCue();
   phoneDeckChalk(false);
   gsap.set([fCard, cardHead, sum],{clearProps:'opacity'});
@@ -1620,11 +1624,20 @@ function spreadSummary(els){
 // again, so an open card lies over the live background of the start screen. Once cleared, it stays so
 // until level 0 brings it back the same way.
 let tableCleared=false;
+// short-screen whisper inset (28px) applies everywhere except while the fan arcs are on screen
+function syncFanArcsClass(){
+  const arcs=!fanScreen.hidden && !tableCleared
+    && !document.body.classList.contains('day-open')
+    && !document.body.classList.contains('spread-row')
+    && !document.body.classList.contains('car-open');
+  document.documentElement.classList.toggle('fan-arcs', arcs);
+}
 function setDim(level, except, onCovered){
   document.querySelectorAll('.fcard').forEach(c=>c.classList.toggle('dim', level>0 && c!==except));
   dimOverlay.classList.toggle('on', level>0);
   if(level===2 && !tableCleared){
     tableCleared=true;
+    syncFanArcsClass();
     showChalk(false);
     gsap.to(dimOverlay,{opacity:1, duration:.7, ease:'sine.inOut', overwrite:true, onComplete:()=>{
       if(!tableCleared) return;
@@ -1640,6 +1653,7 @@ function setDim(level, except, onCovered){
     chalkWeight(true);
     const away=[...fan.querySelectorAll('.fcard.away')].filter(c=>!spread?.cards.includes(c));
     tableCleared=false;
+    syncFanArcsClass();
     if(!away.length){ gsap.to(dimOverlay,{opacity:0, duration:.8, ease:'sine.inOut', overwrite:true}); return; }
     gsap.to(dimOverlay,{opacity:1, duration:.4, ease:'sine.inOut', overwrite:true, onComplete:()=>{
       away.forEach(c=>c.classList.remove('away'));
@@ -1654,6 +1668,7 @@ function fadeInCard(el){
 // a new fan or a new draw: nothing is veiled or put away
 function resetTable(){
   tableCleared=false; gsap.killTweensOf(dimOverlay); gsap.set(dimOverlay,{opacity:0}); dimOverlay.classList.remove('on');
+  syncFanArcsClass();
 }
 
 const isDesktop=()=>matchMedia('(hover:hover) and (pointer:fine)').matches;
@@ -2179,6 +2194,7 @@ function endReading(){
   if(mode==='day') dayDone=true;
   spread?.carousel?.arm?.kill();
   spread=null; fan.classList.remove('carousel'); document.body.classList.remove('car-open', 'car-leaf', 'car-ready', 'spread-row', 'tape-period');
+  syncFanArcsClass();
   syncSpreadCue();
   phoneDeckChalk(true); fan.querySelectorAll('.spread-cap, .pick-list').forEach(e=>e.remove());
   setAskSub(); showStart(true);
@@ -2541,22 +2557,20 @@ function refitDeckHome(){
   if(openingEl.hidden || busy || shufflePhase!=='idle') return;
   gsap.set(deckStack,{x:0, y:0, scale:1, xPercent:-50, yPercent:-50});
 }
-// desktop opening: whisper sits closer on a short screen; the deck shrinks to the band between the
-// tape and the buttons so it never covers either
+function whisperBottomPx(){
+  return parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--whisper-bottom'))||80;
+}
+// desktop opening: deck shrinks to the band between the tape and the buttons so it never covers either
 function fitOpeningLayout(){
   if(!isDesktop() || openingEl.hidden) return;
-  const opening=document.getElementById('opening');
   const velvet=document.getElementById('velvet');
   const tape=document.getElementById('introTapeWrap');
   const opts=document.getElementById('spreadOpts');
   const whisper=document.getElementById('whisper');
-  if(!opening || !velvet || !whisper) return;
+  if(!velvet || !whisper) return;
 
-  const whisperBottom=innerHeight<640 ? 18 : innerHeight<760 ? 28 : innerHeight<900 ? 48 : 80;
-  opening.style.setProperty('--whisper-bottom', whisperBottom+'px');
-
-  // let the new bottom settle, then size the velvet band from the live tape and button tops
   const apply=()=>{
+    const whisperBottom=whisperBottomPx();
     const tapeBottom=Math.max(
       tape?.getBoundingClientRect().bottom||0,
       document.getElementById('introBrand')?.getBoundingClientRect().bottom||0,
@@ -2594,6 +2608,7 @@ function relayoutViewport(){
   viewportKey=viewportFingerprint();
   sizeDust();
   syncOrient();
+  syncFanArcsClass();
   fitTitle();
   fitOptLines();
   fitCountdown();
