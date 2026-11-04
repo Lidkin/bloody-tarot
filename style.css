@@ -247,8 +247,8 @@ body:not(.noir) .big-name{font-family:'Cinzel',serif; color:#5e4c25;}
 /* the suit's drawing over the name: the long wand and sword by width, the cup and pentacle by height */
 .meaning-panel h2{font-family:var(--head-font); font-weight:500; color:var(--accent); letter-spacing:1.2px; font-size:20px; margin:0 0 2px;}
 /* the card's own title from the guidebook, Minor Arcana only */
-.meaning-panel .card-title{display:block; font-family:'Trispace',sans-serif; font-weight:400; font-style:normal;
-  color:var(--ink); opacity:.9; font-size:20px; letter-spacing:.04em; margin:0 0 8px;}
+.meaning-panel .card-title{display:block; font-family:'Trispace',sans-serif; font-weight:300; font-style:normal;
+  color:var(--ink); opacity:.9; font-size:16px; letter-spacing:0; margin:0 0 8px;}
 .meaning-panel .card-title:empty{display:none;}
 .meaning-panel .orient{display:block; font-family:var(--head-font); font-weight:700; color:var(--orient); font-size:14px; letter-spacing:1.9px; text-transform:uppercase; margin-bottom:6px;}
 .meaning-panel p{color:var(--ink); font-size:16px; line-height:1.45; margin:0 0 16px;}
@@ -515,13 +515,13 @@ body.intro-done .intro-brand{transition:opacity .5s ease-in-out;}
   .cap-name, .meaning-panel h2, .card-head h2{font-family:'Trispace',sans-serif; font-weight:500;
     letter-spacing:0; font-size:18px;}
   .meaning-panel .card-title, .card-head .head-title, .cap-title{font-family:'Trispace',sans-serif;
-    font-weight:400; font-style:normal; letter-spacing:.04em; font-size:18px; line-height:1.2; color:var(--ink); opacity:1;}
+    font-weight:300; font-style:normal; letter-spacing:0; font-size:14px; line-height:1.2; color:var(--ink); opacity:1;}
   .cap-title{display:block; margin-top:6px;}
   .cap-title:empty{display:none;}
   #mText, #fText, .finale .summary{font-family:'Trispace',sans-serif; font-weight:300; letter-spacing:0;
     font-size:15px; line-height:1.4;}
   .ask-sub .countdown{font-family:'Trispace',sans-serif; font-weight:700; letter-spacing:.171em; font-size:14px;}
-  #fDeck{font-family:'Trispace',sans-serif; font-weight:400; font-style:normal; letter-spacing:.04em; font-size:18px;}
+  #fDeck{font-family:'Trispace',sans-serif; font-weight:300; font-style:normal; letter-spacing:0; font-size:13px;}
   #fDeck b{color:inherit; font-weight:inherit;}
   .finale .summary{font-style:normal;}
   .velvet{--deck-w:200px;}
@@ -566,8 +566,8 @@ body.intro-done .intro-brand{transition:opacity .5s ease-in-out;}
   #finale .finale-cue{display:block; order:2; position:relative; width:100%; margin:14px 0 0;}
   #finale #fDeck{display:block; max-width:none; white-space:normal; width:100%; box-sizing:border-box;
     padding:0 20px; margin:0;
-    font-family:'Trispace',sans-serif; font-weight:400; font-style:normal; letter-spacing:.04em;
-    font-size:clamp(20px, 1.53vw, 24px); color:var(--muted); opacity:.8;
+    font-family:'Trispace',sans-serif; font-weight:300; font-style:normal; letter-spacing:0;
+    font-size:13px; color:var(--muted); opacity:.8;
     transition:opacity .7s ease;}
   #finale #spreadBack{position:absolute; left:50%; top:32px; transform:translateX(-50%); display:block;
     width:max-content; max-width:calc(100% - 40px); margin:0; padding:6px 2px;
@@ -603,7 +603,7 @@ body.intro-done .intro-brand{transition:opacity .5s ease-in-out;}
     font-family:'IBM Plex Mono',monospace; font-weight:500; letter-spacing:.05em;}
   html[lang=ru] #mText, html[lang=ru] #fText, html[lang=ru] .finale .summary{
     font-family:'IBM Plex Mono',monospace; font-weight:400; letter-spacing:.05em;}
-  html[lang=ru] #fDeck{font-family:'Trispace',sans-serif; font-weight:400; font-style:normal; letter-spacing:.04em;}
+  html[lang=ru] #fDeck{font-family:'Trispace',sans-serif; font-weight:300; font-style:normal; letter-spacing:0;}
 }
 
 /* desktop type. Sizes sit on the 1440px frame and stay inside the band discussed for other monitors.
@@ -640,12 +640,12 @@ body.intro-done .intro-brand{transition:opacity .5s ease-in-out;}
     font-size:clamp(11px, .9vw, 15px); color:var(--ink); margin-right:0;}
   .cap-name, .meaning-panel h2, .card-head h2{font-family:'Trispace',sans-serif; font-weight:500; letter-spacing:0;
     font-size:clamp(16px, 1.25vw, 22px);}
-  .meaning-panel .card-title, .card-head .head-title{font-family:'Trispace',sans-serif; font-weight:400; font-style:normal; letter-spacing:.04em;
-    font-size:clamp(18px, 1.38vw, 24px);}
+  .meaning-panel .card-title, .card-head .head-title{font-family:'Trispace',sans-serif; font-weight:300; font-style:normal; letter-spacing:0;
+    font-size:clamp(14px, 1.05vw, 18px);}
   #mText, #fText, .finale .summary{font-family:'Trispace',sans-serif; font-weight:300; letter-spacing:0;
     font-size:clamp(14px, 1.1111vw, 18px);}
-  #fDeck{font-family:'Trispace',sans-serif; font-weight:400; font-style:normal; letter-spacing:.04em;
-    font-size:clamp(18px, 1.38vw, 22px); color:var(--muted); opacity:.8;}
+  #fDeck{font-family:'Trispace',sans-serif; font-weight:300; font-style:normal; letter-spacing:0;
+    font-size:clamp(12px, .95vw, 15px); color:var(--muted); opacity:.8;}
   #fDeck b{color:inherit; font-weight:inherit;}
 }
 @media (hover:hover) and (pointer:fine){
@@ -655,7 +655,7 @@ body.intro-done .intro-brand{transition:opacity .5s ease-in-out;}
   html[lang=ru] body.day-open .card-head .head-pos{letter-spacing:.12em;}
   html[lang=ru] .cap-name, html[lang=ru] .meaning-panel h2, html[lang=ru] .card-head h2{font-family:'IBM Plex Mono',monospace; font-weight:500; letter-spacing:.05em;}
   html[lang=ru] #mText, html[lang=ru] #fText, html[lang=ru] .finale .summary{font-family:'IBM Plex Mono',monospace; font-weight:400; letter-spacing:.05em;}
-  html[lang=ru] #fDeck{font-family:'Trispace',sans-serif; font-weight:400; font-style:normal; letter-spacing:.04em;}
+  html[lang=ru] #fDeck{font-family:'Trispace',sans-serif; font-weight:300; font-style:normal; letter-spacing:0;}
 }
 /* desktop card of the day: name, a reserved quote, the card, then the reading across the screen,
    the whisper, and a finish button 80px off the bottom */
@@ -692,7 +692,7 @@ body.intro-done .intro-brand{transition:opacity .5s ease-in-out;}
   body.day-open.day-done #mText{margin-bottom:0;}
   body.day-open.day-done #finale{left:0; right:0; top:auto; bottom:80px; width:100%; max-width:none; transform:none;}
   body.day-open.day-done #finale #fDeck{order:2; max-width:none; white-space:normal; padding:0 24px; margin:16px 0 0;
-    font-size:clamp(20px, 1.53vw, 24px);}
+    font-size:clamp(12px, .95vw, 15px);}
   body.day-open.day-done #finale .finale-row{order:1;}
   body.day-open.day-done #finale .finale-row{display:grid; grid-template-columns:1fr auto 1fr; align-items:center; column-gap:22px; width:100%;}
   body.day-open.day-done #finale .return-btn,
@@ -712,8 +712,8 @@ body.intro-done .intro-brand{transition:opacity .5s ease-in-out;}
     font-size:clamp(13px, 1.15vw, 20px); transition:color .9s ease;}
   body.spread-row .spread-cap.hot .cap-pos{color:#fff;}
   body.spread-row .cap-name{text-transform:none; color:var(--accent);}
-  body.spread-row .cap-title{display:block; font-family:'Trispace',sans-serif; font-weight:400; font-style:normal;
-    letter-spacing:.04em; font-size:clamp(18px, 1.38vw, 24px); line-height:1.2; color:var(--ink); opacity:1; margin-top:8px;}
+  body.spread-row .cap-title{display:block; font-family:'Trispace',sans-serif; font-weight:300; font-style:normal;
+    letter-spacing:0; font-size:clamp(14px, 1.05vw, 18px); line-height:1.2; color:var(--ink); opacity:1; margin-top:8px;}
   body.spread-row .cap-title:empty{display:none;}
   body.spread-row #finale{left:0; right:0; top:auto; bottom:80px; width:100%; max-width:none; transform:none;}
   body.spread-row #fSummary{position:relative; max-width:none; width:100%; box-sizing:border-box; padding:14px 24px; margin:0;
@@ -727,7 +727,7 @@ body.intro-done .intro-brand{transition:opacity .5s ease-in-out;}
   body.spread-row #fSummary.card-text::before,
   body.spread-row #fSummary.card-text::after{background:transparent;}
   body.spread-row #finale #fDeck{display:block; order:2; max-width:none; white-space:normal; padding:0 24px; margin:16px 0 0;
-    font-size:clamp(18px, 1.3889vw, 22px);}
+    font-size:clamp(12px, .95vw, 15px);}
   body.spread-row #finale .finale-row{order:1; display:grid; grid-template-columns:1fr auto 1fr; align-items:center; column-gap:22px; width:100%; margin-top:16px;}
   body.spread-row #finale .return-btn,
   body.spread-row #finale .cta,
