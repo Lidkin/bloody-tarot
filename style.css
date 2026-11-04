@@ -194,11 +194,14 @@ img{-webkit-user-drag:none; user-select:none; -webkit-user-select:none; -webkit-
 /* desktop, closing screen: more cards of the deck, each a link to the shop */
 .fcard.showcase{pointer-events:auto;}
 /* a gloved hand. chalk while it rests, the bare hand on anything that can be pressed.
-   the hotspot is the palm, so the fingers can slide off a control without the cursor changing */
-:root{--cur:-webkit-image-set(url(assets/cursor-chalk.png) 1x, url(assets/cursor-chalk-2x.png) 2x) 13 22, auto;
-  --cur-on:-webkit-image-set(url(assets/cursor-hand.png) 1x, url(assets/cursor-hand-2x.png) 2x) 13 22, pointer;}
+   CSS still needs one anchor pixel (centre of the sprite); app.js treats the whole hand as the hit. */
+:root{--cur:-webkit-image-set(url(assets/cursor-chalk.png) 1x, url(assets/cursor-chalk-2x.png) 2x) 13 21, auto;
+  --cur-on:-webkit-image-set(url(assets/cursor-hand.png) 1x, url(assets/cursor-hand-2x.png) 2x) 14 21, pointer;}
 html{cursor:var(--cur);}
 button:not(:disabled), a[href], .deck-stack, .fcard.showcase{cursor:var(--cur-on);}
+/* any part of the hand over a control — not only the centre pixel */
+html.cur-hand{cursor:var(--cur-on);}
+html.cur-hand *{cursor:inherit;}
 /* the white of an illustration is shown as warm paper, like the faces without artwork;
    it turns pure white under the cursor */
 .paper{position:absolute; inset:0; pointer-events:none; background-color:#f4f1ec; mix-blend-mode:multiply;

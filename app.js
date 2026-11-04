@@ -789,6 +789,13 @@ function inCard(s, x, y){
   const lx=dx*Math.cos(t)+dy*Math.sin(t), ly=-dx*Math.sin(t)+dy*Math.cos(t);
   return Math.abs(lx)<=s.w/2 && Math.abs(ly)<=s.h/2;
 }
+// the hand sprite is larger than one CSS hotspot pixel; sample across it so the whole hand reacts
+const CUR_SPRITE={w:28, h:43, hx:14, hy:21};
+function cursorSamples(x, y){
+  const {w,h,hx,hy}=CUR_SPRITE, l=x-hx, t=y-hy, pts=[[x,y]];
+  for(let i=0;i<3;i++) for(let j=0;j<4;j++) pts.push([l+w*(i+.5)/3, t+h*(j+.5)/4]);
+  return pts;
+}
 function cardAt(x, y){
   let best=null;
   fan.querySelectorAll('.fcard:not(.mover)').forEach(el=>{
@@ -796,6 +803,29 @@ function cardAt(x, y){
   });
   if(!best && hoverCard && inCard(hoverCard._state||arcState(hoverCard), x, y)) return hoverCard;
   return best;
+}
+function cardAtCursor(x, y){
+  let best=null;
+  for(const [sx,sy] of cursorSamples(x, y)){
+    const el=cardAt(sx, sy);
+    if(el && (!best || +el.dataset.z>+best.dataset.z)) best=el;
+  }
+  return best;
+}
+const CUR_HOT='button:not(:disabled), a[href], .deck-stack, .fcard.showcase, .opt, .link-btn, .return-btn, .finish-btn, .cta, .lang-switch button';
+function hotUnderCursor(x, y){
+  for(const [sx,sy] of cursorSamples(x, y)){
+    const el=document.elementFromPoint(sx, sy);
+    const hit=el?.closest?.(CUR_HOT);
+    if(hit) return hit;
+  }
+  return null;
+}
+function syncHandCursor(x, y){
+  if(!isDesktop()){ document.documentElement.classList.remove('cur-hand'); return null; }
+  const hit=hotUnderCursor(x, y) || cardAtCursor(x, y);
+  document.documentElement.classList.toggle('cur-hand', !!hit);
+  return hit;
 }
 let faceTimer=0;
 function setHover(el){
@@ -815,8 +845,9 @@ function setHover(el){
 const fanIdle=()=>!busy && !activeCard;
 fan.addEventListener('pointermove', e=>{
   if(!(fanIdle() && e.pointerType==='mouse')) return;
-  const el=cardAt(e.clientX, e.clientY);
+  const el=cardAtCursor(e.clientX, e.clientY);
   setHover(el);
+  syncHandCursor(e.clientX, e.clientY);
   if(!spread?.list) return;
   // the period names the next card, never the one just clicked
   if(el && !el.classList.contains('picked') && spread.cards.length<POSITIONS.length) showPickPeriod();
@@ -840,9 +871,25 @@ addEventListener('pointerdown', e=>{
 fan.addEventListener('click', e=>{
   if(dealTl){ dealTl.timeScale(2); return; }
   if(!fanIdle()) return;
-  const el=cardAt(e.clientX, e.clientY);
+  const el=cardAtCursor(e.clientX, e.clientY);
   if(el) spread ? pickCard(el) : openCard(el, el._card);
 });
+// desktop: the whole hand sprite is the hit, not only the CSS hotspot in its middle
+addEventListener('pointermove', e=>{
+  if(e.pointerType && e.pointerType!=='mouse') return;
+  if(fanIdle() && e.target?.closest?.('#fan')) return; // fan handler already synced
+  syncHandCursor(e.clientX, e.clientY);
+});
+addEventListener('pointerdown', e=>{
+  if(!isDesktop() || (e.pointerType && e.pointerType!=='mouse') || e.button!==0) return;
+  const hot=hotUnderCursor(e.clientX, e.clientY);
+  if(!hot) return;
+  if(e.target===hot || hot.contains(e.target)) return;
+  // palm missed the control but a finger / edge of the hand is on it — fire that control
+  e.preventDefault();
+  e.stopPropagation();
+  hot.click();
+}, true);
 
 // the kinder face is reversed for the Devil, the Four and Five of Cups, the Three, Five,
 // Eight, Nine and Ten of Swords, and the Five of Pentacles. Every other card is kinder upright.
@@ -1772,13 +1819,16 @@ window.addEventListener('pointermove', e=>{
   }
   if(spread?.summary){ // the open spread: the card under the cursor lights up and its meaning replaces the summary
     let over=null;
-    spread.cards.forEach(c=>{ const on=e.pointerType==='mouse' && inCard(c._state, e.clientX, e.clientY); c.classList.toggle('lit', on); if(on) over=c; });
+    spread.cards.forEach(c=>{
+      const on=e.pointerType==='mouse' && cursorSamples(e.clientX, e.clientY).some(([x,y])=>inCard(c._state, x, y));
+      c.classList.toggle('lit', on); if(on) over=c;
+    });
     if(isDesktop() && !spread.carousel) showSummaryText(over); // the stack already shows its top card's meaning
     return;
   }
   const s=activeCard._state; if(!s || holdFlat) return;
   // under the cursor the warm paper of the illustration turns pure white
-  const over=e.pointerType==='mouse' && inCard(s, e.clientX, e.clientY);
+  const over=e.pointerType==='mouse' && cursorSamples(e.clientX, e.clientY).some(([x,y])=>inCard(s, x, y));
   activeCard.classList.toggle('lit', over);
   if(e.pointerType==='touch' && !e.buttons) return;
   tiltTo(clamp1((e.clientX-s.x)/(s.w*.9)), clamp1((e.clientY-s.y)/(s.h*.7)));
