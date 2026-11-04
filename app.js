@@ -2116,8 +2116,8 @@ function storyFace(kind, px){
   if(kind==='name') return {font:`500 ${px}px ${ru?'"IBM Plex Mono"':'Trispace'}`, track:ru?px*.05:0};
   if(kind==='body') return ru ? {font:`400 ${px}px "IBM Plex Mono"`, track:px*.05} : {font:`300 ${px}px Trispace`, track:0};
   if(kind==='ask') return {font:`500 ${px}px Oswald`, track:0};
-  if(kind==='quote') return {font:`italic 500 ${px}px "Cormorant Garamond"`, track:px*.05};
-  return {font:`italic 300 ${px}px "Cormorant Garamond"`, track:px*.05};
+  if(kind==='quote') return {font:`100 ${Math.round(px*1.1)}px Trispace`, track:px*.04};
+  return {font:`100 ${Math.round(px*1.1)}px Trispace`, track:px*.04};
 }
 // A story-sized (9:16) picture of the card of the day (or of the spread) with the deck's name and shop -
 // shared through the system share sheet where files can be shared (phones), otherwise downloaded.
