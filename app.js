@@ -834,12 +834,11 @@ function syncHandCursor(x, y){
     setHandOn(null);
     return null;
   }
+  // bare glove only on controls you press (buttons, links, deck). Cards keep the chalk hand on hover.
   const hot=hotUnderCursor(x, y);
-  const hit=hot || cardAtCursor(x, y);
-  document.documentElement.classList.toggle('cur-hand', !!hit);
-  // bare glove ↔ control hover for every hot target (lang, finish, opts…), not only a short list
+  document.documentElement.classList.toggle('cur-hand', !!hot);
   setHandOn(hot||null);
-  return hit;
+  return hot;
 }
 let faceTimer=0;
 function setHover(el){
@@ -853,7 +852,6 @@ function setHover(el){
   hoverCard=el;
   // a card only swept over on the way to another is not loaded
   clearTimeout(faceTimer); if(el) faceTimer=setTimeout(()=>loadFace(el), 150);
-  fan.style.cursor = el ? 'var(--cur-on)' : '';
   if(el){ el.classList.add('lit'); if(!el.classList.contains('picked')) animateCard(el, arcState(el, cardH/2), {duration:.3, ease:'power2.out'}); }
 }
 const fanIdle=()=>!busy && !activeCard;
