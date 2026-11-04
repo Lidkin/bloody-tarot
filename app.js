@@ -834,11 +834,13 @@ function syncHandCursor(x, y){
     setHandOn(null);
     return null;
   }
-  // bare glove only on controls you press (buttons, links, deck). Cards keep the chalk hand on hover.
+  // bare glove on pressable controls, and on fan cards while they can be picked — not on a resting open card
   const hot=hotUnderCursor(x, y);
-  document.documentElement.classList.toggle('cur-hand', !!hot);
+  const fanCard=fanIdle() ? (cardAtCursor(x, y) || hoverCard) : null;
+  const press=hot || fanCard;
+  document.documentElement.classList.toggle('cur-hand', !!press);
   setHandOn(hot||null);
-  return hot;
+  return press;
 }
 let faceTimer=0;
 function setHover(el){
