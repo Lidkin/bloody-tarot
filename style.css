@@ -834,32 +834,17 @@ html.tablet .link-btn{font-family:'Oswald',sans-serif; font-weight:500; letter-s
   html.tablet .opt{margin-right:0; padding:8px 0; color:var(--accent); background:none; border:none; border-radius:0;
     text-shadow:0 0 12px rgba(var(--accent-rgb),.45);}
   html.tablet .opt::after{left:var(--line-l, 0px); right:var(--line-r, 0px);}
+  /* tablet buttons: same reaction as phone (call pulse / :active / .tap) — not desktop hover */
   html.tablet .finish-btn{padding:6px 0; color:var(--accent); background:none; border:none; border-radius:0;}
   html.tablet .finish-btn .fill{color:transparent; -webkit-text-fill-color:transparent; -webkit-background-clip:text; background-clip:text;
     background-image:linear-gradient(90deg, var(--accent) 37.5%, var(--red) 37.5% 62.5%, var(--accent) 62.5%);
-    background-size:400% 100%; background-position:100% 0;}
-  /* chalk glove: quiet. bare glove on the button: the word starts calling */
-  html.tablet .finish-btn.hand-on .fill{animation:call 3.6s ease-in-out infinite;}
-  html.tablet .finish-btn:hover,
-html.tablet .finish-btn:hover .fill,
-html.tablet .finish-btn.hand-on,
-html.tablet .finish-btn.hand-on .fill{color:transparent; -webkit-text-fill-color:transparent;}
+    background-size:400% 100%; background-position:100% 0; animation:call 3.6s ease-in-out infinite;}
   html.tablet .return-btn{color:var(--accent); background:none; border:1px solid rgba(var(--accent-rgb),.4);
     padding:9px 20px; border-radius:24px;}
-  html.tablet .return-btn:hover,
-html.tablet .return-btn.hand-on{color:var(--accent); background:rgba(228,36,35,.15); border-color:var(--red);}
-  /* the same vertical padding and border as Share, so the red pill is the same height */
   html.tablet .cta,
 html.tablet body.noir .cta{color:#fff; -webkit-text-fill-color:#fff; background:var(--red);
     border:1px solid transparent; padding:9px 30px; border-radius:26px; box-shadow:0 0 18px rgba(228,36,35,.4);}
-  html.tablet .cta:hover,
-html.tablet body.noir .cta:hover,
-html.tablet .cta.hand-on,
-html.tablet body.noir .cta.hand-on{color:#fff; -webkit-text-fill-color:#fff; transform:translateY(-1px);
-    box-shadow:0 0 28px rgba(228,36,35,.65);}
   html.tablet .link-btn{color:var(--muted); background:none; border:none; border-radius:0; padding:9px 6px; box-shadow:none;}
-  html.tablet .link-btn:hover,
-html.tablet .link-btn.hand-on{color:var(--ink);}
   html.tablet .cap-pos,
 html.tablet .meaning-panel .pos-label,
 html.tablet .pick-word:not(.pick-ask){font-family:'Trispace',sans-serif; font-weight:400; letter-spacing:0;
@@ -1029,25 +1014,19 @@ html.tablet[lang=ru] .finale .summary{font-family:'IBM Plex Mono',monospace; fon
   html.tablet body.day-open #meaningPanel .meaning-end{flex-direction:column-reverse; gap:16px; margin-top:0;}
   html.tablet body.day-open #endRule,
 html.tablet body.day-open .finish-btn .arrow{display:none;}
-  html.tablet body.day-open .finish-btn{padding:8px 0; color:var(--red); text-shadow:none;
+  /* phone finish on tablet day-open: call pulse + tap fill — never the desktop hover drain */
+  html.tablet body.day-open .finish-btn{padding:8px 0; color:var(--accent); text-shadow:none;
     font-size:clamp(16px, 1.25vw, 20px);}
-  /* red sits on the button, then on hover drains downward onto the whisper */
   html.tablet body.day-open .finish-btn .fill{color:transparent; -webkit-text-fill-color:transparent;
-    background-image:linear-gradient(to bottom, #fff 0 50%, var(--red) 50% 100%);
-    background-size:100% 200%; background-position:0 100%; background-repeat:no-repeat;
-    -webkit-background-clip:text; background-clip:text; animation:none;
-    transition:background-position 1.6s ease;}
-  html.tablet body.day-open .finish-btn:hover .fill,
-html.tablet body.day-open .finish-btn.hand-on .fill{background-position:0 0; transition-duration:.6s;}
-  html.tablet body.day-open .end-phrase{font-size:clamp(12px, .95vw, 16px); opacity:0;
-    color:transparent; -webkit-text-fill-color:transparent;
-    background-image:linear-gradient(to bottom, color-mix(in srgb, var(--muted) 80%, transparent) 0 50%, var(--red) 50% 100%);
-    background-size:100% 200%; background-position:0 0; background-repeat:no-repeat;
-    -webkit-background-clip:text; background-clip:text;
-    transition:background-position 1.4s ease;}
-  /* whisper starts taking red before the big word has finished turning white */
-  html.tablet body.day-open .meaning-end:has(.finish-btn:hover) .end-phrase,
-html.tablet body.day-open .meaning-end:has(.finish-btn.hand-on) .end-phrase{background-position:0 100%; transition-delay:.05s;}
+    background-image:linear-gradient(90deg, var(--accent) 37.5%, var(--red) 37.5% 62.5%, var(--accent) 62.5%);
+    background-size:400% 100%; background-position:100% 0; background-repeat:no-repeat;
+    -webkit-background-clip:text; background-clip:text; animation:call 3.6s ease-in-out infinite;
+    transition:none;}
+  html.tablet body.day-open .finish-btn.tap .fill,
+html.tablet body.day-open .finish-btn:active .fill{animation:none; background-position:50% 0;}
+  html.tablet body.day-open .end-phrase{font-size:clamp(12px, .95vw, 16px); opacity:1;
+    color:color-mix(in srgb, var(--muted) 80%, transparent); -webkit-text-fill-color:unset;
+    background:none; background-image:none; transition:none;}
   /* after Finish the same screen stays; the closing row takes the button's place, 80px off the bottom */
   html.tablet body.day-open.day-done #meaningPanel .meaning-end{display:none;}
   html.tablet body.day-open.day-done #mText{margin-bottom:0;}
@@ -1150,7 +1129,7 @@ html[lang=ru] .pick-word:not(.pick-ask){
 }
 
 
-/* tablet = desktop layout; buttons use phone press chrome (frames / red / hand-on fills) */
+/* tablet = desktop layout; button reaction = phone (frames, call pulse, :active / .tap) */
 html.tablet, html.tablet *{cursor:auto;}
 html.tablet .rush-hint{display:block;}
 html.tablet .opt::before{content:''; position:absolute; top:0; bottom:0; left:-18px; right:-15px; border:.67px solid rgba(var(--accent-rgb),.55);
@@ -1160,23 +1139,24 @@ html.tablet .opt.done::before,
 html.tablet .opt:not(.done):active::before,
 html.tablet .opt.tap::before{visibility:hidden;}
 html.tablet .opt:not(.done):active,
-html.tablet .opt.tap,
-html.tablet .opt:not(.done).hand-on{color:var(--red); text-shadow:0 0 10px rgba(228,36,35,.7), 0 0 24px rgba(228,36,35,.45);}
+html.tablet .opt.tap{color:var(--red); text-shadow:0 0 10px rgba(228,36,35,.7), 0 0 24px rgba(228,36,35,.45);}
+html.tablet .opt::after,
 html.tablet .opt:not(.done):hover::after,
-html.tablet .opt:not(.done).hand-on::after{transform:none;}
-/* NEXT / Finish: phone-style call pulse; day-open drain runs on .hand-on/.tap (no hover) */
-html.tablet .finish-btn .fill{animation:call 3.6s ease-in-out infinite;}
-html.tablet body.day-open .finish-btn .fill{animation:none;}
-html.tablet body.day-open .finish-btn.hand-on .fill,
-html.tablet body.day-open .finish-btn.tap .fill{background-position:0 0; transition-duration:.6s;}
-html.tablet body.day-open .meaning-end:has(.finish-btn.hand-on) .end-phrase,
-html.tablet body.day-open .meaning-end:has(.finish-btn.tap) .end-phrase{background-position:0 100%; transition-delay:.05s;}
-html.tablet .return-btn.hand-on,
-html.tablet .return-btn.tap{color:var(--accent); background:rgba(228,36,35,.15); border-color:var(--red);}
-html.tablet .cta.hand-on,
-html.tablet .cta.tap,
-html.tablet body.noir .cta.hand-on,
-html.tablet body.noir .cta.tap{color:#fff; -webkit-text-fill-color:#fff; transform:translateY(-1px);
-  box-shadow:0 0 28px rgba(228,36,35,.65);}
-html.tablet .link-btn.hand-on,
-html.tablet .link-btn.tap{color:var(--ink);}
+html.tablet .opt:not(.done).hand-on::after{transform:none !important;}
+html.tablet .finish-btn .fill,
+html.tablet body.day-open .finish-btn .fill{
+  color:transparent !important; -webkit-text-fill-color:transparent !important;
+  background-image:linear-gradient(90deg, var(--accent) 37.5%, var(--red) 37.5% 62.5%, var(--accent) 62.5%) !important;
+  background-size:400% 100% !important; background-position:100% 0 !important;
+  animation:call 3.6s ease-in-out infinite !important; transition:none !important;}
+html.tablet .finish-btn.tap .fill,
+html.tablet .finish-btn:active .fill,
+html.tablet body.day-open .finish-btn.tap .fill,
+html.tablet body.day-open .finish-btn:active .fill{animation:none !important; background-position:50% 0 !important;}
+html.tablet body.day-open .finish-btn{color:var(--accent) !important;}
+html.tablet body.day-open .end-phrase{
+  opacity:1 !important; color:color-mix(in srgb, var(--muted) 80%, transparent) !important;
+  -webkit-text-fill-color:unset !important; background:none !important; background-image:none !important;}
+html.tablet .return-btn:active{background:rgba(228,36,35,.15); border-color:var(--red);}
+html.tablet .cta:active{transform:scale(.97);}
+html.tablet .link-btn:active{color:var(--ink);}

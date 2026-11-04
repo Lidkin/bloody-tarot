@@ -1949,27 +1949,6 @@ document.getElementById('finishBtn').addEventListener('pointerleave', ()=>{
   holdFlat=false;
   if(activeCard) activeCard.classList.remove('lit');
 });
-// tablet / phone: press = the desktop hover (hand-on / tap) so buttons animate without a mouse
-const TAP_BTNS='.opt, .finish-btn, .return-btn, .cta, .link-btn, .lang-switch button';
-addEventListener('pointerdown', e=>{
-  if(isMouseUI()) return;
-  const btn=e.target?.closest?.(TAP_BTNS);
-  if(!btn || btn.disabled || btn.classList.contains('done')) return;
-  btn.classList.add('hand-on', 'tap');
-}, true);
-const clearTapChrome=()=>{
-  if(isMouseUI()) return;
-  // after click (finish sets _tapped); opts keep .tap while the choice fades
-  requestAnimationFrame(()=>{
-    document.querySelectorAll('.hand-on, .tap').forEach(el=>{
-      if(el.classList.contains('finish-btn') && el._tapped){ el.classList.add('hand-on','tap'); return; }
-      if(el.classList.contains('opt') && el.classList.contains('tap')){ el.classList.remove('hand-on'); return; }
-      el.classList.remove('hand-on', 'tap');
-    });
-  });
-};
-addEventListener('pointerup', clearTapChrome, true);
-addEventListener('pointercancel', clearTapChrome, true);
 // the showcase slips under the card of the day and is gone; `then` runs once all of it is under
 function hideShowcase(then){
   sharePreview=false; holdFlat=false;
