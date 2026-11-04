@@ -1150,7 +1150,7 @@ html[lang=ru] .pick-word:not(.pick-ask){
 }
 
 
-/* tablet = desktop layout; buttons keep the phone tap frames / red press */
+/* tablet = desktop layout; buttons use phone press chrome (frames / red / hand-on fills) */
 html.tablet, html.tablet *{cursor:auto;}
 html.tablet .rush-hint{display:block;}
 html.tablet .opt::before{content:''; position:absolute; top:0; bottom:0; left:-18px; right:-15px; border:.67px solid rgba(var(--accent-rgb),.55);
@@ -1160,6 +1160,23 @@ html.tablet .opt.done::before,
 html.tablet .opt:not(.done):active::before,
 html.tablet .opt.tap::before{visibility:hidden;}
 html.tablet .opt:not(.done):active,
-html.tablet .opt.tap{color:var(--red); text-shadow:0 0 10px rgba(228,36,35,.7), 0 0 24px rgba(228,36,35,.45);}
+html.tablet .opt.tap,
+html.tablet .opt:not(.done).hand-on{color:var(--red); text-shadow:0 0 10px rgba(228,36,35,.7), 0 0 24px rgba(228,36,35,.45);}
 html.tablet .opt:not(.done):hover::after,
 html.tablet .opt:not(.done).hand-on::after{transform:none;}
+/* NEXT / Finish: phone-style call pulse; day-open drain runs on .hand-on/.tap (no hover) */
+html.tablet .finish-btn .fill{animation:call 3.6s ease-in-out infinite;}
+html.tablet body.day-open .finish-btn .fill{animation:none;}
+html.tablet body.day-open .finish-btn.hand-on .fill,
+html.tablet body.day-open .finish-btn.tap .fill{background-position:0 0; transition-duration:.6s;}
+html.tablet body.day-open .meaning-end:has(.finish-btn.hand-on) .end-phrase,
+html.tablet body.day-open .meaning-end:has(.finish-btn.tap) .end-phrase{background-position:0 100%; transition-delay:.05s;}
+html.tablet .return-btn.hand-on,
+html.tablet .return-btn.tap{color:var(--accent); background:rgba(228,36,35,.15); border-color:var(--red);}
+html.tablet .cta.hand-on,
+html.tablet .cta.tap,
+html.tablet body.noir .cta.hand-on,
+html.tablet body.noir .cta.tap{color:#fff; -webkit-text-fill-color:#fff; transform:translateY(-1px);
+  box-shadow:0 0 28px rgba(228,36,35,.65);}
+html.tablet .link-btn.hand-on,
+html.tablet .link-btn.tap{color:var(--ink);}

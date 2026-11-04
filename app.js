@@ -930,19 +930,33 @@ addEventListener('pointerdown', e=>{
   if(now-lastTouchRush<340) rushMotion();
   lastTouchRush=now;
 });
-fan.addEventListener('click', e=>{
-  if(dealTl){ dealTl.timeScale(2); return; }
-  // tablet (and touch): tap a laid-out card like pointing at it with the cursor — its meaning replaces the summary
+// tablet: no hover — press a fan card like the cursor resting on it (period name / summary meaning)
+fan.addEventListener('pointerdown', e=>{
+  if(isMouseUI()) return;
   if(spread?.summary && isLayoutDesk() && !spread.carousel){
     const hit=cardAt(e.clientX, e.clientY);
     const el=hit && spread.cards.includes(hit) ? hit : null;
-    const next=el && summaryFor!==el ? el : null;
+    // tap lit card again (or empty) → back to the whole-spread text
+    const next=el && el!==summaryFor ? el : null;
     spread.cards.forEach(c=>c.classList.toggle('lit', c===next));
     showSummaryText(next);
     return;
   }
+  if(!(spread?.list && fanIdle())) return;
+  const el=cardAt(e.clientX, e.clientY);
+  if(el && !el.classList.contains('picked') && spread.cards.length<POSITIONS.length){
+    setHover(el);
+    showPickPeriod();
+  } else {
+    setHover(null);
+    showPickAsk();
+  }
+});
+fan.addEventListener('click', e=>{
+  if(dealTl){ dealTl.timeScale(2); return; }
+  if(spread?.summary && isLayoutDesk() && !spread.carousel && !isMouseUI()) return;
   if(!fanIdle()) return;
-  const el=cardAtCursor(e.clientX, e.clientY);
+  const el=isMouseUI() ? cardAtCursor(e.clientX, e.clientY) : cardAt(e.clientX, e.clientY);
   if(el) spread ? pickCard(el) : openCard(el, el._card);
 });
 // desktop: the whole hand sprite is the hit, not only the CSS hotspot in its middle
@@ -1935,6 +1949,27 @@ document.getElementById('finishBtn').addEventListener('pointerleave', ()=>{
   holdFlat=false;
   if(activeCard) activeCard.classList.remove('lit');
 });
+// tablet / phone: press = the desktop hover (hand-on / tap) so buttons animate without a mouse
+const TAP_BTNS='.opt, .finish-btn, .return-btn, .cta, .link-btn, .lang-switch button';
+addEventListener('pointerdown', e=>{
+  if(isMouseUI()) return;
+  const btn=e.target?.closest?.(TAP_BTNS);
+  if(!btn || btn.disabled || btn.classList.contains('done')) return;
+  btn.classList.add('hand-on', 'tap');
+}, true);
+const clearTapChrome=()=>{
+  if(isMouseUI()) return;
+  // after click (finish sets _tapped); opts keep .tap while the choice fades
+  requestAnimationFrame(()=>{
+    document.querySelectorAll('.hand-on, .tap').forEach(el=>{
+      if(el.classList.contains('finish-btn') && el._tapped){ el.classList.add('hand-on','tap'); return; }
+      if(el.classList.contains('opt') && el.classList.contains('tap')){ el.classList.remove('hand-on'); return; }
+      el.classList.remove('hand-on', 'tap');
+    });
+  });
+};
+addEventListener('pointerup', clearTapChrome, true);
+addEventListener('pointercancel', clearTapChrome, true);
 // the showcase slips under the card of the day and is gone; `then` runs once all of it is under
 function hideShowcase(then){
   sharePreview=false; holdFlat=false;
@@ -1960,8 +1995,8 @@ window.addEventListener('pointermove', e=>{
     return;
   }
   if(spread?.summary){ // the open spread: the card under the cursor lights up and its meaning replaces the summary
-    // mouse / pen follow the pointer; a finger tap is handled on click (tablet has no hover)
-    if(e.pointerType && e.pointerType!=='mouse' && e.pointerType!=='pen') return;
+    // mouse desktop only — tablet / DevTools-touch use pointerdown (mouse move would clear a tap)
+    if(!isMouseUI()) return;
     let over=null;
     spread.cards.forEach(c=>{
       const on=cursorSamples(e.clientX, e.clientY).some(([x,y])=>inCard(c._state, x, y));
