@@ -2262,14 +2262,22 @@ function setAskSub(){
   fitCountdown();
   return true;
 }
-// the digits stay inside the width of "Карта дня"; tabular figures keep that width as they tick
+// digits always fit the Russian "Карта дня" width (same for EN), so the timer matches across languages
 function fitCountdown(){
   const btn=document.querySelector('.opt[data-mode=day]');
   const cd=document.querySelector('#askSub .countdown');
   if(!cd) return;
   cd.style.transform='';
   if(!btn || !cd.textContent) return;
-  const max=btn.getBoundingClientRect().width, w=cd.getBoundingClientRect().width;
+  const cs=getComputedStyle(btn);
+  const probe=document.createElement('span');
+  probe.textContent='Карта дня';
+  probe.style.cssText=`position:absolute;left:0;top:0;visibility:hidden;pointer-events:none;white-space:nowrap;
+    font:${cs.font};letter-spacing:${cs.letterSpacing};text-transform:${cs.textTransform}`;
+  document.body.appendChild(probe);
+  const max=probe.getBoundingClientRect().width;
+  probe.remove();
+  const w=cd.getBoundingClientRect().width;
   if(w>max && max>0){ cd.style.transform=`scale(${max/w})`; cd.style.transformOrigin='center'; }
 }
 function tickCountdown(){
