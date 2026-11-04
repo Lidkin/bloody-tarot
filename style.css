@@ -374,12 +374,16 @@ h1.title{position:fixed; top:calc(14px + env(safe-area-inset-top,0px)); left:50%
 .sound-btn .wave{transition:opacity .3s ease;}
 .sound-btn.muted .wave{opacity:0;}
 .sound-btn:not(.muted) .cross{opacity:0;}
-@media (hover:hover){ .sound-btn:hover{color:var(--ink);} }
 @media (hover:hover) and (pointer:fine){
-  .lang-switch button:hover{
+  .lang-switch button:hover,
+  .lang-switch button.hand-on{
     background:#2a0808;
     box-shadow:0 0 12px rgba(228,36,35,.85), 0 0 26px rgba(228,36,35,.45);
   }
+}
+@media (hover:hover){
+  .sound-btn:hover,
+  .sound-btn.hand-on{color:var(--ink);}
 }
 @media (hover:hover) and (pointer:fine){
   .sound-btn{top:calc(40px + env(safe-area-inset-top,0px)); left:28px;}

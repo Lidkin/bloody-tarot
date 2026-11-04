@@ -834,11 +834,11 @@ function syncHandCursor(x, y){
     setHandOn(null);
     return null;
   }
-  const hit=hotUnderCursor(x, y) || cardAtCursor(x, y);
+  const hot=hotUnderCursor(x, y);
+  const hit=hot || cardAtCursor(x, y);
   document.documentElement.classList.toggle('cur-hand', !!hit);
-  // bare glove ↔ button hover: CSS :hover only sees the hotspot pixel, the whole hand uses .hand-on
-  const btn=hit?.closest?.('.finish-btn, .opt:not(.done), .link-btn, .return-btn, .cta');
-  setHandOn(btn||null);
+  // bare glove ↔ control hover for every hot target (lang, finish, opts…), not only a short list
+  setHandOn(hot||null);
   return hit;
 }
 let faceTimer=0;
