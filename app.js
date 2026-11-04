@@ -539,7 +539,7 @@ function returnToDeck(el, onBack){
     .to(s,{...rest, y:rest.y-rest.h*.45, duration:1.1, ease:'power2.inOut', onUpdate:render})
     .to(s,{y:rest.y, duration:.5, ease:'sine.out', onUpdate:render})
     .call(()=>{
-      sfx.tick(.6); topImg.style.visibility=''; el.remove(); fanScreen.hidden=true; activeCard=null;
+      sfx.tick(.6); topImg.style.visibility=''; el.remove(); fanScreen.hidden=true; activeCard=null; syncFanArcsClass();
       phoneDeckChalk(true);
       settleDeck(dip, ()=>{
         if(onBack) onBack(); else endReading();
@@ -551,7 +551,7 @@ function returnToDeck(el, onBack){
 // The deck flies from the velvet to the first slot of the upper arc; dealing starts from there.
 function flyToFan(){
   chalkWeight(true);
-  fanScreen.hidden=false;
+  fanScreen.hidden=false; syncFanArcsClass();
   const L=layoutFan(), a=L.angleStart*Math.PI/180;
   const tx=L.pivotX+L.rOuter*Math.sin(a), ty=L.pivotY-L.rOuter*Math.cos(a);
   const r=deckStack.getBoundingClientRect();
@@ -2112,7 +2112,7 @@ function tuckUnderDeck(els, onBack){
       deckStack.prepend(img);
       [...deckStack.children].forEach((c,i)=>c.style.zIndex=i ? 2 : 0);
       gsap.set(img,{x:0, y:out, rotation:rot}); img.style.visibility='';
-      els.forEach(el=>el.remove()); fanScreen.hidden=true; activeCard=null;
+      els.forEach(el=>el.remove()); fanScreen.hidden=true; activeCard=null; syncFanArcsClass();
       phoneDeckChalk(true);
       [...deckStack.children].slice(1).forEach((c,i)=>gsap.to(c,{...DECK_REST[i+1], duration:.6, ease:'power2.inOut'}));
     })
@@ -2173,7 +2173,7 @@ function flyHome(el){
   deckStack.style.setProperty('--ex', FAN_EDGE.x/sx+'px'); deckStack.style.setProperty('--ey', FAN_EDGE.y/sy+'px');
   gsap.set(deckStack,{x:s.x-(r.left+r.width/2), y:s.y-(r.top+r.height/2), rotation:s.rot, scaleX:sx, scaleY:sy});
   gsap.set(deckStack.children,{rotation:0, x:0, y:0, borderRadius:`${rad/sx}px / ${rad/sy}px`});
-  fanScreen.hidden=true; fan.innerHTML=''; fan.appendChild(dimOverlay);
+  fanScreen.hidden=true; fan.innerHTML=''; fan.appendChild(dimOverlay); syncFanArcsClass();
   const DUR=1.2, EASE='power3.inOut';
   const carried=gatherTl ? gatherTl.timeScale() : 1;
   const tl=gatherTl=gsap.timeline();
