@@ -212,8 +212,7 @@ ru:{title:'Таро Лидии Хаит', whisper:'хочешь знать?', ru
   pickAsk:['выбери три карты','выбери настоящее','выбери будущее'], pickDone:'выбор сделан',
   toward:['в настоящее','в будущее'], reveal:'Узнать',
   next:'Далее', finish:'Завершить', nowYouKnow:'теперь ты знаешь',
-  deckOne:'Эта карта — из колоды <b>Bloody Feast Tarot</b>: все 78 карт с авторской графикой в файле для печати на Etsy.',
-  deckMany:'Эти карты — из колоды <b>Bloody Feast Tarot</b>: все 78 карт с авторской графикой в файле для печати на Etsy.',
+  deckPlain:'Таро Лидии Хаит: 78 карт с авторской графикой в файле для печати на Etsy.',
   deckShort:'78 карт с авторской графикой в файле для печати.',
   spreadBack:'Посмотреть значение расклада',
   etsy:'Купить колоду', etsyPrint:'Колода для печати · купить на Etsy', rotate:'Поверни телефон вертикально', rotateTablet:'Поверни планшет горизонтально', touchDeck:'коснись колоды', heading:'Таро «Кровавый пир» от Лидии Хаит', share:'Поделиться', gather:'Собрать', onceMore:'Ещё раз',
@@ -237,8 +236,7 @@ en:{title:'Tarot by Lidiia Khait', whisper:'want to know?', rush:'click again �
   pickAsk:['choose three cards','choose the present','choose the future'], pickDone:'the choice is made',
   toward:['into the present','into the future'], reveal:'Reveal',
   next:'Next', finish:'Finish', nowYouKnow:'now you know',
-  deckOne:'This card comes from the <b>Bloody Feast Tarot</b> deck: all 78 cards with original artwork in a printable file on Etsy.',
-  deckMany:'These cards come from the <b>Bloody Feast Tarot</b> deck: all 78 cards with original artwork in a printable file on Etsy.',
+  deckPlain:'Tarot by Lidiia Khait: 78 cards with original artwork in a printable file on Etsy.',
   deckShort:'78 cards with original artwork in a printable file.',
   spreadBack:'See the spread\'s meaning',
   etsy:'Buy the deck', etsyPrint:'Printable deck · buy on Etsy', rotate:'Turn your phone upright', rotateTablet:'Turn your tablet sideways', touchDeck:'touch the deck', heading:'Bloody Feast Tarot deck by Lidiia Khait', share:'Share', gather:'Gather deck', onceMore:'Once more',
@@ -2114,17 +2112,14 @@ function showSummaryText(el){
   gsap.to(sum,{opacity:0, duration:.15, onComplete:()=>{ sum.textContent=text; sum.classList.toggle('card-text', !!el); gsap.to(sum,{opacity:1, duration:.25}); }});
   spread.caps?.forEach((c,i)=>c.classList.toggle('hot', !!el && spread.cards[i]===el));
 }
-// desktop and tablet keep the corner mark on every closing screen. Phones keep it for the card of the day
-// and tuck it away for the carousel.
-function brandOnFinale(els){
-  if(isLayoutDesk()) return true;
+// the rail stays up on the desktop row of three and on the phone's card of the day.
+// without it, the line names the deck.
+function tapeOnFinale(els){
   const one=els ? els.length===1 : !spread || spread.cards.length<=1;
-  return one;
+  return isLayoutDesk() ? !one : one;
 }
 function deckLine(els){
-  if(brandOnFinale(els)) return tr('deckShort');
-  const one=els ? els.length===1 : !spread || spread.cards.length<=1;
-  return tr(one ? 'deckOne' : 'deckMany');
+  return tr(tapeOnFinale(els) ? 'deckShort' : 'deckPlain');
 }
 // the closing screen can change language: rewrite the lines that were filled in the previous one
 function refreshFinaleLang(){
