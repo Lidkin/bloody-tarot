@@ -134,10 +134,7 @@ body:not(.fonts-ready) .ask-sub{visibility:hidden;}
   .opt:not(.done):hover::after,
   .opt:not(.done).hand-on::after{transform:scaleX(1);}
 }
-/* tablet: same layout as desktop */
-
-  html.tablet .opt:not(.done):hover::after,
-html.tablet .opt:not(.done).hand-on::after{transform:scaleX(1);}
+/* tablet opts use the phone frame, not the desktop underline */
 
 
 /* phones: a thin frame shows round one reading, then round the other - pick one; once the card of the day is
@@ -1129,7 +1126,9 @@ html[lang=ru] .pick-word:not(.pick-ask){
 }
 
 
-/* tablet = desktop layout; button reaction = phone (frames, call pulse, :active / .tap) */
+/* tablet = desktop layout; button reaction = phone.
+   DevTools still fires :hover with a mouse, so hover must not turn on the desktop underline or the day-card drain.
+   background-position is not !important: !important freezes it and the call sweep cannot move. */
 html.tablet, html.tablet *{cursor:auto;}
 html.tablet .rush-hint{display:block;}
 html.tablet .opt::before{content:''; position:absolute; top:0; bottom:0; left:-18px; right:-15px; border:.67px solid rgba(var(--accent-rgb),.55);
@@ -1142,21 +1141,27 @@ html.tablet .opt:not(.done):active,
 html.tablet .opt.tap{color:var(--red); text-shadow:0 0 10px rgba(228,36,35,.7), 0 0 24px rgba(228,36,35,.45);}
 html.tablet .opt::after,
 html.tablet .opt:not(.done):hover::after,
-html.tablet .opt:not(.done).hand-on::after{transform:none !important;}
+html.tablet .opt:not(.done).hand-on::after{transform:scaleX(0) !important;}
+html.tablet .finish-btn,
+html.tablet body.day-open .finish-btn{color:var(--accent);}
 html.tablet .finish-btn .fill,
-html.tablet body.day-open .finish-btn .fill{
-  color:transparent !important; -webkit-text-fill-color:transparent !important;
-  background-image:linear-gradient(90deg, var(--accent) 37.5%, var(--red) 37.5% 62.5%, var(--accent) 62.5%) !important;
-  background-size:400% 100% !important; background-position:100% 0 !important;
-  animation:call 3.6s ease-in-out infinite !important; transition:none !important;}
+html.tablet body.day-open .finish-btn .fill,
+html.tablet body.day-open .finish-btn:hover .fill,
+html.tablet body.day-open .finish-btn.hand-on .fill{
+  color:transparent; -webkit-text-fill-color:transparent;
+  background-image:linear-gradient(90deg, var(--accent) 37.5%, var(--red) 37.5% 62.5%, var(--accent) 62.5%);
+  background-size:400% 100%; background-position:100% 0;
+  animation:call 3.6s ease-in-out infinite; transition:none;}
 html.tablet .finish-btn.tap .fill,
 html.tablet .finish-btn:active .fill,
 html.tablet body.day-open .finish-btn.tap .fill,
-html.tablet body.day-open .finish-btn:active .fill{animation:none !important; background-position:50% 0 !important;}
-html.tablet body.day-open .finish-btn{color:var(--accent) !important;}
-html.tablet body.day-open .end-phrase{
-  opacity:1 !important; color:color-mix(in srgb, var(--muted) 80%, transparent) !important;
-  -webkit-text-fill-color:unset !important; background:none !important; background-image:none !important;}
+html.tablet body.day-open .finish-btn:active .fill,
+html.tablet body.day-open .finish-btn:hover:active .fill{animation:none; background-position:50% 0;}
+html.tablet body.day-open .end-phrase,
+html.tablet body.day-open .meaning-end:has(.finish-btn:hover) .end-phrase,
+html.tablet body.day-open .meaning-end:has(.finish-btn.hand-on) .end-phrase{
+  opacity:1; color:color-mix(in srgb, var(--muted) 80%, transparent);
+  -webkit-text-fill-color:unset; background:none; background-image:none; transition:none;}
 html.tablet .return-btn:active{background:rgba(228,36,35,.15); border-color:var(--red);}
 html.tablet .cta:active{transform:scale(.97);}
 html.tablet .link-btn:active{color:var(--ink);}
