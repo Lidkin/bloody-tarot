@@ -539,6 +539,45 @@ syncDeviceClass();
 const isPortraitMobile=()=>isPhone() && matchMedia('(orientation: portrait)').matches &&
   (matchMedia('(pointer: coarse)').matches || innerWidth<600);
 
+// The phone deals from one shuffled deck. A card stays out until the others have been
+// drawn, so the next reading is not the same few faces again. What is left survives a reload.
+const SHOE_KEY='shoe';
+let shoe=[], buried=[];
+function shuffleCards(list){
+  const a=list.slice();
+  for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+  return a;
+}
+function rememberShoe(){
+  try{ sessionStorage.setItem(SHOE_KEY, JSON.stringify({shoe:shoe.map(c=>c.id), buried:buried.map(c=>c.id)})); }catch(e){}
+}
+function restoreShoe(){
+  try{
+    const saved=JSON.parse(sessionStorage.getItem(SHOE_KEY)||'');
+    const asCards=ids=>Array.isArray(ids) && ids.every(id=>DECK[id]) ? ids.map(id=>DECK[id]) : null;
+    const s=asCards(saved&&saved.shoe), b=asCards(saved&&saved.buried);
+    if(s&&b){ shoe=s; buried=b; }
+  }catch(e){}
+}
+restoreShoe();
+function takeCard(hold){
+  const blocked=new Set(hold||[]), free=list=>list.some(c=>!blocked.has(c));
+  if(!free(shoe)){
+    const back=buried.filter(c=>!blocked.has(c));
+    buried=buried.filter(c=>blocked.has(c));
+    const pool=back.length?back:DECK.filter(c=>!blocked.has(c));
+    // the cards just seen go under the new deck, so they are not the next ones out
+    const recent=pool.length>3?pool.slice(-3):[];
+    shoe=shuffleCards(recent).concat(shuffleCards(recent.length?pool.slice(0,-3):pool));
+  }
+  let spins=shoe.length;
+  while(spins-- && blocked.has(shoe[shoe.length-1])) shoe.unshift(shoe.pop());
+  const card=shoe.pop();
+  buried.push(card);
+  rememberShoe();
+  return card;
+}
+
 // Portrait phones: the deck stays where it is; its top card slowly slides up, then
 // grows and flips face up around its vertical axis into the same pose as a card drawn from the fan.
 // A real card element takes the place of the top image of the deck for this.
@@ -546,7 +585,7 @@ function drawFromDeck(dip){
   fanScreen.hidden=false;
   fan.innerHTML=''; fan.appendChild(dimOverlay); resetTable();
   const topImg=deckStack.lastElementChild, r=topImg.getBoundingClientRect();
-  const card=DECK[Math.floor(Math.random()*DECK.length)];
+  const card=takeCard();
   const el=makeCard(card, 0, 0); el.style.zIndex=1000;
   el._fromDeck={topImg, dip, rest:{x:r.left+r.width/2, y:r.top+r.height/2, rot:0, w:r.width, h:r.height, ry:0, tx:0, ty:0}};
   const s=el._state={...el._fromDeck.rest};
@@ -985,11 +1024,19 @@ addEventListener('pointerdown', e=>{
   hot.click();
 }, true);
 
+// the kinder face is reversed for the Devil, the Four and Five of Cups, the Three, Five,
+// Eight, Nine and Ten of Swords, and the Five of Pentacles. Every other card is kinder upright.
+// two draws out of three land on that kinder face
+const KIND_REVERSED=new Set([15,39,40,52,54,57,58,59,68]);
+function kinderReversed(card){
+  const kindFace=KIND_REVERSED.has(card.id);
+  return Math.random()<2/3 ? kindFace : !kindFace;
+}
 // Draws a random orientation for the card, fills the description and places it; returns the pose
 // of the opened card (face up): card + description fit the viewport minus FIT_MARGIN, the
-// description right under the card. Upright and reversed are equally likely, for every card.
+// description right under the card.
 function openedPose(el, card){
-  const reversed = Math.random()<.5; el.dataset.reversed=reversed;
+  const reversed = kinderReversed(card); el.dataset.reversed=reversed;
   loadFace(el); el.querySelector('.fart').classList.toggle('reversed', reversed);
   // fill the description first so its real height is known
   document.getElementById('mPos').textContent=spread ? POSITIONS[spread.i] : '';
@@ -1262,8 +1309,7 @@ function drawSpreadCard(i){
   }
   const r=deckStack.lastElementChild.getBoundingClientRect();
   const rest={x:r.left+r.width/2, y:r.top+r.height/2, rot:0, w:r.width, h:r.height, ry:0, tx:0, ty:0};
-  const used=spread.cards.map(c=>c._card), pool=DECK.filter(c=>!used.includes(c));
-  const el=makeCard(pool[Math.floor(Math.random()*pool.length)], 0, 0);
+  const el=makeCard(takeCard(spread.cards.map(c=>c._card)), 0, 0);
   el.classList.add('picked'); el._fromDeck={topImg:null, dip:0, rest}; loadFace(el);
   const s=el._state={...rest};
   spread.cards.push(el);
