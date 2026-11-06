@@ -837,6 +837,15 @@ function cardAt(x, y){
   if(!best && hoverCard && inCard(hoverCard._state||arcState(hoverCard), x, y)) return hoverCard;
   return best;
 }
+// the three-up row is no longer in the arc slots; hit the pose the card is actually drawn in
+function laidCardAt(x, y){
+  let best=null;
+  (spread?.cards||[]).forEach(el=>{
+    const s=el._state; if(!s || !inCard(s, x, y)) return;
+    if(!best || +el.dataset.z>+best.dataset.z) best=el;
+  });
+  return best;
+}
 function cardAtCursor(x, y){
   let best=null;
   for(const [sx,sy] of cursorSamples(x, y)){
@@ -934,7 +943,7 @@ addEventListener('pointerdown', e=>{
 fan.addEventListener('pointerdown', e=>{
   if(isMouseUI()) return;
   if(spread?.summary && isLayoutDesk() && !spread.carousel){
-    const hit=cardAt(e.clientX, e.clientY);
+    const hit=laidCardAt(e.clientX, e.clientY);
     const el=hit && spread.cards.includes(hit) ? hit : null;
     // tap lit card again (or empty) → back to the whole-spread text
     const next=el && el!==summaryFor ? el : null;
