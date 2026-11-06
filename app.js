@@ -2905,9 +2905,9 @@ async function phoneSplash(){
   const desk=()=>isLayoutDesk();
   const dockTarget=()=>{
     const d=desk(), safeTop=parseFloat(getComputedStyle(document.documentElement).paddingTop)||0;
-    // phone: the centred logo shrinks to a quarter, then docks; the rail is the rest of the width
+    // phone: the centred logo shrinks, then docks a step smaller than a quarter; the rail is the rest of the width
     const left=d ? 28 : 12, top=d ? 40+safeTop : 8+safeTop;
-    const width=d ? 72 : Math.min(innerWidth*.72, 420)/4;
+    const width=d ? 72 : Math.min(innerWidth*.12, 70);
     const tapeW=Math.max(80, innerWidth - left - width);
     return {left, top, width, tapeW};
   };
@@ -2999,6 +2999,10 @@ async function phoneSplash(){
   introTl=gsap.timeline({defaults:{ease:'power2.inOut'}, onComplete:()=>{
     showRushHint(false);
     introTl=null;
+    if(phone){
+      const rest=[document.querySelector('.spread-options'), document.getElementById('whisper')].filter(Boolean);
+      gsap.set(rest,{opacity:0});
+    }
     document.body.classList.add('intro-done');
     document.body.classList.remove('intro');
     brand.classList.remove('abs');
@@ -3006,7 +3010,10 @@ async function phoneSplash(){
     gsap.set(tape,{clearProps:'width,autoAlpha'});
     gsap.set(logo,{clearProps:'clipPath,transformOrigin'});
     requestAnimationFrame(()=>{ syncTape(true); scheduleRelayout(); });
-    if(phone && openingEl) gsap.fromTo(openingEl,{opacity:0},{opacity:1, duration:.8, ease:'power1.out', clearProps:'opacity'});
+    if(phone){
+      const rest=[document.querySelector('.spread-options'), document.getElementById('whisper')].filter(Boolean);
+      gsap.to(rest,{opacity:1, duration:.8, ease:'power1.out', clearProps:'opacity'});
+    }
     finish();
   }})
     .to(logo,{opacity:1, scale:1, duration:1.15, ease:'power2.out'}, 0.2)
@@ -3030,6 +3037,13 @@ async function phoneSplash(){
       onStart(){ slideTween=this; }}, slideAt)
     .to(langSwitch, {opacity:1, duration:.9, ease:'power1.out',
       onStart(){ if(langSwitch) langSwitch.style.pointerEvents=''; }}, slideAt+'+=0.1');
+  // phone: from the screen centre, at half the settled size and fully clear.
+  // it grows and becomes solid while the logo rises and the tape unrolls, and is full when both have settled
+  if(phone && deckStack){
+    const deckDur=dockDur+unrollDur;
+    gsap.set(deckStack,{scale:.5, opacity:0, x:0, y:0, xPercent:-50, yPercent:-50, transformOrigin:'50% 50%'});
+    introTl.to(deckStack,{scale:1, opacity:1, duration:deckDur, ease:'sine.inOut'}, `shrink+=${shrinkDur}`);
+  }
   // behind the logo as it starts upward: a small side view, deck in the frame, fully transparent.
   // the viewpoint rises with the logo, so the outline and the deck grow and are solid
   // exactly when the view is overhead. then the deck grows out and the frame gives way
