@@ -985,19 +985,11 @@ addEventListener('pointerdown', e=>{
   hot.click();
 }, true);
 
-// the kinder face is reversed for the Devil, the Four and Five of Cups, the Three, Five,
-// Eight, Nine and Ten of Swords, and the Five of Pentacles. Every other card is kinder upright.
-// two draws out of three land on that kinder face
-const KIND_REVERSED=new Set([15,39,40,52,54,57,58,59,68]);
-function kinderReversed(card){
-  const kindFace=KIND_REVERSED.has(card.id);
-  return Math.random()<2/3 ? kindFace : !kindFace;
-}
 // Draws a random orientation for the card, fills the description and places it; returns the pose
 // of the opened card (face up): card + description fit the viewport minus FIT_MARGIN, the
-// description right under the card.
+// description right under the card. Upright and reversed are equally likely, for every card.
 function openedPose(el, card){
-  const reversed = kinderReversed(card); el.dataset.reversed=reversed;
+  const reversed = Math.random()<.5; el.dataset.reversed=reversed;
   loadFace(el); el.querySelector('.fart').classList.toggle('reversed', reversed);
   // fill the description first so its real height is known
   document.getElementById('mPos').textContent=spread ? POSITIONS[spread.i] : '';
