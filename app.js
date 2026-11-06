@@ -2980,44 +2980,56 @@ async function phoneSplash(){
   const end=dockTarget();
   const startW=Math.min(innerWidth*.72, 420);
   const ratio=logo.naturalWidth ? logo.naturalHeight/logo.naturalWidth : 678/840;
+  const boxLeft=w=>(innerWidth-w)/2, boxTop=w=>(innerHeight-w*ratio)/2;
+  brand.classList.add('abs');
 
   // pre-measure the stop while docked (rail invisible) so the slide can start with no pause
-  gsap.set(brand,{left:end.left, top:end.top, width:end.width, xPercent:0, yPercent:0});
+  gsap.set(brand,{left:end.left, top:end.top, width:end.width, x:0, y:0, xPercent:0, yPercent:0});
   gsap.set(tape,{width:end.tapeW, autoAlpha:0});
   await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
   syncTape(false);
   tapeReady=true;
   gsap.set(tape,{width:0, autoAlpha:1});
-  gsap.set(brand,{left:(innerWidth-startW)/2, top:(innerHeight-startW*ratio)/2, width:startW, xPercent:0, yPercent:0});
+  gsap.set(brand,{left:boxLeft(startW), top:boxTop(startW), width:startW, x:0, y:0, xPercent:0, yPercent:0});
   gsap.set(tapeHost,{xPercent:-100});
-  gsap.set(logo,{opacity:0, scale:1.08, clipPath:'inset(0% 0% 0% 0%)'});
+  gsap.set(logo,{opacity:0, scale:1.08, transformOrigin:'50% 50%', clipPath:'inset(0% 0% 0% 0%)'});
 
-  const dockDur=1.0, unrollDur=2.5;
-  const riseLeft=(innerWidth-end.width)/2;
+  const dockDur=1.0, unrollDur=2.5, shrinkDur=phone ? .9 : 0;
+  const riseLeft=boxLeft(end.width);
   introTl=gsap.timeline({defaults:{ease:'power2.inOut'}, onComplete:()=>{
     showRushHint(false);
     introTl=null;
     document.body.classList.add('intro-done');
     document.body.classList.remove('intro');
-    gsap.set(brand,{clearProps:'left,top,width,xPercent,yPercent,transform'});
+    brand.classList.remove('abs');
+    gsap.set(brand,{clearProps:'left,top,width,x,y,xPercent,yPercent,transform'});
     gsap.set(tape,{clearProps:'width,autoAlpha'});
-    gsap.set(logo,{clearProps:'clipPath'});
+    gsap.set(logo,{clearProps:'clipPath,transformOrigin'});
     requestAnimationFrame(()=>{ syncTape(true); scheduleRelayout(); });
     if(phone && openingEl) gsap.fromTo(openingEl,{opacity:0},{opacity:1, duration:.8, ease:'power1.out', clearProps:'opacity'});
     finish();
   }})
     .to(logo,{opacity:1, scale:1, duration:1.15, ease:'power2.out'}, 0.2)
-    .to({}, {duration:.7})
-    // straight up to the top, still centered; the subtitle crops away on the way
-    .to(brand,{left:riseLeft, top:end.top, width:end.width, duration:dockDur, ease:'power2.out'}, 'dock')
-    .to(logo,{clipPath:'inset(0% 0% 12% 0%)', duration:dockDur, ease:'power2.out'}, 'dock')
-    // tape pays out to the right while the logo rolls left into the corner
-    .set(tape,{width:end.tapeW}, `dock+=${dockDur}`)
-    .to(brand,{left:end.left, duration:unrollDur, ease:'none', onStart(){ logoTween=this; showRushHint(true); }}, `dock+=${dockDur}`)
+    .to({}, {duration:.7});
+  if(phone){
+    // shrink in the middle of the screen and crop the caption, then rise, still centred
+    introTl
+      .to(brand,{left:boxLeft(end.width), top:boxTop(end.width), width:end.width, duration:shrinkDur, ease:'power2.inOut'}, 'shrink')
+      .to(logo,{clipPath:'inset(0% 0% 12% 0%)', duration:shrinkDur, ease:'power2.inOut'}, 'shrink')
+      .to(brand,{left:riseLeft, top:end.top, duration:dockDur, ease:'power2.inOut'}, `shrink+=${shrinkDur}`);
+  }else{
+    introTl
+      .to(brand,{left:riseLeft, top:end.top, width:end.width, duration:dockDur, ease:'power2.out'}, 'dock')
+      .to(logo,{clipPath:'inset(0% 0% 12% 0%)', duration:dockDur, ease:'power2.out'}, 'dock');
+  }
+  const slideAt=phone ? `shrink+=${shrinkDur+dockDur}` : `dock+=${dockDur}`;
+  introTl
+    .set(tape,{width:end.tapeW}, slideAt)
+    .to(brand,{left:end.left, duration:unrollDur, ease:'none', onStart(){ logoTween=this; showRushHint(true); }}, slideAt)
     .fromTo(tapeHost,{xPercent:-100},{xPercent:()=>endP, duration:unrollDur, ease:'none',
-      onStart(){ slideTween=this; }}, `dock+=${dockDur}`)
+      onStart(){ slideTween=this; }}, slideAt)
     .to(langSwitch, {opacity:1, duration:.9, ease:'power1.out',
-      onStart(){ if(langSwitch) langSwitch.style.pointerEvents=''; }}, `dock+=${dockDur + 0.1}`);
+      onStart(){ if(langSwitch) langSwitch.style.pointerEvents=''; }}, slideAt+'+=0.1');
   // behind the logo as it starts upward: a small side view, deck in the frame, fully transparent.
   // the viewpoint rises with the logo, so the outline and the deck grow and are solid
   // exactly when the view is overhead. then the deck grows out and the frame gives way

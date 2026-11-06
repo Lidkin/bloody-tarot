@@ -559,6 +559,8 @@ html.tablet body.intro .whisper{opacity:0 !important; pointer-events:none;}
 body.intro-done h1.title{opacity:0 !important; pointer-events:none;} /* brand mark replaces the text title */
 .intro-brand{position:fixed; left:50%; top:50%; transform:translate(-50%,-50%);
   display:block; z-index:41; width:min(72vw, 420px); will-change:transform, width, top, left;}
+/* once the intro is measured, left/top are the box corner — the CSS centering shift must not stack on them */
+.intro-brand.abs{transform:none !important;}
 .intro-logo{position:relative; z-index:2; display:block; width:100%; height:auto; user-select:none;
   -webkit-user-drag:none; transform-origin:left center; clip-path:inset(0 0 0 0);}
 /* rail starts at the logo's right edge (not under transparent type); the strip slides in via translateX */
