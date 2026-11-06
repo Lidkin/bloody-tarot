@@ -212,8 +212,8 @@ ru:{title:'Таро Лидии Хаит', whisper:'хочешь знать?', ru
   pickAsk:['выбери три карты','выбери настоящее','выбери будущее'], pickDone:'выбор сделан',
   toward:['в настоящее','в будущее'], reveal:'Узнать',
   next:'Далее', finish:'Завершить', nowYouKnow:'теперь ты знаешь',
-  deckOne:'Эта карта — из колоды <b>Bloody Feast Tarot</b>: все 78 карт с авторской графикой в файле для печати на Etsy.',
-  deckMany:'Эти карты — из колоды <b>Bloody Feast Tarot</b>: все 78 карт с авторской графикой в файле для печати на Etsy.',
+  deckOne:'78 карт с авторской графикой в файле для печати.',
+  deckMany:'78 карт с авторской графикой в файле для печати.',
   spreadBack:'Посмотреть значение расклада',
   etsy:'Купить колоду', etsyPrint:'Колода для печати · купить на Etsy', rotate:'Поверни телефон вертикально', rotateTablet:'Поверни планшет горизонтально', touchDeck:'коснись колоды', heading:'Таро «Кровавый пир» от Лидии Хаит', share:'Поделиться', gather:'Собрать', onceMore:'Ещё раз',
   again:'↺ Новое гадание', saved:'Картинка сохранена — её можно выложить в сторис',
@@ -236,8 +236,8 @@ en:{title:'Tarot by Lidiia Khait', whisper:'want to know?', rush:'click again �
   pickAsk:['choose three cards','choose the present','choose the future'], pickDone:'the choice is made',
   toward:['into the present','into the future'], reveal:'Reveal',
   next:'Next', finish:'Finish', nowYouKnow:'now you know',
-  deckOne:'This card comes from the <b>Bloody Feast Tarot</b> deck: all 78 cards with original artwork in a printable file on Etsy.',
-  deckMany:'These cards come from the <b>Bloody Feast Tarot</b> deck: all 78 cards with original artwork in a printable file on Etsy.',
+  deckOne:'78 cards with original artwork in a printable file.',
+  deckMany:'78 cards with original artwork in a printable file.',
   spreadBack:'See the spread\'s meaning',
   etsy:'Buy the deck', etsyPrint:'Printable deck · buy on Etsy', rotate:'Turn your phone upright', rotateTablet:'Turn your tablet sideways', touchDeck:'touch the deck', heading:'Bloody Feast Tarot deck by Lidiia Khait', share:'Share', gather:'Gather deck', onceMore:'Once more',
   again:'↺ New reading', saved:'Image saved — you can post it to your story',
@@ -1022,7 +1022,8 @@ const cardHead=document.getElementById('cardHead');
 function fitCardHead(){
   const h=document.getElementById('mName'); h.style.fontSize=h.style.letterSpacing='';
   const start=isLayoutDesk() ? 20 : 18, track=isLayoutDesk() ? .06 : 0;
-  for(let f=start; f>=12 && cardHead.offsetWidth>innerWidth-28; f-=.5){ h.style.fontSize=f+'px'; h.style.letterSpacing=f*track+'px'; }
+  const reserve=finale.classList.contains('show') && !langSwitch.classList.contains('off') ? 96 : 28;
+  for(let f=start; f>=12 && cardHead.offsetWidth>innerWidth-reserve; f-=.5){ h.style.fontSize=f+'px'; h.style.letterSpacing=f*track+'px'; }
 }
 // the name takes the title's place for as long as the description is shown
 new MutationObserver(()=>{
@@ -2103,6 +2104,44 @@ function showSummaryText(el){
   gsap.to(sum,{opacity:0, duration:.15, onComplete:()=>{ sum.textContent=text; sum.classList.toggle('card-text', !!el); gsap.to(sum,{opacity:1, duration:.25}); }});
   spread.caps?.forEach((c,i)=>c.classList.toggle('hot', !!el && spread.cards[i]===el));
 }
+// the closing screen can change language: rewrite the lines that were filled in the previous one
+function refreshFinaleLang(){
+  const fDeck=document.getElementById('fDeck');
+  const one=!spread || spread.cards.length<=1;
+  if(fDeck && !fDeck.hidden) fDeck.innerHTML=tr(one ? 'deckOne' : 'deckMany');
+  const etsy=document.getElementById('etsyBtn');
+  if(etsy) etsy.textContent=tr(!fDeck || fDeck.hidden ? 'etsyPrint' : 'etsy');
+  shareBtnEl.textContent=tr('share');
+  document.getElementById('gatherBtn').innerHTML=tr(one ? 'gather' : 'onceMore');
+  const back=document.getElementById('spreadBack');
+  if(back) back.textContent=tr('spreadBack');
+  const sum=document.getElementById('fSummary');
+  if(sum && !sum.hidden && spread?.cards){
+    sum.textContent=sum.classList.contains('card-text') && summaryFor
+      ? cardMeaning(summaryFor) : spreadSummary(spread.cards);
+  }
+  if(document.body.classList.contains('car-leaf') && activeCard) fillCarouselText(activeCard);
+  else if(activeCard?._card && meaningPanel.classList.contains('show')){
+    const card=activeCard._card, quote=card.title ? tr('q')(card.title) : '';
+    document.getElementById('mName').textContent=card.name;
+    document.getElementById('mQuote').textContent=quote;
+    document.getElementById('mTitle').textContent=quote;
+    document.getElementById('mText').textContent=cardMeaning(activeCard);
+    const pos=spread ? (POSITIONS[spread.i]||'') : '';
+    document.getElementById('mKicker').textContent=pos;
+    document.getElementById('mPos').textContent=spread ? POSITIONS[spread.i] : '';
+    fitCardHead();
+  }
+  spread?.caps?.forEach((c,i)=>{
+    const card=spread.cards[i]?._card; if(!card) return;
+    const pos=c.querySelector('.cap-pos'), name=c.querySelector('.cap-name'), title=c.querySelector('.cap-title');
+    if(pos) pos.textContent=POSITIONS[i]||'';
+    if(name && name.textContent) name.textContent=card.name;
+    if(title) title.textContent=card.title ? tr('q')(card.title) : '';
+  });
+  fitFinaleRow();
+  fitCardHead();
+}
 function setFinale(els){
   const one=els.length===1, sum=document.getElementById('fSummary');
   prepareStory(els);
@@ -2537,9 +2576,11 @@ document.fonts.ready.then(()=>fitCountdown());
 // one button, showing the language it switches to
 const langBtn=document.getElementById('langBtn');
 langBtn.addEventListener('click', ()=>{
-  if(!deckAtRest()) return;
+  const onFinale=finale.classList.contains('show');
+  if(!onFinale && !deckAtRest()) return;
   lang=langBtn.dataset.lang; try{ localStorage.setItem('lang', lang); }catch(e){}
   applyLang();
+  if(onFinale) refreshFinaleLang();
 });
 // visitors whose browser speaks nothing but English are never offered Russian
 const browserLangs=navigator.languages?.length ? navigator.languages : [navigator.language||'en'];

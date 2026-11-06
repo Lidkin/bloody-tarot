@@ -448,6 +448,8 @@ html.tablet .ask-sub .cd-row .countdown{margin:0; font-size:var(--count-size); l
   top:calc(10px + env(safe-area-inset-top,0px) + min(12vw, 68px) * 678 / 840 * .38 - 17px);}
 .sound-btn{left:calc(14px + env(safe-area-inset-left,0px));}
 .lang-switch.gone, .sound-btn.gone{opacity:0; pointer-events:none;}
+/* the closing screen keeps the language badge where it sits on the opening */
+body:has(#finale.show) .lang-switch.gone{opacity:1; pointer-events:auto;}
 .lang-switch.off{display:none;}
 .lang-switch button, .sound-btn{background:none; border:none; padding:10px 4px; margin:-10px 0; font:inherit; letter-spacing:inherit;
   color:inherit; cursor:var(--cur-on); transition:color .3s ease, opacity .5s ease-in-out;}
