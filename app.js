@@ -212,8 +212,9 @@ ru:{title:'Таро Лидии Хаит', whisper:'хочешь знать?', ru
   pickAsk:['выбери три карты','выбери настоящее','выбери будущее'], pickDone:'выбор сделан',
   toward:['в настоящее','в будущее'], reveal:'Узнать',
   next:'Далее', finish:'Завершить', nowYouKnow:'теперь ты знаешь',
-  deckOne:'78 карт с авторской графикой в файле для печати.',
-  deckMany:'78 карт с авторской графикой в файле для печати.',
+  deckOne:'Эта карта — из колоды <b>Bloody Feast Tarot</b>: все 78 карт с авторской графикой в файле для печати на Etsy.',
+  deckMany:'Эти карты — из колоды <b>Bloody Feast Tarot</b>: все 78 карт с авторской графикой в файле для печати на Etsy.',
+  deckShort:'78 карт с авторской графикой в файле для печати.',
   spreadBack:'Посмотреть значение расклада',
   etsy:'Купить колоду', etsyPrint:'Колода для печати · купить на Etsy', rotate:'Поверни телефон вертикально', rotateTablet:'Поверни планшет горизонтально', touchDeck:'коснись колоды', heading:'Таро «Кровавый пир» от Лидии Хаит', share:'Поделиться', gather:'Собрать', onceMore:'Ещё раз',
   again:'↺ Новое гадание', saved:'Картинка сохранена — её можно выложить в сторис',
@@ -236,8 +237,9 @@ en:{title:'Tarot by Lidiia Khait', whisper:'want to know?', rush:'click again �
   pickAsk:['choose three cards','choose the present','choose the future'], pickDone:'the choice is made',
   toward:['into the present','into the future'], reveal:'Reveal',
   next:'Next', finish:'Finish', nowYouKnow:'now you know',
-  deckOne:'78 cards with original artwork in a printable file.',
-  deckMany:'78 cards with original artwork in a printable file.',
+  deckOne:'This card comes from the <b>Bloody Feast Tarot</b> deck: all 78 cards with original artwork in a printable file on Etsy.',
+  deckMany:'These cards come from the <b>Bloody Feast Tarot</b> deck: all 78 cards with original artwork in a printable file on Etsy.',
+  deckShort:'78 cards with original artwork in a printable file.',
   spreadBack:'See the spread\'s meaning',
   etsy:'Buy the deck', etsyPrint:'Printable deck · buy on Etsy', rotate:'Turn your phone upright', rotateTablet:'Turn your tablet sideways', touchDeck:'touch the deck', heading:'Bloody Feast Tarot deck by Lidiia Khait', share:'Share', gather:'Gather deck', onceMore:'Once more',
   again:'↺ New reading', saved:'Image saved — you can post it to your story',
@@ -2104,11 +2106,23 @@ function showSummaryText(el){
   gsap.to(sum,{opacity:0, duration:.15, onComplete:()=>{ sum.textContent=text; sum.classList.toggle('card-text', !!el); gsap.to(sum,{opacity:1, duration:.25}); }});
   spread.caps?.forEach((c,i)=>c.classList.toggle('hot', !!el && spread.cards[i]===el));
 }
+// the mark stays up on the phone's card of the day and on the desktop row of three.
+// it steps aside for the card's name (desktop day) and for the phone carousel.
+function brandOnFinale(els){
+  const one=els ? els.length===1 : !spread || spread.cards.length<=1;
+  return isLayoutDesk() ? !one : one;
+}
+function deckLine(els){
+  if(brandOnFinale(els)) return tr('deckShort');
+  const one=els ? els.length===1 : !spread || spread.cards.length<=1;
+  return tr(one ? 'deckOne' : 'deckMany');
+}
 // the closing screen can change language: rewrite the lines that were filled in the previous one
 function refreshFinaleLang(){
   const fDeck=document.getElementById('fDeck');
   const one=!spread || spread.cards.length<=1;
-  if(fDeck && !fDeck.hidden) fDeck.innerHTML=tr(one ? 'deckOne' : 'deckMany');
+  const els=spread?.cards?.length ? spread.cards : (activeCard ? [activeCard] : null);
+  if(fDeck && !fDeck.hidden) fDeck.innerHTML=deckLine(els);
   const etsy=document.getElementById('etsyBtn');
   if(etsy) etsy.textContent=tr(!fDeck || fDeck.hidden ? 'etsyPrint' : 'etsy');
   shareBtnEl.textContent=tr('share');
@@ -2146,16 +2160,16 @@ function setFinale(els){
   const one=els.length===1, sum=document.getElementById('fSummary');
   prepareStory(els);
   document.getElementById('etsyBtn').href=etsyLink(els[0]._card);
-  document.getElementById('fDeck').innerHTML=tr(one ? 'deckOne' : 'deckMany');
+  document.getElementById('fDeck').innerHTML=deckLine(els);
   if(!isLayoutDesk()){
-    // the same line as the desktop finale: under the buttons, on both closing screens
+    // under the buttons on both phone closing screens; the line is short only while the logo is up
     document.getElementById('fDeck').hidden=false;
-    document.getElementById('fDeck').innerHTML=tr('deckMany');
+    document.getElementById('fDeck').innerHTML=deckLine(els);
     document.getElementById('etsyBtn').textContent=tr('etsy');
     syncSpreadCue();
   }else{
     document.getElementById('fDeck').hidden=!!els[0]._fromDeck;
-    if(!document.getElementById('fDeck').hidden) document.getElementById('fDeck').innerHTML=tr('deckMany');
+    if(!document.getElementById('fDeck').hidden) document.getElementById('fDeck').innerHTML=deckLine(els);
     document.getElementById('etsyBtn').textContent=tr(document.getElementById('fDeck').hidden ? 'etsyPrint' : 'etsy');
   }
   shareBtnEl.textContent=tr('share');
