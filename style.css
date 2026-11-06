@@ -719,11 +719,16 @@ html.phone #finale #fSummary{order:0;}
   html.phone #finale .finale-row .return-btn,
 html.phone #finale .finale-row .cta,
 html.phone #finale .finale-row .link-btn{white-space:nowrap;}
-  html.phone #finale .finale-row .return-btn{order:0; justify-self:end; padding:9px 10px;}
-  html.phone #finale .finale-row .cta{order:1; justify-self:center;}
+  html.phone #finale .finale-row .return-btn,
+html.phone #finale .finale-row .cta{display:inline-flex; align-items:center; justify-content:center;
+    box-sizing:border-box; padding-top:9px; padding-bottom:9px; border-width:1px; border-style:solid; line-height:1;}
+  html.phone #finale .finale-row .return-btn{order:0; justify-self:end; padding-left:10px; padding-right:10px;
+    border-color:rgba(var(--accent-rgb),.72);}
+  html.phone #finale .finale-row .cta{order:1; justify-self:center; padding-left:14px; padding-right:14px;
+    border-color:var(--red); border-radius:24px;}
   html.phone #finale .finale-row .link-btn{order:2; justify-self:start; position:relative; padding:9px 2px;}
-  html.phone #finale .finale-row .link-btn::after{content:''; position:absolute; left:0; right:0; bottom:1px; height:1px;
-    background:var(--red); transform:scaleY(.5); transform-origin:bottom center;}
+  html.phone #finale .finale-row .link-btn::after{content:''; position:absolute; left:0; right:0; bottom:0; height:1px;
+    background:var(--red); transform:none; opacity:1;}
   /* the long shop label cannot share the line; it drops under the other two, still above the deck line */
   html.phone #finale .finale-row.shop-below{display:flex; flex-wrap:wrap; justify-content:center; column-gap:22px; row-gap:12px;}
   html.phone #finale .finale-row.shop-below .return-btn{order:1;}
@@ -745,7 +750,13 @@ html.phone #finale .finale-row .link-btn{white-space:nowrap;}
     transition:opacity .7s ease, visibility 0s linear .7s;}
   html.phone body.car-open.car-leaf #finale #fDeck{opacity:0;}
   html.phone body.car-open.car-leaf #finale #spreadBack{opacity:1; visibility:visible; pointer-events:auto;
+    color:color-mix(in srgb, var(--accent) 55%, var(--muted));
+    animation:spread-cue 2.8s ease-in-out infinite;
     transition:opacity .7s ease, visibility 0s linear 0s;}
+@keyframes spread-cue{0%,100%{opacity:.5;} 50%{opacity:1;}}
+@media (prefers-reduced-motion:reduce){
+  html.phone body.car-open.car-leaf #finale #spreadBack{animation:none; opacity:.72;}
+}
   /* the spread's own paragraph, in the card text's face, between two hairlines */
   html.phone body.car-open #fSummary{position:relative; font-style:normal; padding:14px 20px;}
   html.phone body.car-open #fSummary::before,
