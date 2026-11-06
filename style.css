@@ -599,6 +599,11 @@ body.tape-period .tape-zoom path.cls-1{visibility:hidden;}
 body.card-open .tape-zoom, body.car-open .tape-zoom{opacity:0; transition:opacity .5s ease-in-out;}
 /* while a card is open, tuck the brand like the old title */
 body.card-open .intro-brand, body.car-open .intro-brand{opacity:0; transition:opacity .5s ease-in-out;}
+/* buy screen: the corner mark comes back beside the card's name. The rail stays down so it does not cross the name. */
+html.desk body.card-open:has(#finale.show) .intro-brand,
+html.tablet body.card-open:has(#finale.show) .intro-brand{opacity:1;}
+html.desk body.card-open:has(#finale.show) .intro-tape-wrap,
+html.tablet body.card-open:has(#finale.show) .intro-tape-wrap{opacity:0 !important;}
 body.intro-done .intro-brand{transition:opacity .5s ease-in-out;}
 @media (prefers-reduced-motion:reduce){
   body.intro #opening, body.intro .lang-switch{opacity:1; pointer-events:auto;}

@@ -1023,9 +1023,17 @@ function openedPose(el, card){
 const cardHead=document.getElementById('cardHead');
 function fitCardHead(){
   const h=document.getElementById('mName'); h.style.fontSize=h.style.letterSpacing='';
+  const quote=document.getElementById('mQuote');
+  if(quote) quote.style.fontSize='';
   const start=isLayoutDesk() ? 20 : 18, track=isLayoutDesk() ? .06 : 0;
-  const reserve=finale.classList.contains('show') && !langSwitch.classList.contains('off') ? 96 : 28;
-  for(let f=start; f>=12 && cardHead.offsetWidth>innerWidth-reserve; f-=.5){ h.style.fontSize=f+'px'; h.style.letterSpacing=f*track+'px'; }
+  // the corner mark and the language badge sit either side of the name once the shop row is up
+  const reserve=finale.classList.contains('show') && isLayoutDesk() ? 240
+    : finale.classList.contains('show') && !langSwitch.classList.contains('off') ? 96 : 28;
+  const limit=innerWidth-reserve;
+  for(let f=start; f>=12 && cardHead.offsetWidth>limit; f-=.5){ h.style.fontSize=f+'px'; h.style.letterSpacing=f*track+'px'; }
+  if(quote && quote.offsetWidth>limit){
+    for(let f=parseFloat(getComputedStyle(quote).fontSize)||14; f>=11 && quote.offsetWidth>limit; f-=.5) quote.style.fontSize=f+'px';
+  }
 }
 // the name takes the title's place for as long as the description is shown
 new MutationObserver(()=>{
@@ -1418,7 +1426,7 @@ function showSpreadSummary(){
     const capH=Math.max(...spread.caps.map(c=>c.offsetHeight));
     spread.caps.forEach(c=>c.style.height=capH+'px');
   }
-  gsap.delayedCall(1.2, ()=>{ spread.summary=true; showCaps(true); unlockFade(finale); finale.classList.add('show'); busy=false; });
+  gsap.delayedCall(1.2, ()=>{ spread.summary=true; showCaps(true); unlockFade(finale); finale.classList.add('show'); fitCardHead(); busy=false; });
 }
 // phones: the three cards lie face up in a stack the size of the card just read, the past on top.
 // At first the words under it are the spread's. A couple of seconds later the arrows come, and a swipe
@@ -1453,7 +1461,7 @@ function showCarousel(){
   fan.classList.add('carousel'); placeCarArrows();
   gsap.delayedCall(1.4, ()=>{
     if(!spread?.carousel) return;
-    spread.summary=true; unlockFade(finale); finale.classList.add('show'); busy=false;
+    spread.summary=true; unlockFade(finale); finale.classList.add('show'); fitCardHead(); busy=false;
     spread.cards.forEach(c=>c._state && renderCard(c, c._state));
     spread.carousel.arm=gsap.delayedCall(2*gsap.globalTimeline.timeScale(), ()=>{
       if(!spread?.carousel || !document.body.classList.contains('car-open')) return;
@@ -2071,7 +2079,7 @@ document.getElementById('finishBtn').addEventListener('click', e=>{
     setFinale([el]);
     meaningPanel.querySelector('.meaning-end').hidden=true;
     document.body.classList.add('day-done');
-    unlockFade(finale); finale.classList.add('show');
+    unlockFade(finale); finale.classList.add('show'); fitCardHead();
     meaningPanel.style.top=box.top+'px';
     meaningPanel.style.bottom='auto';
     finale.style.top=(text.getBoundingClientRect().bottom+16)+'px';
@@ -2090,7 +2098,7 @@ document.getElementById('finishBtn').addEventListener('click', e=>{
   const pose=fitAbove(finale);
   gsap.killTweensOf(s);
   gsap.to(s,{...pose, duration:.7, ease:'power2.inOut', onUpdate:()=>renderCard(el,s),
-    onComplete:()=>{ unlockFade(finale); finale.classList.add('show'); busy=false; renderCard(el, el._state); showShowcase(el); }});
+    onComplete:()=>{ unlockFade(finale); finale.classList.add('show'); fitCardHead(); busy=false; renderCard(el, el._state); showShowcase(el); }});
 });
 document.getElementById('shareBtn').addEventListener('click', shareStory);
 // the closing screen speaks of one card or of the whole spread
@@ -2106,11 +2114,12 @@ function showSummaryText(el){
   gsap.to(sum,{opacity:0, duration:.15, onComplete:()=>{ sum.textContent=text; sum.classList.toggle('card-text', !!el); gsap.to(sum,{opacity:1, duration:.25}); }});
   spread.caps?.forEach((c,i)=>c.classList.toggle('hot', !!el && spread.cards[i]===el));
 }
-// the mark stays up on the phone's card of the day and on the desktop row of three.
-// it steps aside for the card's name (desktop day) and for the phone carousel.
+// desktop and tablet keep the corner mark on every closing screen. Phones keep it for the card of the day
+// and tuck it away for the carousel.
 function brandOnFinale(els){
+  if(isLayoutDesk()) return true;
   const one=els ? els.length===1 : !spread || spread.cards.length<=1;
-  return isLayoutDesk() ? !one : one;
+  return one;
 }
 function deckLine(els){
   if(brandOnFinale(els)) return tr('deckShort');
@@ -2185,6 +2194,7 @@ function setFinale(els){
   }
   fCard.hidden=true;
   fitFinaleRow();
+  fitCardHead();
 }
 // three labels share one line, as on the desktop. The long shop label drops under the other two.
 function fitFinaleRow(){
