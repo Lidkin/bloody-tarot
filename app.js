@@ -2886,11 +2886,7 @@ async function phoneSplash(){
 
 /* ---------- intro: large logo → top-left, tape slides until a label hits center, then swaps ---------- */
 (async function runIntro(){
-  // phones: logo first, then it dissolves into the deck. The tape stays, with the words centered.
-  if(!isLayoutDesk()){
-    phoneSplash();
-    return;
-  }
+  const phone=!isLayoutDesk();
   const brand=document.getElementById('introBrand'), logo=document.getElementById('introLogo'),
     tape=document.getElementById('introTapeWrap'), tapeHost=document.getElementById('introTape'),
     layer=document.getElementById('intro');
@@ -2909,9 +2905,9 @@ async function phoneSplash(){
   const desk=()=>isLayoutDesk();
   const dockTarget=()=>{
     const d=desk(), safeTop=parseFloat(getComputedStyle(document.documentElement).paddingTop)||0;
-    const left=d ? 28 : 14, top=d ? 40+safeTop : 10+safeTop;
-    const width=d ? 72 : Math.min(innerWidth*.12, 68);
-    // rail to the right edge (EN sits on the tape axis, not beside a gap)
+    // phone: the centred logo shrinks to a quarter, then docks; the rail is the rest of the width
+    const left=d ? 28 : 12, top=d ? 40+safeTop : 8+safeTop;
+    const width=d ? 72 : Math.min(innerWidth*.72, 420)/4;
     const tapeW=Math.max(80, innerWidth - left - width);
     return {left, top, width, tapeW};
   };
@@ -2922,7 +2918,7 @@ async function phoneSplash(){
 
   // tape height follows the CSS clamp, but grows on a wide screen so the one red label
   // can sit on the viewport center while the strip still covers the rail
-  const cssTapeH=()=>Math.max(14, Math.min(23, innerWidth*0.03));
+  const cssTapeH=()=>phone ? 16 : Math.max(14, Math.min(23, innerWidth*0.03));
   let endP=0, slideTween=null, logoTween=null, tapeReady=false;
   const syncTape=(snap)=>{
     if(!svgEl || !redFrac) return 0;
@@ -2974,8 +2970,8 @@ async function phoneSplash(){
     document.body.classList.remove('intro');
     document.body.classList.add('intro-done');
     tapeReady=true;
-    if(plain) gsap.set(plain,{...layChalk(), rotateX:0, scale:1, opacity:.3});
-    if(frame) gsap.set(frame,{opacity:0});
+    if(plain && !phone) gsap.set(plain,{...layChalk(), rotateX:0, scale:1, opacity:.3});
+    if(frame && !phone) gsap.set(frame,{opacity:0});
     requestAnimationFrame(()=>syncTape(true));
     finish();
     return;
@@ -3007,6 +3003,7 @@ async function phoneSplash(){
     gsap.set(tape,{clearProps:'width,autoAlpha'});
     gsap.set(logo,{clearProps:'clipPath'});
     requestAnimationFrame(()=>{ syncTape(true); scheduleRelayout(); });
+    if(phone && openingEl) gsap.fromTo(openingEl,{opacity:0},{opacity:1, duration:.8, ease:'power1.out', clearProps:'opacity'});
     finish();
   }})
     .to(logo,{opacity:1, scale:1, duration:1.15, ease:'power2.out'}, 0.2)
@@ -3024,7 +3021,7 @@ async function phoneSplash(){
   // behind the logo as it starts upward: a small side view, deck in the frame, fully transparent.
   // the viewpoint rises with the logo, so the outline and the deck grow and are solid
   // exactly when the view is overhead. then the deck grows out and the frame gives way
-  if(frame && plain){
+  if(frame && plain && !phone){
     const travel=dockDur+unrollDur, approach=dockDur, persp=1400;
     const guide=document.createElement('div');
     guide.setAttribute('aria-hidden','true');
